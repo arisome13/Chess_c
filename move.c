@@ -5,6 +5,15 @@
 #include <stdlib.h>
 #include "move.h"
 
+struct Move
+{
+    /* source square */
+    Square_T sSrc;
+
+    /* destination square */
+    Square_T sDst;
+};
+
 Move_T Move_new(Square_T src, Square_T dst) {
     Move_T oMove;
 

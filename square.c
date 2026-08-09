@@ -6,6 +6,15 @@
 #include <stdio.h>
 #include <assert.h>
 
+struct Square
+{
+    /* rank */
+    int iRank;
+
+    /* file */
+    int iFile;
+};
+
 Square_T Square_initCoords(int rank, int file) {
     Square_T oSqr;
 

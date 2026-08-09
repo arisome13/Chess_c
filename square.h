@@ -8,14 +8,7 @@
 #include "helpers.h"
 
 /* A Square_T object holds the location of a square on a chess board. */
-struct Square
-{
-    /* rank */
-    int iRank;
 
-    /* file */
-    int iFile;
-};
 typedef struct Square *Square_T;
 
 /*--------------------------------------------------------------------*/

@@ -4,6 +4,8 @@
 
 #include <stdio.h>
 #include "board.h"
+#include "parameters.h"
+#include "move.h"
 
 #ifndef ENGINE_INCLUDED
 #define ENGINE_INCLUDED
@@ -11,15 +13,6 @@
 /* An Engine_T is a pointer to a chess engine capable of both holding a 
     chess position and finding the best possible move from that 
     position. */
-
-struct Engine
-{
-   /* A chess board object holding the pieces on the board */
-   ChessBoard_T oBoard;
-   
-   /* PARAM 2 */
-   unsigned long aulDigits[3];
-};
 
 typedef struct Engine *Engine_T;
 
@@ -41,12 +34,12 @@ void Engine_free(Engine_T oEngine);
 /* Returns the best move in the chess position held by the engine's
    chess board. */
 
-int Engine_bestMove (Engine_T oEngine);
+Move_T Engine_bestMove (Engine_T oEngine);
 
 /*--------------------------------------------------------------------*/
 
-/* FUNCTION DESCRIPTION */
+/* Return the string representation of oBoard. Caller must free. */
 
-int Engine_func (Engine_T oEngine/*, OTHER PARAMETERS*/);
+char *Engine_toString (Engine_T oEngine);
 
 #endif

@@ -9,7 +9,7 @@ int main()
     Engine_T eng = Engine_new(STARTING_FEN);
 
     // print out what board the engine holds
-    printf("%s", ChessBoard_strRep(eng->oBoard));
+    printf("%s", Engine_toString(eng));
     
     // free the engine
     Engine_free(eng);

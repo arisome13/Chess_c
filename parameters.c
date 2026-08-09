@@ -6,7 +6,25 @@
 #include <string.h>
 #include "parameters.h"
 
-ChessParameters_T ChessParameters_new(char *pcFen) {
+struct ChessParameters
+{
+   /* color of the current play*/
+   enum color cTurnColor;
+
+   /* available castle indicators */
+   char *pcCastles;
+
+   /* enpassant square */
+   Square_T sqrEnpassant;
+
+   /* half move count for 50 move rule */
+   int i50MoveCount;
+
+   /* current full move */
+   int iCurrMove;
+};
+
+ChessParameters_T ChessParameters_new(const char *pcFen) {
    ChessParameters_T oParams;
    int fenIndex;
    char pcEnpTemp[3];

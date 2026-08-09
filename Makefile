@@ -4,7 +4,7 @@
 
 SOURCES = main.c engine.c board.c
 OBJECTS = $(SOURCES:.c=.o)
-TARGETS = test #main
+TARGETS = test main
 
 all: $(TARGETS)
 
@@ -17,7 +17,7 @@ clobber: clean
 	rm -f *.o
 
 # make the program
-main: main.o engine.o
+main: main.o engine.o board.o parameters.o move.o mask.o square.o
 	gcc $^ -o $@
 
 test: test.o parameters.o square.o color.o
@@ -27,6 +27,8 @@ test: test.o parameters.o square.o color.o
 main.o: main.c engine.h
 	gcc -c $< -o $@
 engine.o: engine.c 
+	gcc -c $< -o $@
+board.o: board.c mask.h
 	gcc -c $< -o $@
 
 test.o: test.c parameters.h

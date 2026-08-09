@@ -6,6 +6,15 @@
 #include "string.h"
 #include "square.h"
 
+struct Mask
+{
+    /* piece mask */
+    uint64_t ullMask;
+
+    /* piece name */
+    char *cpName;
+};
+
 Mask_T Mask_new(char *name) {
     Mask_T oMask;
 

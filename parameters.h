@@ -9,30 +9,14 @@
 #define PARAMETERS_INCLUDED
 
 /* A ChessParameters_T object defines the state of a chess game. */
-struct ChessParameters
-{
-   /* color of the current play*/
-   enum color cTurnColor;
 
-   /* available castle indicators */
-   char *pcCastles;
-
-   /* enpassant square */
-   Square_T sqrEnpassant;
-
-   /* half move count for 50 move rule */
-   int i50MoveCount;
-
-   /* current full move */
-   int iCurrMove;
-};
 typedef struct ChessParameters *ChessParameters_T;
 
 /*--------------------------------------------------------------------*/
 
 /* Return a new ChessParameters_T object initialized to the pcFen
    parameters, or NULL if insufficient memory is available. */
-ChessParameters_T ChessParameters_new(char *pcFen);
+ChessParameters_T ChessParameters_new(const char *pcFen);
 
 /* Free oParams. */
 void ChessParameters_free(ChessParameters_T oParams);
