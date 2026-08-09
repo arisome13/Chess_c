@@ -1,0 +1,99 @@
+/*--------------------------------------------------------------------*/
+/* parameters.c                                                       */
+/*--------------------------------------------------------------------*/
+
+#include <stdio.h> 
+#include <string.h>
+#include "parameters.h"
+
+ChessParameters_T ChessParameters_new(char *pcFen) {
+   ChessParameters_T oParams;
+   int fenIndex;
+   char pcEnpTemp[3];
+   char pcNumTemp[10];
+   char *pcEndStr;
+
+   
+   oParams = (ChessParameters_T)calloc(1, 
+            sizeof(struct ChessParameters));
+   if (oParams == NULL)
+      return NULL;
+
+   /* get fenIndex to the first element in a fen string: 
+      the turn color */
+   fenIndex = 0;
+   while (pcFen[fenIndex++] != ' ') {}
+   
+   if (pcFen[fenIndex] == 'w')
+      oParams->cTurnColor = WHITE;
+   else if (pcFen[fenIndex] == 'b')
+      oParams->cTurnColor = BLACK;
+   else {
+      printf("Impropper turn color char: %c", pcFen[fenIndex]);
+      exit(EXIT_FAILURE);
+   }
+   fenIndex += 2; /* move index to castling section */
+
+   oParams->pcCastles = malloc(10);
+   oParams->pcCastles[0] = '\0';
+   while (pcFen[fenIndex] != ' ') {
+      strncat(oParams->pcCastles, &pcFen[fenIndex], 1);
+      fenIndex++;
+   }
+   fenIndex++; /* move index to enpassant section */
+
+   oParams->sqrEnpassant = NULL;
+   if (pcFen[fenIndex] != '-') {
+      strncpy(pcEnpTemp, &pcFen[fenIndex], 2);
+      oParams->sqrEnpassant = Square_initNotation(pcEnpTemp);
+      fenIndex++;
+   }
+   fenIndex += 2; /* move index to 50 move rule section */
+
+   oParams->i50MoveCount = strtol(pcFen + fenIndex, &pcEndStr, 10);
+   oParams->iCurrMove = strtol(pcEndStr, &pcEndStr, 10);
+
+   return oParams;
+}
+
+void ChessParameters_free(ChessParameters_T oParams) {
+   free(oParams->sqrEnpassant);
+   free(oParams);
+}
+
+enum color ChessParameters_turnColor(ChessParameters_T oParams) {
+   return oParams->cTurnColor;
+}
+
+char *ChessParameters_castles(ChessParameters_T oParams) {
+   return oParams->pcCastles;
+}
+
+Square_T ChessParameters_enpSqr(ChessParameters_T oParams) {
+   return oParams->sqrEnpassant;
+}
+
+int ChessParameters_50MoveRule(ChessParameters_T oParams) {
+   return oParams->i50MoveCount;
+}
+
+int ChessParameters_numMoves(ChessParameters_T oParams) {
+   return oParams->iCurrMove;
+}
+
+char *ChessParameters_toString(ChessParameters_T oParams) {
+   char *pcStrRep;
+   char *pcSqr = Square_getNotation(oParams->sqrEnpassant);
+
+   asprintf(&pcStrRep, 
+      "Turn color: %s\nCastles: %s\nEnpassant: %s\n50 move rule: %d\nCurrent full move: %d\n", 
+      Color_toString(oParams->cTurnColor), 
+      oParams->pcCastles, 
+      pcSqr,
+      oParams->i50MoveCount, 
+      oParams->iCurrMove);
+
+   free(pcSqr);
+
+   return pcStrRep;
+}

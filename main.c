@@ -1,0 +1,16 @@
+
+#include "engine.h"
+
+const char *STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+int main()
+{
+    // create the engine
+    Engine_T eng = Engine_new(STARTING_FEN);
+
+    // print out what board the engine holds
+    printf("%s", ChessBoard_strRep(eng->oBoard));
+    
+    // free the engine
+    Engine_free(eng);
+}
