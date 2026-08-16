@@ -66,16 +66,31 @@ void Mask_capture(Mask_T oMask, Square_T oSqr) {
     oMask->ullMask &= ~Square_bitMask(oSqr);
 }
 
+bool isCovered(Mask_T oMask, int r, int f) {
+    Square_T sqr = Square_initCoords(r, f);
+    bool covered = oMask->ullMask >> Square_bitPos(sqr) & 1;
+    Square_free(sqr);
+    return covered;
+}
+
 char *Mask_toString(Mask_T oMask) {
-    char *name = oMask->cpName;
-    char *pcStrRep;
-    
-    pcStrRep = malloc(200);
+    char *pcStrRep = malloc(700);
     if (pcStrRep == NULL)
         return "NO SPACE IN MEMORY";
+    
+    char *ptr = pcStrRep;
 
-    uint64_to_binary_string(oMask->ullMask, pcStrRep);
-    sprintf(pcStrRep, "%s\n", oMask->cpName);
+    ptr += sprintf(ptr, "Piece Type: \'%.30s\'", oMask->cpName);
+
+    for (int r = 0; r <= 7; r++) {
+        ptr += sprintf(ptr, "\n  +---+---+---+---+---+---+---+---+\n%d |", 8-r);
+        for (int f = 0; f <= 7; f++) {
+            char *bit = isCovered(oMask, r, f) ? "X": " ";
+            ptr += sprintf(ptr, " %s |", bit);
+        }
+    }
+    ptr += sprintf(ptr, "\n  +---+---+---+---+---+---+---+---+\n");
+    ptr += sprintf(ptr, "    a   b   c   d   e   f   g   h  \n");
 
     return pcStrRep;
 }

@@ -22,7 +22,11 @@ typedef struct Square *Square_T;
 
 /* Return a new Square_T object initialized to the given parameters, or 
     NULL if insufficient memory is available. */
+    /* coords are defined from the top left 
+        rank: 0-7, file: 0-7 */
 Square_T Square_initCoords(int rank, int file);
+    /* notation is defined from bottom left 
+        rank: 1-8, file: a-h */
 Square_T Square_initNotation(char *pcNotation);
 
 /* Free oSquare. */

@@ -1,9 +1,19 @@
 
 #include <stdio.h>
-#include "parameters.h"
+#include "mask.h"
 
 int main () {
-    ChessParameters_T parms = ChessParameters_new("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    printf("%s", ChessParameters_toString(parms));
-    ChessParameters_free(parms);
+    Mask_T oMask = Mask_new("p");
+    Square_T oSqr1 = Square_initCoords(0, 5);
+    Square_T oSqr2 = Square_initNotation("b5");
+
+    Mask_place(oMask, oSqr1);
+    Mask_place(oMask, oSqr2);
+    Mask_capture(oMask, oSqr2);
+    
+    printf("%s\n", Mask_toString(oMask));
+    
+    Mask_free(oMask);
+    Square_free(oSqr1);
+    Square_free(oSqr2);
 }

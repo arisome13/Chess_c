@@ -20,7 +20,7 @@ clobber: clean
 main: main.o engine.o board.o parameters.o move.o mask.o square.o color.o
 	gcc $^ -o $@
 
-test: test.o parameters.o square.o color.o
+test: test.o mask.o square.o
 	gcc $^ -o $@
 
 # .o file creations
@@ -30,16 +30,18 @@ engine.o: engine.c
 	gcc -c $< -o $@
 board.o: board.c mask.h
 	gcc -c $< -o $@
-
-test.o: test.c parameters.h
-	gcc -c $< -o $@
 parameters.o: parameters.c square.h helpers.h
+	gcc -c $< -o $@
+
+mask.o: mask.c square.h helpers.h
 	gcc -c $< -o $@
 square.o: square.c helpers.h
 	gcc -c $< -o $@
 color.o: color.c
 	gcc -c $< -o $@
 
+test.o: test.c mask.h
+	gcc -c $< -o $@
 
 #.NUMBER = 2290
 #diff:

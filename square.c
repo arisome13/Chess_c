@@ -3,7 +3,6 @@
 /*--------------------------------------------------------------------*/
 
 #include "square.h"
-#include <stdio.h>
 #include <assert.h>
 
 Square_T Square_initCoords(int rank, int file) {
@@ -15,8 +14,8 @@ Square_T Square_initCoords(int rank, int file) {
     if (oSqr == NULL)
         return NULL;
 
-    oSqr->iFile = file;
     oSqr->iRank = rank;
+    oSqr->iFile = file;
 
     return oSqr;
 }
@@ -30,7 +29,7 @@ Square_T Square_initNotation(char *pcNotation) {
     f = pcNotation[0] - 'a';
     r = pcNotation[1] - '1';
 
-    return Square_initCoords(r, f);
+    return Square_initCoords(7 - r, f);
 }
   
 /*--------------------------------------------------------------------*/
@@ -43,18 +42,24 @@ void Square_free(Square_T oSquare) {
 /*--------------------------------------------------------------------*/
 
 bool Square_equals(Square_T oSquare1, Square_T oSquare2) {
+    assert(oSquare1 != NULL);
+    assert(oSquare2 != NULL);
     return oSquare1->iFile == oSquare2->iFile && oSquare1->iRank == oSquare2->iRank;
 }
 
 int Square_bitPos(Square_T oSquare) {
-    return (oSquare->iFile + (oSquare->iRank * 8)) >> 1;
+    assert(oSquare != NULL);
+    return oSquare->iFile + ((7 - oSquare->iRank) * 8);
 }
 
 uint64_t Square_bitMask(Square_T oSquare) {
-    return 1 << Square_bitPos(oSquare);
+    assert(oSquare != NULL);
+    return 1ULL << Square_bitPos(oSquare);
 }
 
 char *Square_getNotation(Square_T oSquare) {
+    assert(oSquare != NULL);
+    
     char *pcNotation = (char *)malloc(3);
     if (pcNotation == NULL) return NULL;
 
