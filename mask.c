@@ -8,15 +8,6 @@
 #include "string.h"
 #include "square.h"
 
-struct Mask
-{
-    /* piece mask */
-    uint64_t ullMask;
-
-    /* piece name */
-    char *cpName;
-};
-
 Mask_T Mask_new(char *name) {
     Mask_T oMask;
 
@@ -33,19 +24,8 @@ Mask_T Mask_new(char *name) {
 }
   
 void Mask_free(Mask_T oMask) {
-    free(oMask);
-}
-
-/*--------------------------------------------------------------------*/
-
-// buffer must be at least 65 bytes (64 bits + null terminator)
-char *uint64_to_binary_string(uint64_t value, char *buffer) {
-    buffer[64] = '\0';
-    for (int i = 63; i >= 0; i--) {
-        buffer[i] = (value & 1) ? '1' : '0';
-        value >>= 1;
-    }
-    return buffer;
+    if (oMask != NULL)
+        free(oMask);
 }
 
 /*--------------------------------------------------------------------*/
@@ -66,7 +46,7 @@ void Mask_capture(Mask_T oMask, Square_T oSqr) {
     oMask->ullMask &= ~Square_bitMask(oSqr);
 }
 
-bool isCovered(Mask_T oMask, int r, int f) {
+bool Mask_isCovered(Mask_T oMask, int r, int f) {
     Square_T sqr = Square_initCoords(r, f);
     bool covered = oMask->ullMask >> Square_bitPos(sqr) & 1;
     Square_free(sqr);
@@ -85,7 +65,7 @@ char *Mask_toString(Mask_T oMask) {
     for (int r = 0; r <= 7; r++) {
         ptr += sprintf(ptr, "\n  +---+---+---+---+---+---+---+---+\n%d |", 8-r);
         for (int f = 0; f <= 7; f++) {
-            char *bit = isCovered(oMask, r, f) ? "X": " ";
+            char *bit = Mask_isCovered(oMask, r, f) ? "X": " ";
             ptr += sprintf(ptr, " %s |", bit);
         }
     }

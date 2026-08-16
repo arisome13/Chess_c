@@ -11,8 +11,15 @@
 
 /* A Mask_T object holds the piece positions of a single piece on 
     a chess board. */
+struct Mask
+{
+    /* piece mask */
+    uint64_t ullMask;
 
-    typedef struct Mask *Mask_T;
+    /* piece name */
+    char *cpName;
+};
+typedef struct Mask *Mask_T;
 
 /*--------------------------------------------------------------------*/
 
@@ -51,6 +58,12 @@ void Mask_place(Mask_T oMask, Square_T oSqr);
 /* Alter oMask so that there is a 0 in the spot corresponding to sqr. */
 
 void Mask_capture(Mask_T oMask, Square_T oSqr);
+
+/*--------------------------------------------------------------------*/
+
+/* Returns whether the location r,f holds a piece. */
+
+bool Mask_isCovered(Mask_T oMask, int r, int f);
 
 /*--------------------------------------------------------------------*/
 

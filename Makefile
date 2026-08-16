@@ -20,7 +20,7 @@ clobber: clean
 main: main.o engine.o board.o parameters.o move.o mask.o square.o color.o
 	gcc $^ -o $@
 
-test: test.o mask.o square.o
+test: test.o board.o mask.o color.o square.o
 	gcc $^ -o $@
 
 # .o file creations

@@ -8,6 +8,8 @@
 #define BOARD_INCLUDED
 
 #include "mask.h"
+#include "color.h"
+#include "type.h"
 
 enum {MAX_PIECE_TYPES = 64};
 
@@ -24,6 +26,6 @@ ChessBoard_T ChessBoard_new(const char *pcFen);
 void ChessBoard_free(ChessBoard_T oBoard);
 
 /* Return the string representation of oBoard. Caller must free. */
-char *ChessBoard_strRep(ChessBoard_T oBoard);
+char *ChessBoard_toString(ChessBoard_T oBoard);
 
 #endif
