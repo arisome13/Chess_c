@@ -3,6 +3,7 @@
 /*--------------------------------------------------------------------*/
 
 #include <stdlib.h>
+#include <assert.h>
 #include "move.h"
 
 struct Move

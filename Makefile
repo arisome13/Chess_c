@@ -17,7 +17,7 @@ clobber: clean
 	rm -f *.o
 
 # make the program
-main: main.o engine.o board.o parameters.o move.o mask.o square.o
+main: main.o engine.o board.o parameters.o move.o mask.o square.o color.o
 	gcc $^ -o $@
 
 test: test.o parameters.o square.o color.o

@@ -7,11 +7,14 @@
 
 struct Engine
 {
-   /* A chess board object holding the pieces on the board. */
-   ChessBoard_T oBoard;
+    /* A chess board object holding the pieces on the board. */
+    ChessBoard_T oBoard;
    
-   /* A chess parameters object holding the state of the chess game. */
-   ChessParameters_T oParams;
+    /* A chess parameters object holding the state of the chess game. */
+    ChessParameters_T oParams;
+
+    /* search depth */
+    int iDepth;
 };
 
 
@@ -31,11 +34,12 @@ Engine_T Engine_new(const char *pcFen) {
     oEngine->oParams = ChessParameters_new(pcFen);
     if (oEngine->oParams == NULL)
         return NULL;
+    
+    /* alter when testing */
+    oEngine->iDepth = 3;
 
     return oEngine;
 }
-
-/*--------------------------------------------------------------------*/
 
 void Engine_free(Engine_T oEngine) {
     assert(oEngine != NULL);
@@ -47,10 +51,14 @@ void Engine_free(Engine_T oEngine) {
 
 /*--------------------------------------------------------------------*/
 
+/* unfinished */
 Move_T Engine_bestMove (Engine_T oEngine) {
     return Move_new(Square_initNotation("a2"), Square_initNotation("a4"));
 }
 
+/*--------------------------------------------------------------------*/
+
+/* unfinished */
 char *Engine_toString (Engine_T oEngine) {
     char *pcStrRep = malloc(300);
 

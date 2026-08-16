@@ -41,9 +41,16 @@ uint64_t Mask_getPos(Mask_T oMask);
 
 /*--------------------------------------------------------------------*/
 
-/* Return the mask's piece position mask. */
+/* Alter oMask so that there is a 1 in the spot corresponding to sqr. */
 
-void Mask_place(Mask_T oMask, Square_T pos);
+void Mask_place(Mask_T oMask, Square_T oSqr);
+
+
+/*--------------------------------------------------------------------*/
+
+/* Alter oMask so that there is a 0 in the spot corresponding to sqr. */
+
+void Mask_capture(Mask_T oMask, Square_T oSqr);
 
 /*--------------------------------------------------------------------*/
 

@@ -6,15 +6,6 @@
 #include <stdio.h>
 #include <assert.h>
 
-struct Square
-{
-    /* rank */
-    int iRank;
-
-    /* file */
-    int iFile;
-};
-
 Square_T Square_initCoords(int rank, int file) {
     Square_T oSqr;
 
@@ -53,6 +44,14 @@ void Square_free(Square_T oSquare) {
 
 bool Square_equals(Square_T oSquare1, Square_T oSquare2) {
     return oSquare1->iFile == oSquare2->iFile && oSquare1->iRank == oSquare2->iRank;
+}
+
+int Square_bitPos(Square_T oSquare) {
+    return (oSquare->iFile + (oSquare->iRank * 8)) >> 1;
+}
+
+uint64_t Square_bitMask(Square_T oSquare) {
+    return 1 << Square_bitPos(oSquare);
 }
 
 char *Square_getNotation(Square_T oSquare) {

@@ -3,6 +3,7 @@
 /*--------------------------------------------------------------------*/
 
 #include "board.h"
+#include <assert.h>
 
 struct ChessBoard
 {
@@ -34,7 +35,7 @@ void ChessBoard_free(ChessBoard_T oBoard) {
 
 char *ChessBoard_strRep(ChessBoard_T oBoard) {
     assert(oBoard != NULL);
-    
+
     return "hello world";
 }
 
