@@ -5,7 +5,7 @@
 #include "square.h"
 #include <assert.h>
 
-Square_T Square_initCoords(int rank, int file) {
+Square_T Square_newCoords(int rank, int file) {
     Square_T oSqr;
 
     assert(0 <= rank && rank < 8 && 0 <= file && file < 8);
@@ -20,7 +20,7 @@ Square_T Square_initCoords(int rank, int file) {
     return oSqr;
 }
 
-Square_T Square_initNotation(char *pcNotation) {
+Square_T Square_newNotation(char *pcNotation) {
     int r;
     int f;
 
@@ -29,7 +29,7 @@ Square_T Square_initNotation(char *pcNotation) {
     f = pcNotation[0] - 'a';
     r = pcNotation[1] - '1';
 
-    return Square_initCoords(7 - r, f);
+    return Square_newCoords(7 - r, f);
 }
   
 /*--------------------------------------------------------------------*/

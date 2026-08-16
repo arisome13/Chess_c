@@ -47,7 +47,7 @@ void Mask_capture(Mask_T oMask, Square_T oSqr) {
 }
 
 bool Mask_isCovered(Mask_T oMask, int r, int f) {
-    Square_T sqr = Square_initCoords(r, f);
+    Square_T sqr = Square_newCoords(r, f);
     bool covered = oMask->ullMask >> Square_bitPos(sqr) & 1;
     Square_free(sqr);
     return covered;

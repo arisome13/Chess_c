@@ -63,7 +63,7 @@ ChessParameters_T ChessParameters_new(const char *pcFen) {
    oParams->sqrEnpassant = NULL;
    if (pcFen[fenIndex] != '-') {
       strncpy(pcEnpTemp, &pcFen[fenIndex], 2);
-      oParams->sqrEnpassant = Square_initNotation(pcEnpTemp);
+      oParams->sqrEnpassant = Square_newNotation(pcEnpTemp);
       fenIndex++;
    }
    fenIndex += 2; /* move index to 50 move rule section */

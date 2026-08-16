@@ -52,9 +52,28 @@ ChessBoard_T ChessBoard_new(const char *pcFen) {
     oBoard->mPieceMasks[WHITE][KING] = Mask_new("K");
     if (oBoard->mPieceMasks[WHITE][KING] == NULL) return NULL;
     
-    Square_T sqr = Square_initCoords(0, 0);
+    Square_T sqr = Square_newCoords(0, 0);
     if (sqr == NULL) return NULL;
 
+    /* place black back rank pieces */
+    sqr->iRank = 0;
+    sqr->iFile = 0;
+    Mask_place(oBoard->mPieceMasks[BLACK][ROOK], sqr);
+    sqr->iFile++;
+    Mask_place(oBoard->mPieceMasks[BLACK][KNIGHT], sqr);
+    sqr->iFile++;
+    Mask_place(oBoard->mPieceMasks[BLACK][BISHOP], sqr);
+    sqr->iFile++;
+    Mask_place(oBoard->mPieceMasks[BLACK][QUEEN], sqr);
+    sqr->iFile++;
+    Mask_place(oBoard->mPieceMasks[BLACK][KING], sqr);
+    sqr->iFile++;
+    Mask_place(oBoard->mPieceMasks[BLACK][BISHOP], sqr);
+    sqr->iFile++;
+    Mask_place(oBoard->mPieceMasks[BLACK][KNIGHT], sqr);
+    sqr->iFile++;
+    Mask_place(oBoard->mPieceMasks[BLACK][ROOK], sqr);
+    
     /* place black pawns */
     sqr->iRank = 1;
     for (sqr->iFile = 0; sqr->iFile < 8; sqr->iFile++) {
@@ -65,8 +84,24 @@ ChessBoard_T ChessBoard_new(const char *pcFen) {
     for (sqr->iFile = 0; sqr->iFile < 8; sqr->iFile++) {
         Mask_place(oBoard->mPieceMasks[WHITE][PAWN], sqr);
     }
-
-    /* PLACE OTHER PIECES */
+    /* place white back rank pieces */
+    sqr->iRank = 7;
+    sqr->iFile = 0;
+    Mask_place(oBoard->mPieceMasks[WHITE][ROOK], sqr);
+    sqr->iFile++;
+    Mask_place(oBoard->mPieceMasks[WHITE][KNIGHT], sqr);
+    sqr->iFile++;
+    Mask_place(oBoard->mPieceMasks[WHITE][BISHOP], sqr);
+    sqr->iFile++;
+    Mask_place(oBoard->mPieceMasks[WHITE][QUEEN], sqr);
+    sqr->iFile++;
+    Mask_place(oBoard->mPieceMasks[WHITE][KING], sqr);
+    sqr->iFile++;
+    Mask_place(oBoard->mPieceMasks[WHITE][BISHOP], sqr);
+    sqr->iFile++;
+    Mask_place(oBoard->mPieceMasks[WHITE][KNIGHT], sqr);
+    sqr->iFile++;
+    Mask_place(oBoard->mPieceMasks[WHITE][ROOK], sqr);
 
     free(sqr);
     return oBoard;
@@ -105,9 +140,11 @@ char *ChessBoard_toString(ChessBoard_T oBoard) {
                         } else {
                             assert(1 == 0);
                         }
+                        goto foundPiece;
                     }
                 }
             }
+            foundPiece:
             ptr += sprintf(ptr, " %.1s |", bit);
         }
     }

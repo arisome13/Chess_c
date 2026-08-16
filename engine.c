@@ -53,7 +53,7 @@ void Engine_free(Engine_T oEngine) {
 
 /* unfinished */
 Move_T Engine_bestMove (Engine_T oEngine) {
-    return Move_new(Square_initNotation("a2"), Square_initNotation("a4"));
+    return Move_new(Square_newNotation("a2"), Square_newNotation("a4"));
 }
 
 /*--------------------------------------------------------------------*/
