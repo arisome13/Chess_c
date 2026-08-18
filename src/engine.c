@@ -18,7 +18,8 @@ struct Engine
 };
 
 
-Engine_T Engine_new(const char *pcFen) {
+Engine_T Engine_new(const char *pcFen) 
+{
     Engine_T oEngine;
 
     assert(pcFen != NULL);
@@ -41,7 +42,8 @@ Engine_T Engine_new(const char *pcFen) {
     return oEngine;
 }
 
-void Engine_free(Engine_T oEngine) {
+void Engine_free(Engine_T oEngine) 
+{
     assert(oEngine != NULL);
 
     free(oEngine->oBoard);
@@ -52,18 +54,29 @@ void Engine_free(Engine_T oEngine) {
 /*--------------------------------------------------------------------*/
 
 /* unfinished */
-Move_T Engine_bestMove (Engine_T oEngine) {
+Move_T Engine_bestMove (Engine_T oEngine)
+{
+    oEngine->iDepth = 3;
     return Move_new(Square_newNotation("a2"), Square_newNotation("a4"));
 }
 
 /*--------------------------------------------------------------------*/
 
-/* unfinished */
-char *Engine_toString (Engine_T oEngine) {
-    char *pcStrRep = malloc(300);
-
+char *Engine_toString (Engine_T oEngine)
+{
     assert(oEngine != NULL);
 
-    pcStrRep[0] = '\0';
+    char *pcStrRep = malloc(800);
+    char *ptr = pcStrRep;
+    ptr[0] = '\0';
+
+    char *board = ChessBoard_toString(oEngine->oBoard);
+    ptr += sprintf(ptr, "%s", board);
+
+    ptr += sprintf(ptr, "\n");
+
+    char *params = ChessParameters_toString(oEngine->oParams);
+    ptr += sprintf(ptr, "%s", params);
+
     return pcStrRep;
 }

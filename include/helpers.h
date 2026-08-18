@@ -10,5 +10,6 @@
 #include "color.h"
 #include "type.h"
 #include "castles.h"
+#include "error.h"
 
 #endif

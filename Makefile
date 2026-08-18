@@ -2,49 +2,40 @@
 #  Makefile																  #
 # ----------------------------------------------------------------------- #
 
-SOURCES = main.c engine.c board.c
-OBJECTS = $(SOURCES:.c=.o)
-TARGETS = test main
+SOURCES = $(wildcard src/*.c)
+OBJECTS = $(patsubst src/%.c, obj/%.o, $(SOURCES))
 
-all: $(TARGETS)
+TEST_OBJS = obj/test.o $(OBJECTS)
+MAIN_OBJS = obj/main.o $(OBJECTS)
+
+CFLAGS = -Wall -Wextra -Wpedantic -Wshadow -I include
+
+# make both executables
+all: bin/test bin/main
 
 # removes all program files
 clean:
-	rm -f $(TARGETS)
-
+	rm -f bin/test bin/main
 # removes all .o files AND program files
 clobber: clean
-	rm -f *.o
+	rm -f obj/*.o
 
-# make the program
-main: main.o engine.o board.o parameters.o move.o mask.o square.o color.o
-	gcc $^ -o $@
-
-test: test.o board.o mask.o color.o square.o
-	gcc $^ -o $@
+# make the programs
+bin/test: $(TEST_OBJS) | bin
+	gcc $(CFLAGS) -o $@ $^
+bin/main: $(MAIN_OBJS) | bin
+	gcc $(CFLAGS) -o $@ $^
 
 # .o file creations
-main.o: main.c engine.h
-	gcc -c $< -o $@
-engine.o: engine.c 
-	gcc -c $< -o $@
-board.o: board.c mask.h
-	gcc -c $< -o $@
-parameters.o: parameters.c square.h helpers.h
-	gcc -c $< -o $@
+obj/main.o: prgm/main.c | obj
+	gcc $(CFLAGS) -c $< -o $@
+obj/test.o: prgm/test.c | obj
+	gcc $(CFLAGS) -c $< -o $@
+obj/%.o: src/%.c | obj
+	gcc $(CFLAGS) -c $< -o $@
 
-mask.o: mask.c square.h helpers.h
-	gcc -c $< -o $@
-square.o: square.c helpers.h
-	gcc -c $< -o $@
-color.o: color.c
-	gcc -c $< -o $@
+# create directories
+obj bin:
+	mkdir -p $@
 
-test.o: test.c mask.h
-	gcc -c $< -o $@
-
-#.NUMBER = 2290
-#diff:
-#	./fibc $(.NUMBER) >| file1
-#	./fiboo $(.NUMBER) >| file2
-#	-diff file1 file2 >| checkFile.txt
+	

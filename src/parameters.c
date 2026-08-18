@@ -28,7 +28,6 @@ ChessParameters_T ChessParameters_new(const char *pcFen) {
    ChessParameters_T oParams;
    int fenIndex;
    char pcEnpTemp[3];
-   char pcNumTemp[10];
    char *pcEndStr;
 
    
@@ -47,8 +46,7 @@ ChessParameters_T ChessParameters_new(const char *pcFen) {
    else if (pcFen[fenIndex] == 'b')
       oParams->cTurnColor = BLACK;
    else {
-      printf("Impropper turn color char: %c", pcFen[fenIndex]);
-      exit(EXIT_FAILURE);
+      ERROR("Impropper turn color char: %c", pcFen[fenIndex]);
    }
    fenIndex += 2; /* move index to castling section */
 
@@ -82,36 +80,33 @@ void ChessParameters_free(ChessParameters_T oParams) {
 enum color ChessParameters_turnColor(ChessParameters_T oParams) {
    return oParams->cTurnColor;
 }
-
 char *ChessParameters_castles(ChessParameters_T oParams) {
    return oParams->pcCastles;
 }
-
 Square_T ChessParameters_enpSqr(ChessParameters_T oParams) {
    return oParams->sqrEnpassant;
 }
-
 int ChessParameters_50MoveRule(ChessParameters_T oParams) {
    return oParams->i50MoveCount;
 }
-
 int ChessParameters_numMoves(ChessParameters_T oParams) {
    return oParams->iCurrMove;
 }
 
 char *ChessParameters_toString(ChessParameters_T oParams) {
    char *pcStrRep;
-   char *pcSqr = Square_getNotation(oParams->sqrEnpassant);
+   char *pcSqr = oParams->sqrEnpassant == NULL ? "--" : Square_getNotation(oParams->sqrEnpassant);
 
    asprintf(&pcStrRep, 
-      "Turn color: %s\nCastles: %s\nEnpassant: %s\n50 move rule: %d\nCurrent full move: %d\n", 
+      "  +-------+------+----+---+---+\n  | %s | %s | %s | %d | %d |\n  +-------+------+----+---+---+\n", 
       Color_toString(oParams->cTurnColor), 
       oParams->pcCastles, 
       pcSqr,
       oParams->i50MoveCount, 
       oParams->iCurrMove);
 
-   free(pcSqr);
+   if (oParams->sqrEnpassant != NULL)
+      free(pcSqr);
 
    return pcStrRep;
 }
