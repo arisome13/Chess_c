@@ -11,6 +11,4 @@
 #include "type.h"
 #include "error.h"
 
-extern const char *STARTING_FEN;
-
 #endif

@@ -17,14 +17,18 @@ struct Engine
     int iDepth;
 };
 
+const char *STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
 Engine_T Engine_new(const char *pcFen) 
 {
-    assert(pcFen != NULL);
-
     Engine_T oEngine;
 
     oEngine = (Engine_T)calloc(1, sizeof(struct Engine));
     MEM_CHECK(oEngine);
+
+    if (pcFen == NULL)
+        pcFen = STARTING_FEN;
+
     oEngine->oBoard = ChessBoard_new(pcFen);
     MEM_CHECK(oEngine->oBoard);
     oEngine->oParams = ChessParameters_new(pcFen);
@@ -68,13 +72,16 @@ Engine_T Engine_copy (Engine_T oEngine)
    The parameter oEngine should be a */
 Move_T Engine_search (Engine_T oEngine)
 {
-
+    /* INCOMPLETE */
+    assert(oEngine != NULL);
+    return Move_new(Square_newNotation("e2"), Square_newNotation("e4"));
 }
 
 void Mask_addUpPieces (Mask_T oMask, int *total) {
+    assert(oMask != NULL);
+    assert(total != NULL);
     *total += Type_getValue(Mask_getName(oMask)) * Mask_numPieces(oMask);
 }
-
 /* Return a score for the position held by oEngine. + if it is in 
     favor of white, - if it is in favor of black. */
 int Engine_evaluate (Engine_T oEngine)
@@ -106,7 +113,7 @@ char *Engine_toString (Engine_T oEngine)
 {
     assert(oEngine != NULL);
 
-    char *pcStrRep = malloc(800);
+    char *pcStrRep = malloc(900);
     char *ptr = pcStrRep;
     ptr[0] = '\0';
 
@@ -117,6 +124,12 @@ char *Engine_toString (Engine_T oEngine)
 
     char *params = ChessParameters_toString(oEngine->oParams);
     ptr += sprintf(ptr, "%s", params);
+
+    ptr += sprintf(ptr, "\n");
+
+    ptr += sprintf(ptr, "  Engine eval: %d", Engine_evaluate(oEngine));
+
+    ptr += sprintf(ptr, "\n");
 
     return pcStrRep;
 }

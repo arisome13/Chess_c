@@ -67,7 +67,7 @@ char *Square_toString(Square_T oSquare) {
     char *pcNotation = (char *)malloc(3);
     MEM_CHECK(pcNotation);
 
-    if (oSquare == NULL) 
+    if (oSquare == NULL)
     {
         pcNotation[0] = '-';
         pcNotation[1] = '\0';
@@ -77,7 +77,7 @@ char *Square_toString(Square_T oSquare) {
     else
     {
         pcNotation[0] = 'a' + oSquare->iFile;
-        pcNotation[1] = '1' + oSquare->iRank;
+        pcNotation[1] = '1' + 7 - oSquare->iRank;
         pcNotation[2] = '\0';
 
         return pcNotation;

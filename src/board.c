@@ -9,7 +9,6 @@
 #include <string.h>
 
 enum {MAX_PIECE_TYPES = 64};
-const char *STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 struct ChessBoard
 {
@@ -21,13 +20,12 @@ struct ChessBoard
 
 ChessBoard_T ChessBoard_new(const char *pcFen) 
 {
+    assert(pcFen != NULL);
+
     ChessBoard_T oBoard = (ChessBoard_T)calloc(1, sizeof(struct ChessBoard));
     MEM_CHECK(oBoard);
     
-    if (pcFen == NULL)
-        ChessBoard_setFen(oBoard, STARTING_FEN);
-    else
-        ChessBoard_setFen(oBoard, pcFen);
+    ChessBoard_setFen(oBoard, pcFen);
     
     return oBoard;
 }
@@ -118,8 +116,10 @@ void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
 
 Mask_T ChessBoard_getMask(ChessBoard_T oBoard, char cName) {
     for (int m = 0; m < MAX_PIECE_TYPES; m++) {
-        if (oBoard->pmPieceMasks[m] == NULL)
+        if (oBoard->pmPieceMasks[m] == NULL) {
+            oBoard->pmPieceMasks[m] = Mask_new(cName);
             return oBoard->pmPieceMasks[m];
+        }
         else if (Mask_getName(oBoard->pmPieceMasks[m]) == cName)
             return oBoard->pmPieceMasks[m];
     }
@@ -156,6 +156,8 @@ char *ChessBoard_toString(ChessBoard_T oBoard)
             char bit = ' ';
             // go through all the bit masks
             for (int m = 0; m < MAX_PIECE_TYPES; m++) {
+                if (oBoard->pmPieceMasks[m] == NULL)
+                    break;
                 if (Mask_isCovered(oBoard->pmPieceMasks[m], r, f)) {
                     if (bit == ' ') {
                         bit = Mask_getName(oBoard->pmPieceMasks[m]);

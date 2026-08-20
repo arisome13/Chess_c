@@ -4,7 +4,7 @@
 int main(void)
 {
     // create the engine
-    Engine_T eng = Engine_new(STARTING_FEN);
+    Engine_T eng = Engine_new(NULL);
 
     // print out what board the engine holds
     printf("%s", Engine_toString(eng));
