@@ -32,6 +32,9 @@ Square_T Square_newNotation(char *pcNotation);
 /* Free oSquare. */
 void Square_free(Square_T oSquare);
 
+/* Return a deep copy of oSquare. Caller must free. */
+Square_T Square_copy(Square_T oSquare);
+
 /*--------------------------------------------------------------------*/
 
 /* Return whether oSquare1 contians the same location as oSquare2. */
@@ -45,6 +48,6 @@ uint64_t Square_bitMask(Square_T oSquare);
 
 /* Return the algebraic notation for the square oSquare represents,
     or NULL if insufficient memory is available. Caller must free. */
-char *Square_getNotation(Square_T oSquare);
+char *Square_toString(Square_T oSquare);
 
 #endif

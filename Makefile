@@ -16,9 +16,9 @@ all: bin/test bin/main
 # removes all program files
 clean:
 	rm -f bin/test bin/main
-# removes all .o files AND program files
+# removes all files from the bin and object directories
 clobber: clean
-	rm -f obj/*.o
+	rm -rf obj bin
 
 # make the programs
 bin/test: $(TEST_OBJS) | bin

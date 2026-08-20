@@ -16,3 +16,8 @@ void ERROR(const char *pcMessage, ...)
     va_end(args);
     exit(EXIT_FAILURE);
 }
+
+void MEM_CHECK(void *pObject) {
+    if (pObject == NULL)
+        ERROR("Memory error.");
+}

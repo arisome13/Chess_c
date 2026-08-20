@@ -9,7 +9,8 @@
 #include <stdlib.h>
 #include "color.h"
 #include "type.h"
-#include "castles.h"
 #include "error.h"
+
+extern const char *STARTING_FEN;
 
 #endif

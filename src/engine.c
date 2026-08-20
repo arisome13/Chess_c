@@ -13,30 +13,23 @@ struct Engine
     /* A chess parameters object holding the state of the chess game. */
     ChessParameters_T oParams;
 
-    /* search depth */
+    /* search depth: alter when testing */
     int iDepth;
 };
 
-
 Engine_T Engine_new(const char *pcFen) 
 {
-    Engine_T oEngine;
-
     assert(pcFen != NULL);
 
-    oEngine = (Engine_T)calloc(1, sizeof(struct Engine));
-    if (oEngine == NULL)
-        return NULL;
-    
-    oEngine->oBoard = ChessBoard_new(pcFen);
-    if (oEngine->oBoard == NULL)
-        return NULL;
+    Engine_T oEngine;
 
+    oEngine = (Engine_T)calloc(1, sizeof(struct Engine));
+    MEM_CHECK(oEngine);
+    oEngine->oBoard = ChessBoard_new(pcFen);
+    MEM_CHECK(oEngine->oBoard);
     oEngine->oParams = ChessParameters_new(pcFen);
-    if (oEngine->oParams == NULL)
-        return NULL;
+    MEM_CHECK(oEngine->oParams);
     
-    /* alter when testing */
     oEngine->iDepth = 3;
 
     return oEngine;
@@ -51,13 +44,60 @@ void Engine_free(Engine_T oEngine)
     free(oEngine);
 }
 
+Engine_T Engine_copy (Engine_T oEngine)
+{
+    assert(oEngine);
+    Engine_T oeCopy;
+
+    oeCopy = (Engine_T)calloc(1, sizeof(struct Engine));
+    MEM_CHECK(oeCopy);
+    oeCopy->oBoard = ChessBoard_copy(oEngine->oBoard);
+    MEM_CHECK(oeCopy->oBoard);
+    oeCopy->oParams = ChessParameters_copy(oEngine->oParams);
+    MEM_CHECK(oeCopy->oParams);
+
+    oeCopy->iDepth = oEngine->iDepth;
+
+    return oeCopy;
+}
+
 /*--------------------------------------------------------------------*/
 
-/* unfinished */
+/* Search 3 moves in to the move tree and return the best move for the 
+   current player, or NULL if insufficient memory is available. 
+   The parameter oEngine should be a */
+Move_T Engine_search (Engine_T oEngine)
+{
+
+}
+
+void Mask_addUpPieces (Mask_T oMask, int *total) {
+    *total += Type_getValue(Mask_getName(oMask)) * Mask_numPieces(oMask);
+}
+
+/* Return a score for the position held by oEngine. + if it is in 
+    favor of white, - if it is in favor of black. */
+int Engine_evaluate (Engine_T oEngine)
+{
+    assert(oEngine != NULL);
+    int score = 0;
+
+    ChessBoard_onEachMask(oEngine->oBoard, Mask_addUpPieces, &score);
+    
+    return score;
+}
+
+
+/*--------------------------------------------------------------------*/
+
 Move_T Engine_bestMove (Engine_T oEngine)
 {
-    oEngine->iDepth = 3;
-    return Move_new(Square_newNotation("a2"), Square_newNotation("a4"));
+    Engine_T oeCopy = Engine_copy(oEngine);
+
+    Move_T omBest = Engine_search(oEngine);
+
+    free(oeCopy);
+    return omBest;
 }
 
 /*--------------------------------------------------------------------*/

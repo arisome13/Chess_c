@@ -9,13 +9,13 @@
 struct ChessParameters
 {
    /* color of the current play*/
-   enum color cTurnColor;
+   color cTurnColor;
 
    /* available castle indicators */
-   char *pcCastles;
+   Castles_T oCastles;
 
    /* enpassant square */
-   Square_T sqrEnpassant;
+   Square_T oEnpSqr;
 
    /* half move count for 50 move rule */
    int i50MoveCount;
@@ -25,17 +25,14 @@ struct ChessParameters
 };
 
 ChessParameters_T ChessParameters_new(const char *pcFen) {
-   ChessParameters_T oParams;
    int fenIndex;
    char pcEnpTemp[3];
    char *pcEndStr;
 
-   
-   oParams = (ChessParameters_T)calloc(1, 
+   ChessParameters_T oParams = (ChessParameters_T)calloc(1, 
             sizeof(struct ChessParameters));
-   if (oParams == NULL)
-      return NULL;
-
+   MEM_CHECK(oParams);
+   
    /* get fenIndex to the first element in a fen string: 
       the turn color */
    fenIndex = 0;
@@ -50,18 +47,17 @@ ChessParameters_T ChessParameters_new(const char *pcFen) {
    }
    fenIndex += 2; /* move index to castling section */
 
-   oParams->pcCastles = malloc(10);
-   oParams->pcCastles[0] = '\0';
+   oParams->oCastles = Castles_new();
    while (pcFen[fenIndex] != ' ') {
-      strncat(oParams->pcCastles, &pcFen[fenIndex], 1);
+      Castles_add(oParams->oCastles, pcFen[fenIndex]);
       fenIndex++;
    }
    fenIndex++; /* move index to enpassant section */
 
-   oParams->sqrEnpassant = NULL;
+   oParams->oEnpSqr = NULL;
    if (pcFen[fenIndex] != '-') {
       strncpy(pcEnpTemp, &pcFen[fenIndex], 2);
-      oParams->sqrEnpassant = Square_newNotation(pcEnpTemp);
+      oParams->oEnpSqr = Square_newNotation(pcEnpTemp);
       fenIndex++;
    }
    fenIndex += 2; /* move index to 50 move rule section */
@@ -73,39 +69,61 @@ ChessParameters_T ChessParameters_new(const char *pcFen) {
 }
 
 void ChessParameters_free(ChessParameters_T oParams) {
-   free(oParams->sqrEnpassant);
+   free(oParams->oEnpSqr);
    free(oParams);
 }
+
+ChessParameters_T ChessParameters_copy(ChessParameters_T oParams) {
+   ChessParameters_T opCopy = (ChessParameters_T)calloc(1, 
+            sizeof(struct ChessParameters));
+   MEM_CHECK(oParams);
+
+   opCopy->cTurnColor = oParams->cTurnColor;
+   opCopy->oCastles = Castles_copy(oParams->oCastles);
+   opCopy->oEnpSqr = Square_copy(oParams->oEnpSqr);
+   opCopy->i50MoveCount = oParams->i50MoveCount;
+   opCopy->iCurrMove = oParams->iCurrMove;
+
+   return opCopy;
+}
+
+/*--------------------------------------------------------------------*/
 
 enum color ChessParameters_turnColor(ChessParameters_T oParams) {
    return oParams->cTurnColor;
 }
-char *ChessParameters_castles(ChessParameters_T oParams) {
-   return oParams->pcCastles;
+
+Castles_T ChessParameters_castles(ChessParameters_T oParams) {
+   return oParams->oCastles;
 }
+
 Square_T ChessParameters_enpSqr(ChessParameters_T oParams) {
-   return oParams->sqrEnpassant;
+   return oParams->oEnpSqr;
 }
+
 int ChessParameters_50MoveRule(ChessParameters_T oParams) {
    return oParams->i50MoveCount;
 }
+
 int ChessParameters_numMoves(ChessParameters_T oParams) {
    return oParams->iCurrMove;
 }
 
+/*--------------------------------------------------------------------*/
+
 char *ChessParameters_toString(ChessParameters_T oParams) {
    char *pcStrRep;
-   char *pcSqr = oParams->sqrEnpassant == NULL ? "--" : Square_getNotation(oParams->sqrEnpassant);
+   char *pcSqr = oParams->oEnpSqr == NULL ? "--" : Square_toString(oParams->oEnpSqr);
 
    asprintf(&pcStrRep, 
       "  +-------+------+----+---+---+\n  | %s | %s | %s | %d | %d |\n  +-------+------+----+---+---+\n", 
       Color_toString(oParams->cTurnColor), 
-      oParams->pcCastles, 
+      Castles_toString(oParams->oCastles), 
       pcSqr,
       oParams->i50MoveCount, 
       oParams->iCurrMove);
 
-   if (oParams->sqrEnpassant != NULL)
+   if (oParams->oEnpSqr != NULL)
       free(pcSqr);
 
    return pcStrRep;

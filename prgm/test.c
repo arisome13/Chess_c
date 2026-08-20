@@ -3,7 +3,7 @@
 #include "board.h"
 
 int main (void) {
-    ChessBoard_T oBoard = ChessBoard_new("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    ChessBoard_T oBoard = ChessBoard_new(STARTING_FEN);
 
     printf("%s\n", ChessBoard_toString(oBoard));
     

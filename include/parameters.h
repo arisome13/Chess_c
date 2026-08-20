@@ -3,13 +3,13 @@
 /*--------------------------------------------------------------------*/
 
 #include "square.h"
+#include "castles.h"
 #include "helpers.h"
 
 #ifndef PARAMETERS_INCLUDED
 #define PARAMETERS_INCLUDED
 
 /* A ChessParameters_T object defines the state of a chess game. */
-
 typedef struct ChessParameters *ChessParameters_T;
 
 /*--------------------------------------------------------------------*/
@@ -21,13 +21,16 @@ ChessParameters_T ChessParameters_new(const char *pcFen);
 /* Free oParams. */
 void ChessParameters_free(ChessParameters_T oParams);
 
+/* Return a deep copy of oParams. Caller must free. */
+ChessParameters_T ChessParameters_copy(ChessParameters_T oParams);
+
 /*--------------------------------------------------------------------*/
 
 /* Return the turn color. */
-enum color ChessParameters_turnColor(ChessParameters_T oParams);
+color ChessParameters_turnColor(ChessParameters_T oParams);
 
-/* Return the available castles as a 4 bit number. */
-char *ChessParameters_castles(ChessParameters_T oParams);
+/* Return the available castles as a castles struct. */
+Castles_T ChessParameters_castles(ChessParameters_T oParams);
 
 /* Return the enpassant square as a 6 bit number, or NULL if no
    enpassant square exists. */

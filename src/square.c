@@ -11,8 +11,7 @@ Square_T Square_newCoords(int rank, int file) {
     assert(0 <= rank && rank < 8 && 0 <= file && file < 8);
 
     oSqr = (Square_T)calloc(1, sizeof(struct Square));
-    if (oSqr == NULL)
-        return NULL;
+    MEM_CHECK(oSqr);
 
     oSqr->iRank = rank;
     oSqr->iFile = file;
@@ -32,11 +31,14 @@ Square_T Square_newNotation(char *pcNotation) {
     return Square_newCoords(7 - r, f);
 }
   
-/*--------------------------------------------------------------------*/
-
 void Square_free(Square_T oSquare) {
     assert(oSquare != NULL);
     free(oSquare);
+}
+
+Square_T Square_copy(Square_T oSquare) {
+    assert(oSquare != NULL);
+    return Square_newCoords(oSquare->iRank, oSquare->iFile);
 }
 
 /*--------------------------------------------------------------------*/
@@ -57,11 +59,13 @@ uint64_t Square_bitMask(Square_T oSquare) {
     return 1ULL << Square_bitPos(oSquare);
 }
 
-char *Square_getNotation(Square_T oSquare) {
+/*--------------------------------------------------------------------*/
+
+char *Square_toString(Square_T oSquare) {
     assert(oSquare != NULL);
     
     char *pcNotation = (char *)malloc(3);
-    if (pcNotation == NULL) return NULL;
+    MEM_CHECK(pcNotation);
 
     if (oSquare == NULL) 
     {

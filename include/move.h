@@ -9,7 +9,6 @@
 
 /* A Move_T object holds the location of source and destination 
     squares. */
-
 typedef struct Move *Move_T;
 
 /*--------------------------------------------------------------------*/

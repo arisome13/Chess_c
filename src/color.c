@@ -1,7 +1,7 @@
 
 #include "color.h"
 
-const char *Color_toString(enum color c) {
+const char *Color_toString(color c) {
     switch (c) {
         case BLACK:
             return "BLACK";

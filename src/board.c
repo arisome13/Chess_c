@@ -8,172 +8,76 @@
 #include <stdio.h>
 #include <string.h>
 
-enum {NUM_PLAYERS = 2, PIECE_TYPES = 6};
+enum {MAX_PIECE_TYPES = 64};
+const char *STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 struct ChessBoard
 {
-    /* the collection of different pieces: 2 players, 6 piece types. 
-        The enums type and color can be used to index through these
-        piece masks: color 0-1, type: 0-5 */
-    Mask_T mPieceMasks[NUM_PLAYERS][PIECE_TYPES];
+    /* the collections of different piece types */
+    Mask_T pmPieceMasks[MAX_PIECE_TYPES];
 };
 
-void ChessBoard_setToStart(ChessBoard_T oBoard)
-{
-    /* reset the bit boards */
-    for (int c = 0; c < 2; c++) {
-        for (int p = 0; p < 6; p++) {
-            oBoard->mPieceMasks[c][p] = 0;
-        }
-    }
-
-    Square_T sqr = Square_newCoords(0, 0);
-    if (sqr == NULL) ERROR("Memory allocation error: sqr didn't have enough space.");
-
-    /* place black back rank pieces */
-    sqr->iRank = 0;
-    sqr->iFile = 0;
-    Mask_place(oBoard->mPieceMasks[BLACK][ROOK], sqr);
-    sqr->iFile++;
-    Mask_place(oBoard->mPieceMasks[BLACK][KNIGHT], sqr);
-    sqr->iFile++;
-    Mask_place(oBoard->mPieceMasks[BLACK][BISHOP], sqr);
-    sqr->iFile++;
-    Mask_place(oBoard->mPieceMasks[BLACK][QUEEN], sqr);
-    sqr->iFile++;
-    Mask_place(oBoard->mPieceMasks[BLACK][KING], sqr);
-    sqr->iFile++;
-    Mask_place(oBoard->mPieceMasks[BLACK][BISHOP], sqr);
-    sqr->iFile++;
-    Mask_place(oBoard->mPieceMasks[BLACK][KNIGHT], sqr);
-    sqr->iFile++;
-    Mask_place(oBoard->mPieceMasks[BLACK][ROOK], sqr);
-    
-    /* place black pawns */
-    sqr->iRank = 1;
-    for (sqr->iFile = 0; sqr->iFile < 8; sqr->iFile++) {
-        Mask_place(oBoard->mPieceMasks[BLACK][PAWN], sqr);
-    }
-    /* place white pawns */
-    sqr->iRank = 6;
-    for (sqr->iFile = 0; sqr->iFile < 8; sqr->iFile++) {
-        Mask_place(oBoard->mPieceMasks[WHITE][PAWN], sqr);
-    }
-
-    /* place white back rank pieces */
-    sqr->iRank = 7;
-    sqr->iFile = 0;
-    Mask_place(oBoard->mPieceMasks[WHITE][ROOK], sqr);
-    sqr->iFile++;
-    Mask_place(oBoard->mPieceMasks[WHITE][KNIGHT], sqr);
-    sqr->iFile++;
-    Mask_place(oBoard->mPieceMasks[WHITE][BISHOP], sqr);
-    sqr->iFile++;
-    Mask_place(oBoard->mPieceMasks[WHITE][QUEEN], sqr);
-    sqr->iFile++;
-    Mask_place(oBoard->mPieceMasks[WHITE][KING], sqr);
-    sqr->iFile++;
-    Mask_place(oBoard->mPieceMasks[WHITE][BISHOP], sqr);
-    sqr->iFile++;
-    Mask_place(oBoard->mPieceMasks[WHITE][KNIGHT], sqr);
-    sqr->iFile++;
-    Mask_place(oBoard->mPieceMasks[WHITE][ROOK], sqr);
-}
+/*--------------------------------------------------------------------*/
 
 ChessBoard_T ChessBoard_new(const char *pcFen) 
 {
     ChessBoard_T oBoard = (ChessBoard_T)calloc(1, sizeof(struct ChessBoard));
-    if (oBoard == NULL)
-        return oBoard;
-
-    /* initialize piece masks */
-    oBoard->mPieceMasks[BLACK][PAWN] = Mask_new("p");
-    if (oBoard->mPieceMasks[BLACK][PAWN] == NULL) return NULL;
-    oBoard->mPieceMasks[BLACK][ROOK] = Mask_new("r");
-    if (oBoard->mPieceMasks[BLACK][ROOK] == NULL) return NULL;
-    oBoard->mPieceMasks[BLACK][KNIGHT] = Mask_new("n");
-    if (oBoard->mPieceMasks[BLACK][KNIGHT] == NULL) return NULL;
-    oBoard->mPieceMasks[BLACK][BISHOP] = Mask_new("b");
-    if (oBoard->mPieceMasks[BLACK][BISHOP] == NULL) return NULL;
-    oBoard->mPieceMasks[BLACK][QUEEN] = Mask_new("q");
-    if (oBoard->mPieceMasks[BLACK][QUEEN] == NULL) return NULL;
-    oBoard->mPieceMasks[BLACK][KING] = Mask_new("k");
-    if (oBoard->mPieceMasks[BLACK][KING] == NULL) return NULL;
-    oBoard->mPieceMasks[WHITE][PAWN] = Mask_new("P");
-    if (oBoard->mPieceMasks[WHITE][PAWN] == NULL) return NULL;
-    oBoard->mPieceMasks[WHITE][ROOK] = Mask_new("R");
-    if (oBoard->mPieceMasks[WHITE][ROOK] == NULL) return NULL;
-    oBoard->mPieceMasks[WHITE][KNIGHT] = Mask_new("N");
-    if (oBoard->mPieceMasks[WHITE][KNIGHT] == NULL) return NULL;
-    oBoard->mPieceMasks[WHITE][BISHOP] = Mask_new("B");
-    if (oBoard->mPieceMasks[WHITE][BISHOP] == NULL) return NULL;
-    oBoard->mPieceMasks[WHITE][QUEEN] = Mask_new("Q");
-    if (oBoard->mPieceMasks[WHITE][QUEEN] == NULL) return NULL;
-    oBoard->mPieceMasks[WHITE][KING] = Mask_new("K");
-    if (oBoard->mPieceMasks[WHITE][KING] == NULL) return NULL;
+    MEM_CHECK(oBoard);
     
-    if (pcFen == NULL) {
-        ChessBoard_setToStart(oBoard);
-        return oBoard;
+    if (pcFen == NULL)
+        ChessBoard_setFen(oBoard, STARTING_FEN);
+    else
+        ChessBoard_setFen(oBoard, pcFen);
+    
+    return oBoard;
+}
+
+void ChessBoard_free(ChessBoard_T oBoard)
+{
+    assert(oBoard != NULL);
+
+    for (int m = 0; m < MAX_PIECE_TYPES; m++)
+        Mask_free(oBoard->pmPieceMasks[m]);
+
+    free(oBoard);
+}
+
+ChessBoard_T ChessBoard_copy(ChessBoard_T oBoard) {
+    assert(oBoard != NULL);
+    
+    ChessBoard_T obCopy = (ChessBoard_T)calloc(1, sizeof(struct ChessBoard));
+    MEM_CHECK(obCopy);
+    
+    for (int m = 0; m < MAX_PIECE_TYPES; m++) {
+        if (obCopy->pmPieceMasks[m] != NULL)
+            obCopy->pmPieceMasks[m] = Mask_copy(oBoard->pmPieceMasks[m]);
+        else
+            break;
+    }
+    
+    return obCopy;
+}
+
+/*--------------------------------------------------------------------*/
+
+void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
+{
+    /* reset the bit boards */
+    for (int m = 0; m < MAX_PIECE_TYPES; m++) {
+        Mask_free(oBoard->pmPieceMasks[m]);
+        oBoard->pmPieceMasks[m] = NULL;
     }
 
     Square_T sqr = Square_newCoords(0, 0);
-    if (sqr == NULL) return NULL;
+    MEM_CHECK(sqr);
 
     int i = 0;
     char c = pcFen[i++];
+    Mask_T tempMask;
     while (c != '\0')
     {
         switch (c)
         {
-            case 'p':
-                Mask_place(oBoard->mPieceMasks[BLACK][PAWN], sqr);
-                sqr->iFile++;
-                break;
-            case 'r':
-                Mask_place(oBoard->mPieceMasks[BLACK][ROOK], sqr);
-                sqr->iFile++;
-                break;
-            case 'n':
-                Mask_place(oBoard->mPieceMasks[BLACK][KNIGHT], sqr);
-                sqr->iFile++;
-                break;
-            case 'b':
-                Mask_place(oBoard->mPieceMasks[BLACK][BISHOP], sqr);
-                sqr->iFile++;
-                break;
-            case 'q':
-                Mask_place(oBoard->mPieceMasks[BLACK][QUEEN], sqr);
-                sqr->iFile++;
-                break;
-            case 'k':
-                Mask_place(oBoard->mPieceMasks[BLACK][KING], sqr);
-                sqr->iFile++;
-                break;
-            case 'P':
-                Mask_place(oBoard->mPieceMasks[WHITE][PAWN], sqr);
-                sqr->iFile++;
-                break;
-            case 'R':
-                Mask_place(oBoard->mPieceMasks[WHITE][ROOK], sqr);
-                sqr->iFile++;
-                break;
-            case 'N':
-                Mask_place(oBoard->mPieceMasks[WHITE][KNIGHT], sqr);
-                sqr->iFile++;
-                break;
-            case 'B':
-                Mask_place(oBoard->mPieceMasks[WHITE][BISHOP], sqr);
-                sqr->iFile++;
-                break;
-            case 'Q':
-                Mask_place(oBoard->mPieceMasks[WHITE][QUEEN], sqr);
-                sqr->iFile++;
-                break;
-            case 'K':
-                Mask_place(oBoard->mPieceMasks[WHITE][KING], sqr);
-                sqr->iFile++;
-                break;
             case '1':
             case '2':
             case '3':
@@ -190,28 +94,50 @@ ChessBoard_T ChessBoard_new(const char *pcFen)
                 sqr->iRank++;
                 break;
             case ' ': 
+                /* finished reading pcFen */
                 goto finishedParsing;
             default:
-                ERROR("Invalid char in fen: %c", c);
+                tempMask = ChessBoard_getMask(oBoard, c);
+
+                /* no 'c' pieces on the board just yet */
+                if (tempMask == NULL)
+                    tempMask = Mask_new(c);
+                
+                /* place the piece */
+                Mask_place(tempMask, sqr);
+
+                /* index to the next column on the board */
+                sqr->iFile++;
         }
         c = pcFen[i++];
     }
     finishedParsing:
     
     free(sqr);
-    return oBoard;
 }
 
-void ChessBoard_free(ChessBoard_T oBoard)
-{
+Mask_T ChessBoard_getMask(ChessBoard_T oBoard, char cName) {
+    for (int m = 0; m < MAX_PIECE_TYPES; m++) {
+        if (oBoard->pmPieceMasks[m] == NULL)
+            return oBoard->pmPieceMasks[m];
+        else if (Mask_getName(oBoard->pmPieceMasks[m]) == cName)
+            return oBoard->pmPieceMasks[m];
+    }
+    ERROR("ChessBoard does not have the piece requested and not space for more.");
+    return NULL;
+}
+
+void ChessBoard_onEachMask(ChessBoard_T oBoard, MaskFunction func, int *data) {
     assert(oBoard != NULL);
+    assert(func != NULL);
 
-    for (int c = 0; c < NUM_PLAYERS; c++)
-        for (int p = 0; p < PIECE_TYPES; p++)
-            Mask_free(oBoard->mPieceMasks[c][p]);
-
-    free(oBoard);
+    for (int m = 0; m < MAX_PIECE_TYPES; m++) {
+        if (oBoard->pmPieceMasks[m] != NULL)
+            func(oBoard->pmPieceMasks[m], data);
+    }
 }
+
+/*--------------------------------------------------------------------*/
 
 char *ChessBoard_toString(ChessBoard_T oBoard)
 {
@@ -227,22 +153,20 @@ char *ChessBoard_toString(ChessBoard_T oBoard)
     for (int r = 0; r <= 7; r++) {
         ptr += sprintf(ptr, "%d |", 8-r);
         for (int f = 0; f <= 7; f++) {
-            char *bit = " ";
+            char bit = ' ';
             // go through all the bit masks
-            for (int c = 0; c < NUM_PLAYERS; c++) {
-                for (int p = 0; p < PIECE_TYPES; p++) {
-                    if (Mask_isCovered(oBoard->mPieceMasks[c][p], r, f)) {
-                        if (strcmp(bit, " ") == 0) {
-                            bit = oBoard->mPieceMasks[c][p]->cpName;
-                        } else {
-                            ERROR("Multiple pieces at the same location.");
-                        }
-                        goto foundPiece;
+            for (int m = 0; m < MAX_PIECE_TYPES; m++) {
+                if (Mask_isCovered(oBoard->pmPieceMasks[m], r, f)) {
+                    if (bit == ' ') {
+                        bit = Mask_getName(oBoard->pmPieceMasks[m]);
+                    } else {
+                        ERROR("Multiple pieces at the same location.");
                     }
+                    goto foundPiece;
                 }
             }
             foundPiece:
-            ptr += sprintf(ptr, " %.1s |", bit);
+            ptr += sprintf(ptr, " %c |", bit);
         }
         ptr += sprintf(ptr, "\n  +---+---+---+---+---+---+---+---+\n");
     }

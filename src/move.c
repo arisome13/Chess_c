@@ -16,14 +16,11 @@ struct Move
 };
 
 Move_T Move_new(Square_T src, Square_T dst) {
-    Move_T oMove;
-
     assert(src != NULL);
     assert(dst != NULL);
 
-    oMove = (Move_T)calloc(1, sizeof(struct Move));
-    if (oMove == NULL)
-        return NULL;
+    Move_T oMove = (Move_T)calloc(1, sizeof(struct Move));
+    MEM_CHECK(oMove);
 
     oMove->sSrc = src;
     oMove->sDst = dst;
@@ -31,8 +28,6 @@ Move_T Move_new(Square_T src, Square_T dst) {
     return oMove;
 }
   
-/*--------------------------------------------------------------------*/
-
 void Move_free(Move_T oMove) {
     assert(oMove != NULL);
     
@@ -54,15 +49,14 @@ bool Move_equals(Move_T oMove1, Move_T oMove2) {
 /*--------------------------------------------------------------------*/
 
 char *Move_toString(Move_T oMove) {
-    char *src = Square_getNotation(oMove->sSrc);
-    char *dst = Square_getNotation(oMove->sDst);
+    char *src = Square_toString(oMove->sSrc);
+    char *dst = Square_toString(oMove->sDst);
     int iStrRepIndex = 0;
     int iNoteIndex = 0;
 
     char *pcStrRep = malloc(10);
-    if (pcStrRep == NULL)
-        return NULL;
-
+    MEM_CHECK(pcStrRep);
+    
     assert(oMove != NULL);
 
     pcStrRep[iStrRepIndex++] = '\0';
