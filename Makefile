@@ -27,9 +27,9 @@ bin/main: $(MAIN_OBJS) | bin
 	gcc $(CFLAGS) -o $@ $^
 
 # .o file creations
-obj/main.o: prgm/main.c | obj
+obj/main.o: exe/main.c | obj
 	gcc $(CFLAGS) -c $< -o $@
-obj/test.o: prgm/test.c | obj
+obj/test.o: exe/test.c | obj
 	gcc $(CFLAGS) -c $< -o $@
 obj/%.o: src/%.c | obj
 	gcc $(CFLAGS) -c $< -o $@
