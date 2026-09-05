@@ -33,6 +33,9 @@ Engine_T Engine_copy (Engine_T oEngine);
    chess board. */
 Move_T Engine_bestMove (Engine_T oEngine);
 
+/* Make oMove on oEngine's chess board. */
+void Engine_makeMove (Engine_T oEngine, Move_T oMove);
+
 /*--------------------------------------------------------------------*/
 
 /* Return the string representation of oBoard. Caller must free. */

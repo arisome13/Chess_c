@@ -70,6 +70,7 @@ ChessParameters_T ChessParameters_new(const char *pcFen) {
 
 void ChessParameters_free(ChessParameters_T oParams) {
    free(oParams->oEnpSqr);
+   free(oParams->oCastles);
    free(oParams);
 }
 
@@ -80,7 +81,10 @@ ChessParameters_T ChessParameters_copy(ChessParameters_T oParams) {
 
    opCopy->cTurnColor = oParams->cTurnColor;
    opCopy->oCastles = Castles_copy(oParams->oCastles);
-   opCopy->oEnpSqr = Square_copy(oParams->oEnpSqr);
+   if (oParams->oEnpSqr != NULL)
+      opCopy->oEnpSqr = Square_copy(oParams->oEnpSqr);
+   else
+      opCopy->oEnpSqr = NULL;
    opCopy->i50MoveCount = oParams->i50MoveCount;
    opCopy->iCurrMove = oParams->iCurrMove;
 
@@ -116,7 +120,7 @@ char *ChessParameters_toString(ChessParameters_T oParams) {
    char *pcSqr = oParams->oEnpSqr == NULL ? "--" : Square_toString(oParams->oEnpSqr);
 
    asprintf(&pcStrRep, 
-      "  +-------+------+----+---+---+\n  | %s | %s | %s | %d | %d |\n  +-------+------+----+---+---+\n", 
+      "  +-------+------+----+---+---+\n  | %s | %s | %s | %d | %d |\n  +-------+------+----+---+---+", 
       Color_toString(oParams->cTurnColor), 
       Castles_toString(oParams->oCastles), 
       pcSqr,

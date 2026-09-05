@@ -1,11 +1,17 @@
 
 #include <stdio.h>
-#include "board.h"
+#include "movepattern.h"
 
 int main (void) {
-    ChessBoard_T oBoard = ChessBoard_new("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    MovePattern_T oPattern = MovePattern_new();
+    MovePattern_add(oPattern, 0, 1, false);
+    MovePattern_add(oPattern, 0, -1, false);
+    MovePattern_add(oPattern, 1, 0, false);
+    MovePattern_add(oPattern, -1, 0, false);
 
-    printf("%s\n", ChessBoard_toString(oBoard));
+    char *str = MovePattern_toString(oPattern);
+    printf("\' %s \'\n", str);
+    free(str);
     
-    ChessBoard_free(oBoard);
+    MovePattern_free(oPattern);
 }

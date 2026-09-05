@@ -1,14 +1,19 @@
 /*--------------------------------------------------------------------*/
-/* infoenums.h                                                           */
+/* helpers.h                                                           */
 /*--------------------------------------------------------------------*/
 
-#ifndef INFOENUMS_INCLUDED
-#define INFOENUMS_INCLUDED
+#ifndef HELPERS_INCLUDED
+#define HELPERS_INCLUDED
 
-#include <stdbool.h>
-#include <stdlib.h>
+#include <stdbool.h>  // bool
+#include <stdlib.h>   // NULL
+#include <assert.h>   // assert
+
+// chess related
 #include "color.h"
 #include "type.h"
-#include "error.h"
+
+// strings, PRINT, ERROR, MEM_CHECK
+#include "printers.h"
 
 #endif

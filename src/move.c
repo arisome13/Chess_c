@@ -2,8 +2,7 @@
 /* move.c                                                             */
 /*--------------------------------------------------------------------*/
 
-#include <stdlib.h>
-#include <assert.h>
+#include "helpers.h"
 #include "move.h"
 
 struct Move
@@ -27,7 +26,21 @@ Move_T Move_new(Square_T src, Square_T dst) {
 
     return oMove;
 }
-  
+
+Move_T Move_read(const char *pcNotation) {
+    assert(pcNotation != NULL);
+    
+    Square_T src = Square_newNotation(pcNotation);
+    Square_T dst = Square_newNotation(pcNotation + 2);
+    
+    Move_T oNew = Move_new(src, dst);
+    
+    free(src);
+    free(dst);
+    
+    return oNew;
+}
+
 void Move_free(Move_T oMove) {
     assert(oMove != NULL);
     
@@ -51,21 +64,20 @@ bool Move_equals(Move_T oMove1, Move_T oMove2) {
 char *Move_toString(Move_T oMove) {
     char *src = Square_toString(oMove->sSrc);
     char *dst = Square_toString(oMove->sDst);
-    int iStrRepIndex = 0;
-    int iNoteIndex = 0;
 
     char *pcStrRep = malloc(10);
     MEM_CHECK(pcStrRep);
     
-    assert(oMove != NULL);
-
-    pcStrRep[iStrRepIndex++] = '\0';
-    while (src[iNoteIndex] != '\0') {
-        pcStrRep[iStrRepIndex++] = src[iNoteIndex++];
-    } iNoteIndex = 0;
-    while (dst[iNoteIndex] != '\0') {
-        pcStrRep[iStrRepIndex++] = dst[iNoteIndex++];
-    } pcStrRep[iStrRepIndex++] = '\0';
+    if (oMove != NULL) 
+    {
+        pcStrRep[0] = '\0';
+        strncpy(pcStrRep, src, 2);
+        strncpy(pcStrRep+2, dst, 2);
+    }
+    else 
+    {
+        pcStrRep = "NULL";
+    }
 
     free(src);
     free(dst);

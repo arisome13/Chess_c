@@ -13,7 +13,7 @@ enum {MAX_PIECE_TYPES = 64};
 struct ChessBoard
 {
     /* the collections of different piece types */
-    Mask_T pmPieceMasks[MAX_PIECE_TYPES];
+    Map_T pmPieceMaps[MAX_PIECE_TYPES];
 };
 
 /*--------------------------------------------------------------------*/
@@ -35,7 +35,7 @@ void ChessBoard_free(ChessBoard_T oBoard)
     assert(oBoard != NULL);
 
     for (int m = 0; m < MAX_PIECE_TYPES; m++)
-        Mask_free(oBoard->pmPieceMasks[m]);
+        Map_free(oBoard->pmPieceMaps[m]);
 
     free(oBoard);
 }
@@ -47,8 +47,8 @@ ChessBoard_T ChessBoard_copy(ChessBoard_T oBoard) {
     MEM_CHECK(obCopy);
     
     for (int m = 0; m < MAX_PIECE_TYPES; m++) {
-        if (obCopy->pmPieceMasks[m] != NULL)
-            obCopy->pmPieceMasks[m] = Mask_copy(oBoard->pmPieceMasks[m]);
+        if (obCopy->pmPieceMaps[m] != NULL)
+            obCopy->pmPieceMaps[m] = Map_copy(oBoard->pmPieceMaps[m]);
         else
             break;
     }
@@ -62,8 +62,8 @@ void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
 {
     /* reset the bit boards */
     for (int m = 0; m < MAX_PIECE_TYPES; m++) {
-        Mask_free(oBoard->pmPieceMasks[m]);
-        oBoard->pmPieceMasks[m] = NULL;
+        Map_free(oBoard->pmPieceMaps[m]);
+        oBoard->pmPieceMaps[m] = NULL;
     }
 
     Square_T sqr = Square_newCoords(0, 0);
@@ -71,7 +71,7 @@ void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
 
     int i = 0;
     char c = pcFen[i++];
-    Mask_T tempMask;
+    Map_T tempMap;
     while (c != '\0')
     {
         switch (c)
@@ -95,14 +95,14 @@ void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
                 /* finished reading pcFen */
                 goto finishedParsing;
             default:
-                tempMask = ChessBoard_getMask(oBoard, c);
+                tempMap = ChessBoard_getMap(oBoard, c);
 
                 /* no 'c' pieces on the board just yet */
-                if (tempMask == NULL)
-                    tempMask = Mask_new(c);
+                if (tempMap == NULL)
+                    tempMap = Map_new(c);
                 
                 /* place the piece */
-                Mask_place(tempMask, sqr);
+                Map_place(tempMap, sqr);
 
                 /* index to the next column on the board */
                 sqr->iFile++;
@@ -114,27 +114,31 @@ void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
     free(sqr);
 }
 
-Mask_T ChessBoard_getMask(ChessBoard_T oBoard, char cName) {
+Map_T ChessBoard_getMap(ChessBoard_T oBoard, char cName) {
     for (int m = 0; m < MAX_PIECE_TYPES; m++) {
-        if (oBoard->pmPieceMasks[m] == NULL) {
-            oBoard->pmPieceMasks[m] = Mask_new(cName);
-            return oBoard->pmPieceMasks[m];
+        if (oBoard->pmPieceMaps[m] == NULL) {
+            oBoard->pmPieceMaps[m] = Map_new(cName);
+            return oBoard->pmPieceMaps[m];
         }
-        else if (Mask_getName(oBoard->pmPieceMasks[m]) == cName)
-            return oBoard->pmPieceMasks[m];
+        else if (Map_getName(oBoard->pmPieceMaps[m]) == cName)
+            return oBoard->pmPieceMaps[m];
     }
     ERROR("ChessBoard does not have the piece requested and not space for more.");
     return NULL;
 }
 
-void ChessBoard_onEachMask(ChessBoard_T oBoard, MaskFunction func, int *data) {
+void ChessBoard_onEachMap(ChessBoard_T oBoard, MapFunction func, int *data) {
     assert(oBoard != NULL);
     assert(func != NULL);
 
     for (int m = 0; m < MAX_PIECE_TYPES; m++) {
-        if (oBoard->pmPieceMasks[m] != NULL)
-            func(oBoard->pmPieceMasks[m], data);
+        if (oBoard->pmPieceMaps[m] != NULL)
+            func(oBoard->pmPieceMaps[m], data);
     }
+}
+
+r_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove) {
+    return FAIL;
 }
 
 /*--------------------------------------------------------------------*/
@@ -154,13 +158,13 @@ char *ChessBoard_toString(ChessBoard_T oBoard)
         ptr += sprintf(ptr, "%d |", 8-r);
         for (int f = 0; f <= 7; f++) {
             char bit = ' ';
-            // go through all the bit masks
+            // go through all the bit maps
             for (int m = 0; m < MAX_PIECE_TYPES; m++) {
-                if (oBoard->pmPieceMasks[m] == NULL)
+                if (oBoard->pmPieceMaps[m] == NULL)
                     break;
-                if (Mask_isCovered(oBoard->pmPieceMasks[m], r, f)) {
+                if (Map_isCovered(oBoard->pmPieceMaps[m], r, f)) {
                     if (bit == ' ') {
-                        bit = Mask_getName(oBoard->pmPieceMasks[m]);
+                        bit = Map_getName(oBoard->pmPieceMaps[m]);
                     } else {
                         ERROR("Multiple pieces at the same location.");
                     }
@@ -172,7 +176,7 @@ char *ChessBoard_toString(ChessBoard_T oBoard)
         }
         ptr += sprintf(ptr, "\n  +---+---+---+---+---+---+---+---+\n");
     }
-    ptr += sprintf(ptr, "    a   b   c   d   e   f   g   h  \n");
+    ptr += sprintf(ptr, "    a   b   c   d   e   f   g   h  ");
 
     return pcStrRep;
 }

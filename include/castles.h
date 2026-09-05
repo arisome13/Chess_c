@@ -15,6 +15,9 @@ typedef struct Castles *Castles_T;
     insufficient memory is available. */
 Castles_T Castles_new (void);
 
+/* Free oCastles. */
+void Castles_free (Castles_T oCastles);
+
 /* Adds the given castleType to oCastles. Raises an error if the castle
     is invalid. */
 void Castles_add (Castles_T oCastles, char castleType);

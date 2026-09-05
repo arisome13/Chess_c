@@ -19,7 +19,7 @@ Square_T Square_newCoords(int rank, int file) {
     return oSqr;
 }
 
-Square_T Square_newNotation(char *pcNotation) {
+Square_T Square_newNotation(const char *pcNotation) {
     int r;
     int f;
 
@@ -54,7 +54,7 @@ int Square_bitPos(Square_T oSquare) {
     return oSquare->iFile + ((7 - oSquare->iRank) * 8);
 }
 
-uint64_t Square_bitMask(Square_T oSquare) {
+uint64_t Square_bitMap(Square_T oSquare) {
     assert(oSquare != NULL);
     return 1ULL << Square_bitPos(oSquare);
 }

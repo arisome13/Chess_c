@@ -14,9 +14,13 @@ typedef struct Move *Move_T;
 /*--------------------------------------------------------------------*/
 
 /* Return a new Move_T object initialized to the given parameters, or 
-    NULL if insufficient memory is available. Client becomes responsible
-    for freeing src and dst after use. */
+    NULL if insufficient memory is available. Client is responsible
+    for freeing src and dst. */
 Move_T Move_new(Square_T src, Square_T dst);
+
+/* Return a new Move_T object initialized to the given pcNotation, or
+    NULL if insufficient memory is available. */
+Move_T Move_read(const char *pcNotation);
   
 /* Free oMove. */
 void Move_free(Move_T oMove);

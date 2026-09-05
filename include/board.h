@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/* board.h                                                       */
+/* board.h                                                            */
 /*--------------------------------------------------------------------*/
 
 #include <stdint.h>
@@ -7,7 +7,9 @@
 #ifndef BOARD_INCLUDED
 #define BOARD_INCLUDED
 
-#include "mask.h"
+#include "map.h"
+#include "move.h"
+#include "results.h"
 #include "color.h"
 #include "type.h"
 
@@ -28,14 +30,19 @@ ChessBoard_T ChessBoard_copy(ChessBoard_T oBoard);
 
 /*--------------------------------------------------------------------*/
 
-/* Set up oBoard's masks to match pcFen. */
+/* Set up oBoard's maps to match pcFen. */
 void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen);
 
-/* Return the mask from oBoard matching cName. */
-Mask_T ChessBoard_getMask(ChessBoard_T oBoard, char cName);
+/* Return the map from oBoard matching cName. */
+Map_T ChessBoard_getMap(ChessBoard_T oBoard, char cName);
 
-/* Preforms the function 'func' on each mask in oBoard. */
-void ChessBoard_onEachMask(ChessBoard_T oBoard, MaskFunction func, int *data);
+/* Preforms the function 'func' on each map in oBoard. */
+void ChessBoard_onEachMap(ChessBoard_T oBoard, MapFunction func, int *data);
+
+/* Tries to perform oMove on oBoard. Returns SUCCESS and changes the 
+   board appropriately if the move was valid. Returns FAIL and doesn't
+   change the board if the move was invalid. */
+r_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove);
 
 /*--------------------------------------------------------------------*/
 

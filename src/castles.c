@@ -29,6 +29,10 @@ Castles_T Castles_new (void) {
     return oCastles;
 }
 
+void Castles_free (Castles_T oCastles) {
+    free(oCastles);
+}
+
 void Castles_add (Castles_T oCastles, char castleType) {
     switch (castleType)
     {
