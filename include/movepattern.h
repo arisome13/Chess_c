@@ -11,18 +11,19 @@
     can make. */
 typedef struct MovePattern *MovePattern_T;
 
-/* Return a new MovePattern_T object initialized to empty. Raises error if
-    insufficient memory is available. */
+/* Return a new MovePattern_T object initialized to empty. Raises 
+    error if insufficient memory is available. */
 MovePattern_T MovePattern_new (void);
 
 /* Free oPattern. */
 void MovePattern_free (MovePattern_T oPattern);
 
-/* Adds a move int direction (x, y) to oPattern. */
-void MovePattern_add (MovePattern_T oPattern, int x, int y, bool repeating);
+/* Adds a move in direction (dx, dy) to oPattern. */
+void MovePattern_add (MovePattern_T oPattern, 
+    int dx, int dy, bool repeating);
 
-///* Return a deep copy of oCastles. Caller must free. */
-//MovePattern_T MovePattern_copy (MovePattern_T oCastles);
+/* Returns the move pattern for the given pieceName. */
+MovePattern_T MovePattern_for (char pieceName);
 
 /* Return a string representation of oPattern. Caller free. */
 char *MovePattern_toString (MovePattern_T oPattern);

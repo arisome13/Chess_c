@@ -2,16 +2,12 @@
 /* board.h                                                            */
 /*--------------------------------------------------------------------*/
 
-#include <stdint.h>
-
-#ifndef BOARD_INCLUDED
-#define BOARD_INCLUDED
-
 #include "map.h"
 #include "move.h"
 #include "results.h"
-#include "color.h"
-#include "type.h"
+
+#ifndef BOARD_INCLUDED
+#define BOARD_INCLUDED
 
 /* A ChessBoard_T object holds the piece positions on a chess board. */
 typedef struct ChessBoard *ChessBoard_T;

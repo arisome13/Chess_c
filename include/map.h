@@ -2,8 +2,6 @@
 /* map.h                                                             */
 /*--------------------------------------------------------------------*/
 
-#include <stdint.h>
-#include "helpers.h"
 #include "square.h"
 
 #ifndef MAP_INCLUDED

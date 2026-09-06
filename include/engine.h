@@ -2,9 +2,6 @@
 /* engine.h                                                           */
 /*--------------------------------------------------------------------*/
 
-#include <stdio.h>
-#include "board.h"
-#include "parameters.h"
 #include "move.h"
 
 #ifndef ENGINE_INCLUDED

@@ -4,7 +4,7 @@
 
 #include "square.h"
 #include "castles.h"
-#include "helpers.h"
+#include "color.h"
 
 #ifndef PARAMETERS_INCLUDED
 #define PARAMETERS_INCLUDED

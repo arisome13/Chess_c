@@ -4,9 +4,6 @@
 
 #include "board.h"
 #include "parameters.h"
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
 
 enum {MAX_PIECE_TYPES = 64};
 
@@ -137,7 +134,10 @@ void ChessBoard_onEachMap(ChessBoard_T oBoard, MapFunction func, int *data) {
     }
 }
 
-r_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove) {
+r_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove)
+{
+    // check if the move is in the range of the og piece
+    // check 
     return FAIL;
 }
 

@@ -2,10 +2,10 @@
 /* square.h                                                           */
 /*--------------------------------------------------------------------*/
 
+#include "helpers.h"
+
 #ifndef SQUARE_INCLUDED
 #define SQUARE_INCLUDED
-
-#include "helpers.h"
 
 /* A Square_T object holds the location of a square on a chess board. */
 struct Square

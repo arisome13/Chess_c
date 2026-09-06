@@ -3,8 +3,10 @@
 /*--------------------------------------------------------------------*/
 
 #include "engine.h"
-#include "results.h"
-#include <assert.h>
+#include "board.h"
+#include "parameters.h"
+
+const char *STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 struct Engine
 {
@@ -17,8 +19,6 @@ struct Engine
     /* search depth: alter when testing */
     int iDepth;
 };
-
-const char *STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 Engine_T Engine_new(const char *pcFen) 
 {
@@ -39,7 +39,6 @@ Engine_T Engine_new(const char *pcFen)
 
     return oEngine;
 }
-
 void Engine_free(Engine_T oEngine) 
 {
     assert(oEngine != NULL);
@@ -48,7 +47,6 @@ void Engine_free(Engine_T oEngine)
     free(oEngine->oParams);
     free(oEngine);
 }
-
 Engine_T Engine_copy (Engine_T oEngine)
 {
     assert(oEngine);
@@ -86,21 +84,24 @@ int Engine_evaluate (Engine_T oEngine)
 Move_T Engine_search (Engine_T oEngine)
 {
     assert(oEngine != NULL);
-
-    if (oEngine->iDepth == 0)
-    {
-        
-    }
-    return Move_new(Square_newNotation("e2"), Square_newNotation("b4"));
+    
+    printf("NOT IMPLEMENTED: Engine_search");
+    
+    return Move_new(Square_newNotation("e2"), Square_newNotation("e4"));
 }
 
 Move_T Engine_bestMove (Engine_T oEngine)
 {
+    MEM_CHECK(oEngine);
+
+    // copy the current engine
     Engine_T oeCopy = Engine_copy(oEngine);
-
+    // search the move tree for the best move
     Move_T omBest = Engine_search(oeCopy);
-
+    
+    // free the 
     free(oeCopy);
+    // return the best move
     return omBest;
 }
 

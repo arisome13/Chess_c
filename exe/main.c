@@ -7,6 +7,7 @@ int main(void)
     Engine_T eng = Engine_new(NULL);
     printf("%s\n", Engine_toString(eng));
 
+    // find the best move
     Move_T bestM = Engine_bestMove(eng);
     printf("\nBest move: %s\n", Move_toString(bestM));
 

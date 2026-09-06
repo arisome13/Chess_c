@@ -2,9 +2,8 @@
 /* parameters.c                                                       */
 /*--------------------------------------------------------------------*/
 
-#include <stdio.h> 
-#include <string.h>
 #include "parameters.h"
+//#include "helpers.h"
 
 struct ChessParameters
 {

@@ -3,7 +3,6 @@
 /*--------------------------------------------------------------------*/
 
 #include "square.h"
-#include <assert.h>
 
 Square_T Square_newCoords(int rank, int file) {
     Square_T oSqr;

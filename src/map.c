@@ -2,11 +2,8 @@
 /* map.c                                                             */
 /*--------------------------------------------------------------------*/
 
-#include <assert.h>
-#include <stdio.h>
 #include "map.h"
-#include "string.h"
-#include "square.h"
+#include "movepattern.h"
 
 struct Map
 {
@@ -15,6 +12,9 @@ struct Map
 
     /* piece name */
     char cName;
+
+    /* move pattern */
+    MovePattern_T pMoves;
 };
 
 /*--------------------------------------------------------------------*/
@@ -26,13 +26,16 @@ Map_T Map_new(char name) {
 
     oMap->cName = name;
     oMap->ullMap = 0;
+    oMap->pMoves = MovePattern_for(oMap->cName);
 
     return oMap;
 }
 
 void Map_free(Map_T oMap) {
-    if (oMap != NULL)
+    if (oMap != NULL) {
+        free(oMap->pMoves);
         free(oMap);
+    }
 }
 
 Map_T Map_copy (Map_T oMap) {

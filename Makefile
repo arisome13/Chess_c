@@ -19,6 +19,8 @@ clean:
 # removes all files from the bin and object directories
 clobber: clean
 	rm -rf obj bin
+# remakes all files
+re: clobber all
 
 # make the programs
 bin/test: $(TEST_OBJS) | bin
