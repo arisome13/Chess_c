@@ -15,19 +15,19 @@ typedef struct Engine *Engine_T;
 /*--------------------------------------------------------------------*/
 
 /* Return a new Engine_T object initialized to pcFen parrameters, or 
-   NULL if insufficient memory is available. */
+   the normal chess starting position if pcFen is NULL. CALLER FREE */
 Engine_T Engine_new(const char *pcFen);
 
 /* Free oEngine. */
 void Engine_free(Engine_T oEngine);
 
-/* Return a deep copy of oEngine. Caller must free. */
+/* Return a deep copy of oEngine. CALLER FREE. */
 Engine_T Engine_copy (Engine_T oEngine);
 
 /*--------------------------------------------------------------------*/
 
 /* Returns the best move in the chess position held by the engine's
-   chess board. */
+   chess board. CALLER FREE. */
 Move_T Engine_bestMove (Engine_T oEngine);
 
 /* Make oMove on oEngine's chess board. */
@@ -35,7 +35,7 @@ void Engine_makeMove (Engine_T oEngine, Move_T oMove);
 
 /*--------------------------------------------------------------------*/
 
-/* Return the string representation of oBoard. Caller must free. */
+/* Return the string representation of oBoard. CALLER FREE. */
 char *Engine_toString (Engine_T oEngine);
 
 #endif

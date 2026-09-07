@@ -7,6 +7,7 @@
 #include "parameters.h"
 
 const char *STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+enum {MAX_DEPTH = 8};
 
 struct Engine
 {
@@ -16,8 +17,8 @@ struct Engine
     /* A chess parameters object holding the state of the chess game. */
     ChessParameters_T oParams;
 
-    /* search depth: alter when testing */
-    int iDepth;
+    /* search depth: alter when testing. 0 < iDepth <= 8 */
+    size_t iDepth;
 };
 
 Engine_T Engine_new(const char *pcFen) 
@@ -25,17 +26,17 @@ Engine_T Engine_new(const char *pcFen)
     Engine_T oEngine;
 
     oEngine = (Engine_T)calloc(1, sizeof(struct Engine));
-    MEM_CHECK(oEngine);
+    CHECK_MEM(oEngine);
 
     if (pcFen == NULL)
         pcFen = STARTING_FEN;
 
     oEngine->oBoard = ChessBoard_new(pcFen);
-    MEM_CHECK(oEngine->oBoard);
+    CHECK_MEM(oEngine->oBoard);
     oEngine->oParams = ChessParameters_new(pcFen);
-    MEM_CHECK(oEngine->oParams);
+    CHECK_MEM(oEngine->oParams);
     
-    oEngine->iDepth = 3;
+    Engine_setDepth(oEngine, 1);
 
     return oEngine;
 }
@@ -53,11 +54,11 @@ Engine_T Engine_copy (Engine_T oEngine)
     Engine_T oeCopy;
 
     oeCopy = (Engine_T)calloc(1, sizeof(struct Engine));
-    MEM_CHECK(oeCopy);
+    CHECK_MEM(oeCopy);
     oeCopy->oBoard = ChessBoard_copy(oEngine->oBoard);
-    MEM_CHECK(oeCopy->oBoard);
+    CHECK_MEM(oeCopy->oBoard);
     oeCopy->oParams = ChessParameters_copy(oEngine->oParams);
-    MEM_CHECK(oeCopy->oParams);
+    CHECK_MEM(oeCopy->oParams);
 
     oeCopy->iDepth = oEngine->iDepth;
 
@@ -66,73 +67,96 @@ Engine_T Engine_copy (Engine_T oEngine)
 
 /*--------------------------------------------------------------------*/
 
-/* Return a score for the position held by oEngine. + if it is in 
-    favor of white, - if it is in favor of black. */
-int Engine_evaluate (Engine_T oEngine)
+/* Return an evaluation for the position held by oEngine. + if it is in 
+    favor of white, - if it is in favor of black. CALLER FREE. */
+Eval_T Engine_evaluate (Engine_T oEngine)
 {
-    assert(oEngine != NULL);
-    int score = 0;
+    CHECK_NULL(oEngine);
 
     // comparing material
+    int score = 0;
     ChessBoard_onEachMap(oEngine->oBoard, Map_addUpPieces, &score);
+
+    Eval_T eval = Eval_new(COMP, score); // enum eval_type {COMP, MATE} eval_type;
     
     return score;
 }
 
-/* Search 3 moves in to the move tree and return the best move for the 
-   current player, or NULL if insufficient memory is available. */
-Move_T Engine_search (Engine_T oEngine)
+/* Search oEngine's position. CALLER FREE. */
+Eval_T Engine_search (Engine_T oEngine)
 {
-    assert(oEngine != NULL);
+    CHECK_NULL(oEngine);
     
     printf("NOT IMPLEMENTED: Engine_search");
     
-    return Move_new(Square_newNotation("e2"), Square_newNotation("e4"));
+    return NULL;
 }
 
 Move_T Engine_bestMove (Engine_T oEngine)
 {
-    MEM_CHECK(oEngine);
+    CHECK_NULL(oEngine);
 
     // copy the current engine
     Engine_T oeCopy = Engine_copy(oEngine);
     // search the move tree for the best move
-    Move_T omBest = Engine_search(oeCopy);
+    Move_T bestMove = NULL;
+    Eval_T bestEval = NULL;
+    Eval_T tempEval;
+    /*
+    for (piece in pieces)
+        for (move in moves)
+            if (move is possible)
+                oeCopy = Engine_copy(oEngine)
+                Engine_makeMove(move)
+                tempEval = Engine_search(oeCopy)
+                if (Eval_compare(tempEval, bestEval) > 0)
+                    bestEval = tempEval
+                    bestMove = move
+    */
     
-    // free the 
     free(oeCopy);
+    free(bestEval);
+    free(tempEval);
     // return the best move
-    return omBest;
+    return bestMove;
 }
 
 /*--------------------------------------------------------------------*/
 
 void Engine_makeMove (Engine_T oEngine, Move_T oMove)
 {
-    MEM_CHECK(oEngine);
-    MEM_CHECK(oMove);
+    CHECK_NULL(oEngine);
+    CHECK_NULL(oMove);
 
     r_move result = ChessBoard_tryMove(oEngine->oBoard, oMove);
+    const char *s = Move_toString(oMove);
+
     switch (result)
     {
         case SUCCESS:
-            return;
-        case FAIL:
-            ERROR("Invalid move: %s\n", Move_toString(oMove));
-            return;
+            PRINT("Succeeded in moving: %s\n", s);
+            break;
         default:
-            ERROR("r_move result is not recognized: %d", result);
-            return;
+            ERROR("Invalid move: %s\n", s);
     }
+    free(s);
+}
+
+void Engine_setDepth (Engine_T oEngine, size_t d) {
+    CHECK_NULL(oEngine);
+    assert(0 < d && d < MAX_DEPTH);
+    oEngine->iDepth = d;
 }
 
 /*--------------------------------------------------------------------*/
 
 char *Engine_toString (Engine_T oEngine)
 {
-    assert(oEngine != NULL);
+    CHECK_NULL(oEngine);
 
     char *pcStrRep = malloc(900);
+    CHECK_MEM(pcStrRep);
+    
     char *ptr = pcStrRep;
     ptr[0] = '\0';
 
@@ -142,7 +166,11 @@ char *Engine_toString (Engine_T oEngine)
     char *params = ChessParameters_toString(oEngine->oParams);
     ptr += sprintf(ptr, "%s\n\n", params);
 
-    ptr += sprintf(ptr, "  Engine eval: %d", Engine_evaluate(oEngine));
+    char *eval = Eval_toString(Engine_evaluate(oEngine));
+    ptr += sprintf(ptr, "  Engine eval: %d", eval);
 
+    free(board);
+    free(params);
+    free(eval);
     return pcStrRep;
 }

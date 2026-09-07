@@ -2,7 +2,8 @@
 /* map.h                                                             */
 /*--------------------------------------------------------------------*/
 
-#include "square.h"
+#include "move.h"
+#include "mask.h"
 
 #ifndef MAP_INCLUDED
 #define MAP_INCLUDED
@@ -16,14 +17,13 @@ typedef void (*MapFunction)(Map_T, int*);
 
 /*--------------------------------------------------------------------*/
 
-/* Return a new Map_T object initialized to the given parameters, or 
-    NULL if insufficient memory is available. */
+/* Return a new Map_T object initialized to empty. CALLER FREE. */
 Map_T Map_new(char name);
 
 /* Free oMap. */
 void Map_free(Map_T oMap);
 
-/* Return a deep copy of oMap. Caller must free. */
+/* Return a deep copy of oMap. CALLER FREE. */
 Map_T Map_copy (Map_T oMap);
 
 /*--------------------------------------------------------------------*/
@@ -34,8 +34,8 @@ char Map_getName(Map_T oMap);
 /* Return how many pieces are held in oMap. */
 int Map_numPieces(Map_T oMap);
 
-/* Return the map's piece position map. */
-uint64_t Map_getPos(Map_T oMap);
+/* Return the color of the piece type oMap holds. */
+color Map_color(Map_T oMap);
 
 /*--------------------------------------------------------------------*/
 
@@ -43,19 +43,29 @@ uint64_t Map_getPos(Map_T oMap);
 void Map_place(Map_T oMap, Square_T oSqr);
 
 /* Alter oMap so that there is a 0 in the spot corresponding to sqr. */
-void Map_capture(Map_T oMap, Square_T oSqr);
+void Map_remove(Map_T oMap, Square_T oSqr);
 
 /*--------------------------------------------------------------------*/
 
-/* Returns whether the location r,f holds a piece. */
-bool Map_isCovered(Map_T oMap, int r, int f);
+/* Returns whether the given location holds a piece. */
+bool Map_isCovered_coords(Map_T oMap, int x, int y);
+bool Map_isCovered_sqr(Map_T oMap, Square_T oSqr);
 
 /* Add the value of the pieces in oMap to iTotal. */
 void Map_addUpPieces (Map_T oMap, int *iTotal);
 
+/* Returns an empty or populated list of the squares oMap's piece would 
+    have to cross to get to the destination. If it is NULL, the move 
+    cannot be made. CALLER FREE. */
+Mask_T Map_hasRangeTo (Map_T oMap, Move_T oMove);
+
+/* Returns true if both oMap and oMask have at least one filled sqr in 
+    the same location, false otherwise. */
+bool Map_shareSqr (Map_T oMap, Mask_T oMask);
+
 /*--------------------------------------------------------------------*/
 
-/* Return the string representation of the ullMap. */
+/* Return the string representation of the ullMap. CALLER FREE. */
 char *Map_toString(Map_T oMap);
 
 #endif

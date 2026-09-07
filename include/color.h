@@ -7,6 +7,7 @@
 
 typedef enum color {BLACK, WHITE} color;
 
+/* Returns the string representation of color c. */
 const char *Color_toString(color c);
 
 #endif

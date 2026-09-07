@@ -4,6 +4,8 @@
 
 #include "board.h"
 #include "parameters.h"
+#include "validation.h"
+#include <mask.h>
 
 enum {MAX_PIECE_TYPES = 64};
 
@@ -11,43 +13,41 @@ struct ChessBoard
 {
     /* the collections of different piece types */
     Map_T pmPieceMaps[MAX_PIECE_TYPES];
+
+    /* the number of non-null maps */
+    size_t NUM_MAPS;
 };
 
 /*--------------------------------------------------------------------*/
 
-ChessBoard_T ChessBoard_new(const char *pcFen) 
+ChessBoard_T ChessBoard_new(const char *pcFen)
 {
-    assert(pcFen != NULL);
+    CHECK_NULL(pcFen);
 
     ChessBoard_T oBoard = (ChessBoard_T)calloc(1, sizeof(struct ChessBoard));
-    MEM_CHECK(oBoard);
+    CHECK_MEM(oBoard);
     
     ChessBoard_setFen(oBoard, pcFen);
     
     return oBoard;
 }
-
 void ChessBoard_free(ChessBoard_T oBoard)
 {
-    assert(oBoard != NULL);
+    CHECK_NULL(oBoard);
 
-    for (int m = 0; m < MAX_PIECE_TYPES; m++)
+    for (size_t m = 0; m < oBoard->NUM_MAPS; m++)
         Map_free(oBoard->pmPieceMaps[m]);
 
     free(oBoard);
 }
-
 ChessBoard_T ChessBoard_copy(ChessBoard_T oBoard) {
-    assert(oBoard != NULL);
+    CHECK_NULL(oBoard);
     
     ChessBoard_T obCopy = (ChessBoard_T)calloc(1, sizeof(struct ChessBoard));
-    MEM_CHECK(obCopy);
+    CHECK_MEM(obCopy);
     
-    for (int m = 0; m < MAX_PIECE_TYPES; m++) {
-        if (obCopy->pmPieceMaps[m] != NULL)
-            obCopy->pmPieceMaps[m] = Map_copy(oBoard->pmPieceMaps[m]);
-        else
-            break;
+    for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
+        obCopy->pmPieceMaps[m] = Map_copy(oBoard->pmPieceMaps[m]);
     }
     
     return obCopy;
@@ -55,20 +55,34 @@ ChessBoard_T ChessBoard_copy(ChessBoard_T oBoard) {
 
 /*--------------------------------------------------------------------*/
 
+/* Return the map from oBoard matching cName. Create a new one if one
+   hasn't already been created. */
+Map_T chessboard_getOrMakeMap(ChessBoard_T oBoard, char cName) {
+    CHECK_NULL(oBoard);
+    for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
+        if (Map_getName(oBoard->pmPieceMaps[m]) == cName)
+            return oBoard->pmPieceMaps[m];
+    }
+    if (oBoard->NUM_MAPS == MAX_PIECE_TYPES)
+        ERROR("ChessBoard does not have the piece requested and not space for more.");
+    
+    oBoard->pmPieceMaps[oBoard->NUM_MAPS] = Map_new(cName);
+    Map_T madeMap = oBoard->pmPieceMaps[oBoard->NUM_MAPS];
+    oBoard->NUM_MAPS++;
+    return madeMap;
+}
+/* USED FOR setFen */
 void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
 {
-    /* reset the bit boards */
-    for (int m = 0; m < MAX_PIECE_TYPES; m++) {
-        Map_free(oBoard->pmPieceMaps[m]);
-        oBoard->pmPieceMaps[m] = NULL;
-    }
+    CHECK_NULL(pcFen);
+    CHECK_NULL(oBoard);
 
+    oBoard->NUM_MAPS = 0;
     Square_T sqr = Square_newCoords(0, 0);
-    MEM_CHECK(sqr);
 
     int i = 0;
     char c = pcFen[i++];
-    Map_T tempMap;
+    Map_T pMap;
     while (c != '\0')
     {
         switch (c)
@@ -81,28 +95,24 @@ void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
             case '6':
             case '7':
             case '8':
-                sqr->iFile += c - '0';
+                sqr->y += c - '0';
                 break;
             case '/':
-                assert(sqr->iFile == 8);
-                sqr->iFile = 0;
-                sqr->iRank++;
+                assert(sqr->y == 8);
+                sqr->y = 0;
+                sqr->x++;
                 break;
             case ' ': 
                 /* finished reading pcFen */
                 goto finishedParsing;
             default:
-                tempMap = ChessBoard_getMap(oBoard, c);
-
-                /* no 'c' pieces on the board just yet */
-                if (tempMap == NULL)
-                    tempMap = Map_new(c);
+                pMap = chessboard_getOrMakeMap(oBoard, c);
                 
                 /* place the piece */
-                Map_place(tempMap, sqr);
+                Map_place(pMap, sqr);
 
                 /* index to the next column on the board */
-                sqr->iFile++;
+                sqr->y++;
         }
         c = pcFen[i++];
     }
@@ -111,45 +121,86 @@ void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
     free(sqr);
 }
 
-Map_T ChessBoard_getMap(ChessBoard_T oBoard, char cName) {
-    for (int m = 0; m < MAX_PIECE_TYPES; m++) {
-        if (oBoard->pmPieceMaps[m] == NULL) {
-            oBoard->pmPieceMaps[m] = Map_new(cName);
-            return oBoard->pmPieceMaps[m];
-        }
-        else if (Map_getName(oBoard->pmPieceMaps[m]) == cName)
-            return oBoard->pmPieceMaps[m];
-    }
-    ERROR("ChessBoard does not have the piece requested and not space for more.");
-    return NULL;
-}
-
 void ChessBoard_onEachMap(ChessBoard_T oBoard, MapFunction func, int *data) {
     assert(oBoard != NULL);
     assert(func != NULL);
 
-    for (int m = 0; m < MAX_PIECE_TYPES; m++) {
-        if (oBoard->pmPieceMaps[m] != NULL)
-            func(oBoard->pmPieceMaps[m], data);
-    }
+    for (size_t m = 0; m < oBoard->NUM_MAPS; m++)
+        func(oBoard->pmPieceMaps[m], data);
 }
 
+/* Return the map from oBoard that has a piece on oSqr. Return NULL if 
+   none like that exist. */
+Map_T chessboard_getMapFromSqr(ChessBoard_T oBoard, Square_T oSqr) {
+    CHECK_NULL(oBoard);
+    //Validate_chessboard(oBoard);
+    for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
+        if (Map_isCovered_sqr(oBoard->pmPieceMaps[m], oSqr))
+            return oBoard->pmPieceMaps[m];
+    }
+    return NULL;
+}
+/* Returns SUCCESS if move could be completed, some other move result 
+    otherwise and leaves the chessboard untouched. */
+r_move chessboard_handleMove(ChessBoard_T oBoard, Move_T oMove) 
+{
+    // get the map that contains the piece on the src square
+    Map_T srcMap = chessboard_getMapFromSqr(oBoard, Move_src(oMove));
+    
+    // if there is no piece on the src square for the move, the move is INVALID
+    if (srcMap == NULL)
+        return SAME_COLOR_DST;
+
+    // if the piece does not have the range to get the the dst square, the move is INVALID
+    Mask_T traversed = Map_hasRangeTo(srcMap, oMove);
+    if (traversed == NULL)
+        return DOESNT_HAVE_RANGE;
+
+    // if the piece traverses squares that are covered, the move is INVALID
+    for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
+        if (Map_shareSqr(oBoard->pmPieceMaps[m], traversed))
+            return BLOCKED_PATH;
+    }
+    
+    // get the map that contains the piece on the dst square
+    Map_T dstMap = chessboard_getMapFromSqr(oBoard, Move_src(oMove));
+    
+    // if there is a piece on the dst square...
+    if (dstMap != NULL)
+    {
+        // if the piece is the same color as the moving piece, the move is INVALID
+        if (Map_color(dstMap) == Map_color(srcMap))
+            return false;
+        
+        Map_remove(dstMap, Move_dst(oMove));
+    }
+
+    Map_remove(srcMap, Move_src(oMove));
+    Map_place(srcMap, Move_dst(oMove));
+    return SUCCESS;
+}
+/* USED FOR tryMove */
 r_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove)
 {
-    // check if the move is in the range of the og piece
-    // check 
-    return FAIL;
+    /* currently configured as a king capture game */
+    
+    r_move result = chessboard_handleMove(oBoard, oMove);
+    
+    if (result != SUCCESS)
+        /* try the move as a special move */;
+    
+    return result;
+
 }
 
 /*--------------------------------------------------------------------*/
 
 char *ChessBoard_toString(ChessBoard_T oBoard)
 {
-    assert(oBoard != NULL);
+    CHECK_NULL(oBoard);
 
     char *pcStrRep = malloc(800);
-    if (pcStrRep == NULL)
-        return "NO SPACE IN MEMORY";
+    CHECK_MEM(pcStrRep);
     char *ptr = pcStrRep;
 
     ptr += sprintf(ptr, "  +---+---+---+---+---+---+---+---+\n");
@@ -159,19 +210,12 @@ char *ChessBoard_toString(ChessBoard_T oBoard)
         for (int f = 0; f <= 7; f++) {
             char bit = ' ';
             // go through all the bit maps
-            for (int m = 0; m < MAX_PIECE_TYPES; m++) {
-                if (oBoard->pmPieceMaps[m] == NULL)
+            for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
+                if (Map_isCovered_coords(oBoard->pmPieceMaps[m], r, f)) {
+                    bit = Map_getName(oBoard->pmPieceMaps[m]);
                     break;
-                if (Map_isCovered(oBoard->pmPieceMaps[m], r, f)) {
-                    if (bit == ' ') {
-                        bit = Map_getName(oBoard->pmPieceMaps[m]);
-                    } else {
-                        ERROR("Multiple pieces at the same location.");
-                    }
-                    goto foundPiece;
                 }
             }
-            foundPiece:
             ptr += sprintf(ptr, " %c |", bit);
         }
         ptr += sprintf(ptr, "\n  +---+---+---+---+---+---+---+---+\n");

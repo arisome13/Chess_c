@@ -2,7 +2,6 @@
 /* move.c                                                             */
 /*--------------------------------------------------------------------*/
 
-#include "helpers.h"
 #include "move.h"
 
 struct Move
@@ -15,11 +14,11 @@ struct Move
 };
 
 Move_T Move_new(Square_T src, Square_T dst) {
-    assert(src != NULL);
-    assert(dst != NULL);
+    CHECK_NULL(src);
+    CHECK_NULL(dst);
 
     Move_T oMove = (Move_T)calloc(1, sizeof(struct Move));
-    MEM_CHECK(oMove);
+    CHECK_MEM(oMove);
 
     oMove->sSrc = src;
     oMove->sDst = dst;
@@ -28,7 +27,7 @@ Move_T Move_new(Square_T src, Square_T dst) {
 }
 
 Move_T Move_read(const char *pcNotation) {
-    assert(pcNotation != NULL);
+    CHECK_NULL(pcNotation);
     
     Square_T src = Square_newNotation(pcNotation);
     Square_T dst = Square_newNotation(pcNotation + 2);
@@ -61,12 +60,21 @@ bool Move_equals(Move_T oMove1, Move_T oMove2) {
 
 /*--------------------------------------------------------------------*/
 
+Square_T Move_src(Move_T oMove) {
+    return oMove->sSrc;
+}
+Square_T Move_dst(Move_T oMove) {
+    return oMove->sDst;
+}
+
+/*--------------------------------------------------------------------*/
+
 char *Move_toString(Move_T oMove) {
     char *src = Square_toString(oMove->sSrc);
     char *dst = Square_toString(oMove->sDst);
 
     char *pcStrRep = malloc(10);
-    MEM_CHECK(pcStrRep);
+    CHECK_MEM(pcStrRep);
     
     if (oMove != NULL) 
     {

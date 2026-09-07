@@ -11,19 +11,17 @@
     allow. */
 typedef struct Castles *Castles_T;
 
-/* Return a new Castles_T object initialized to empty. Raises error if
-    insufficient memory is available. */
+/* Return a new Castles_T object initialized to empty. CALLER FREE. */
 Castles_T Castles_new (void);
 
 /* Free oCastles. */
 void Castles_free (Castles_T oCastles);
 
-/* Adds the given castleType to oCastles. Raises an error if the castle
-    is invalid. */
-void Castles_add (Castles_T oCastles, char castleType);
-
-/* Return a deep copy of oCastles. Caller must free. */
+/* Return a deep copy of oCastles. CALLER FREE. */
 Castles_T Castles_copy (Castles_T oCastles);
+
+/* Adds the given castleType to oCastles. Raises error if already added. */
+void Castles_add (Castles_T oCastles, char castleType);
 
 /* Return a string representation of oCastles. */
 const char *Castles_toString (Castles_T oCastles);

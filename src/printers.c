@@ -18,9 +18,18 @@ void ERROR(const char *pcMessage, ...)
     exit(EXIT_FAILURE);
 }
 
-void MEM_CHECK(void *pObject) {
+void CHECK_NULL(void *pObject) {
+    if (pObject == NULL)
+        ERROR("Null error.\n");
+}
+void CHECK_MEM(void *pObject) {
     if (pObject == NULL)
         ERROR("Memory error.\n");
+}
+
+void CHECK_COORDS(size_t x, size_t y) {
+    if (!(0 <= x && x < 8 && 0 <= y && y < 8))
+        ERROR("Invalid coordinates. x, y must be in [0, 7]");
 }
 
 void PRINT(const char *pcMessage, ...)

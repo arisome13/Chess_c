@@ -15,13 +15,13 @@ typedef struct ChessParameters *ChessParameters_T;
 /*--------------------------------------------------------------------*/
 
 /* Return a new ChessParameters_T object initialized to the pcFen
-   parameters, or NULL if insufficient memory is available. */
+   parameters. CALLER FREE. */
 ChessParameters_T ChessParameters_new(const char *pcFen);
 
 /* Free oParams. */
 void ChessParameters_free(ChessParameters_T oParams);
 
-/* Return a deep copy of oParams. Caller must free. */
+/* Return a deep copy of oParams. CALLER FREE. */
 ChessParameters_T ChessParameters_copy(ChessParameters_T oParams);
 
 /*--------------------------------------------------------------------*/
@@ -36,8 +36,7 @@ Castles_T ChessParameters_castles(ChessParameters_T oParams);
    enpassant square exists. */
 Square_T ChessParameters_enpSqr(ChessParameters_T oParams);
 
-/* Return the number of half moves since a capture or pawn move. This
-   number will always be under 50 so can be stored as a 6 bit number. */
+/* Return the number of half moves since a capture or pawn move. */
 int ChessParameters_50MoveRule(ChessParameters_T oParams);
 
 /* Return the move number of the current move being played. */
@@ -45,7 +44,8 @@ int ChessParameters_numMoves(ChessParameters_T oParams);
 
 /*--------------------------------------------------------------------*/
 
-/* Return the string representation of the oParams object. */
+/* Return the string representation of the oParams object. 
+   CALLER FREE. */
 char *ChessParameters_toString(ChessParameters_T oParams);
 
 #endif

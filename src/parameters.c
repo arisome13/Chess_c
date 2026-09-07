@@ -30,7 +30,7 @@ ChessParameters_T ChessParameters_new(const char *pcFen) {
 
    ChessParameters_T oParams = (ChessParameters_T)calloc(1, 
             sizeof(struct ChessParameters));
-   MEM_CHECK(oParams);
+   CHECK_MEM(oParams);
    
    /* get fenIndex to the first element in a fen string: 
       the turn color */
@@ -76,7 +76,7 @@ void ChessParameters_free(ChessParameters_T oParams) {
 ChessParameters_T ChessParameters_copy(ChessParameters_T oParams) {
    ChessParameters_T opCopy = (ChessParameters_T)calloc(1, 
             sizeof(struct ChessParameters));
-   MEM_CHECK(oParams);
+   CHECK_MEM(oParams);
 
    opCopy->cTurnColor = oParams->cTurnColor;
    opCopy->oCastles = Castles_copy(oParams->oCastles);

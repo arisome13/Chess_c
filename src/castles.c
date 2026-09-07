@@ -19,7 +19,7 @@ struct Castles
 
 Castles_T Castles_new (void) {
     Castles_T oCastles = (Castles_T)calloc(1, sizeof(struct Castles));
-    MEM_CHECK(oCastles);
+    CHECK_MEM(oCastles);
 
     oCastles->bKW = false;
     oCastles->bQW = false;
@@ -30,10 +30,12 @@ Castles_T Castles_new (void) {
 }
 
 void Castles_free (Castles_T oCastles) {
+    CHECK_NULL(oCastles);
     free(oCastles);
 }
 
 void Castles_add (Castles_T oCastles, char castleType) {
+    CHECK_NULL(oCastles);
     switch (castleType)
     {
         case 'K':
@@ -63,8 +65,10 @@ void Castles_add (Castles_T oCastles, char castleType) {
 }
 
 Castles_T Castles_copy (Castles_T oCastles) {
+    CHECK_NULL(oCastles);
+
     Castles_T ocCopy = (Castles_T)calloc(1, sizeof(struct Castles));
-    MEM_CHECK(oCastles);
+    CHECK_MEM(ocCopy);
 
     ocCopy->bKW = oCastles->bKW;
     ocCopy->bQW = oCastles->bQW;
@@ -75,7 +79,7 @@ Castles_T Castles_copy (Castles_T oCastles) {
 }
 
 const char *Castles_toString (Castles_T oCastles) {
-    assert(oCastles != NULL);
+    CHECK_NULL(oCastles);
     if (oCastles->bKW) {
         if (oCastles->bQW) {
             if (oCastles->bKB) {

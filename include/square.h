@@ -10,29 +10,28 @@
 /* A Square_T object holds the location of a square on a chess board. */
 struct Square
 {
-    /* rank */
-    int iRank;
+    /* rank = 8 - x */
+    size_t x;
 
-    /* file */
-    int iFile;
+    /* file = y */
+    size_t y;
 };
 typedef struct Square *Square_T;
 
+
 /*--------------------------------------------------------------------*/
 
-/* Return a new Square_T object initialized to the given parameters, or 
-    NULL if insufficient memory is available. */
-    /* coords are defined from the top left 
-        rank: 0-7, file: 0-7 */
-Square_T Square_newCoords(int rank, int file);
-    /* notation is defined from bottom left 
-        rank: 1-8, file: a-h */
+/* Return a new Square_T object initialized to the given parameters. 
+    CALLER FREE. */
+/* coords are defined from the top left rank: 0-7, file: 0-7 */
+Square_T Square_newCoords(size_t rank, size_t file);
+/* notation is defined from bottom left rank: 1-8, file: a-h */
 Square_T Square_newNotation(const char *pcNotation);
 
 /* Free oSquare. */
 void Square_free(Square_T oSquare);
 
-/* Return a deep copy of oSquare. Caller must free. */
+/* Return a deep copy of oSquare. CALLER FREE. */
 Square_T Square_copy(Square_T oSquare);
 
 /*--------------------------------------------------------------------*/
@@ -40,14 +39,8 @@ Square_T Square_copy(Square_T oSquare);
 /* Return whether oSquare1 contians the same location as oSquare2. */
 bool Square_equals(Square_T oSquare1, Square_T oSquare2);
 
-/* Return the position on a bit board the oSquare object represents. */
-int Square_bitPos(Square_T oSquare);
-
-/* Return a map of the position of the oSquare object. */
-uint64_t Square_bitMap(Square_T oSquare);
-
 /* Return the algebraic notation for the square oSquare represents,
-    or NULL if insufficient memory is available. Caller must free. */
+    or NULL if insufficient memory is available. CALLER FREE. */
 char *Square_toString(Square_T oSquare);
 
 #endif

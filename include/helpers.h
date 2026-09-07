@@ -13,7 +13,10 @@
 #include "color.h"
 #include "type.h"
 
-// strings, PRINT, ERROR, MEM_CHECK
+// strings, PRINT, ERROR, CHECK_MEM
 #include "printers.h"
+
+// universal switch
+typedef enum ON_OFF {ON, OFF} ON_OFF;
 
 #endif
