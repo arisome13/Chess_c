@@ -34,7 +34,7 @@ void Mask_reset (Mask_T oMask);
 size_t Mask_count(Mask_T oMask);
 
 /* Returns true if (x, y) on oMask is on, false otherwise. */
-bool Mask_isSet(Mask_T oMask, size_t x, size_t y);
+bool Mask_isSet(Mask_T oMask, size_t y, size_t x);
 
 /* Returns true if at least one square is shared. */
 bool Mask_shareSqr(Mask_T oMask1, Mask_T oMask2);
@@ -43,7 +43,7 @@ bool Mask_shareSqr(Mask_T oMask1, Mask_T oMask2);
 // ALTERATION
 
 /* Set the square on oMask at (x, y): x, y in [0, 7] */
-void Mask_set(Mask_T oMask, size_t x, size_t y, enum ON_OFF onORoff);
+void Mask_set(Mask_T oMask, size_t y, size_t x, enum ON_OFF onORoff);
 
 /*--------------------------------------------------------------------*/
 // DESCRIPTION

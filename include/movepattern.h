@@ -29,7 +29,7 @@ MovePattern_T MovePattern_copy (MovePattern_T oPattern);
 
 /* Adds a move in direction (dx, dy) to oPattern. */
 void MovePattern_add (MovePattern_T oPattern, 
-    int dx, int dy, bool repeating);
+    int dy, int dx, bool repeating);
 
 /* Returns a mask of the squares oMove goes through, or NULL if the 
     move cannot be made with oPattern. CALLER FREE. */
@@ -42,5 +42,6 @@ MovePattern_T MovePattern_for (char pieceName);
 
 /* Return a string representation of oPattern. CALLER FREE. */
 char *MovePattern_toString (MovePattern_T oPattern);
+char *MovePattern_showMovesFrom (MovePattern_T oPattern, Square_T oSqr);
 
 #endif

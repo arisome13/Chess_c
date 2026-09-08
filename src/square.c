@@ -4,10 +4,10 @@
 
 #include "square.h"
 
-Square_T Square_newCoords(size_t x, size_t y) {
+Square_T Square_newCoords(size_t y, size_t x) {
     Square_T oSqr;
 
-    CHECK_COORDS(x, y);
+    CHECK_COORDS(y, x, "Square_newCoords");
 
     oSqr = (Square_T)calloc(1, sizeof(struct Square));
     CHECK_MEM(oSqr);
@@ -19,15 +19,12 @@ Square_T Square_newCoords(size_t x, size_t y) {
 }
 
 Square_T Square_newNotation(const char *pcNotation) {
-    int x;
-    int y;
-
     CHECK_NULL(pcNotation);
 
-    y = pcNotation[0] - 'a';
-    x = 7 - (pcNotation[1] - '1');
+    size_t x = pcNotation[0] - 'a';
+    size_t y = 7 - (pcNotation[1] - '1');
 
-    return Square_newCoords(x, y);
+    return Square_newCoords(y, x);
 }
   
 void Square_free(Square_T oSquare) {
@@ -37,7 +34,7 @@ void Square_free(Square_T oSquare) {
 
 Square_T Square_copy(Square_T oSquare) {
     CHECK_NULL(oSquare);
-    return Square_newCoords(oSquare->x, oSquare->y);
+    return Square_newCoords(oSquare->y, oSquare->x);
 }
 
 /*--------------------------------------------------------------------*/
@@ -61,8 +58,8 @@ char *Square_toString(Square_T oSquare){
     }
     else
     {
-        pcNotation[0] = 'a' + oSquare->y;
-        pcNotation[1] = '8' - oSquare->x;
+        pcNotation[0] = 'a' + oSquare->x;
+        pcNotation[1] = '8' - oSquare->y;
         pcNotation[2] = '\0';
     }
     return pcNotation;

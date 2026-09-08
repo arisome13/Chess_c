@@ -3,15 +3,15 @@
 #include "movepattern.h"
 
 int main (void) {
-    MovePattern_T oPattern = MovePattern_new();
-    MovePattern_add(oPattern, 0, 1, false);
-    MovePattern_add(oPattern, 0, -1, true);
-    MovePattern_add(oPattern, 1, 0, false);
-    MovePattern_add(oPattern, -1, 0, true);
+    char *str;
+    MovePattern_T tempMP;
+    Square_T start = Square_newNotation("e2");
 
-    char *str = MovePattern_toString(oPattern);
-    printf("%s\n", str);
+    tempMP = MovePattern_for('P');
+    str = MovePattern_showMovesFrom(tempMP, start);
+    printf("Pawn\n%s\n", str);
+    MovePattern_free(tempMP);
     free(str);
     
-    MovePattern_free(oPattern);
+    Square_free(start);
 }

@@ -37,10 +37,10 @@ Castles_T ChessParameters_castles(ChessParameters_T oParams);
 Square_T ChessParameters_enpSqr(ChessParameters_T oParams);
 
 /* Return the number of half moves since a capture or pawn move. */
-int ChessParameters_50MoveRule(ChessParameters_T oParams);
+size_t ChessParameters_50MoveRule(ChessParameters_T oParams);
 
 /* Return the move number of the current move being played. */
-int ChessParameters_numMoves(ChessParameters_T oParams);
+size_t ChessParameters_numMoves(ChessParameters_T oParams);
 
 /*--------------------------------------------------------------------*/
 

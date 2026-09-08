@@ -5,6 +5,7 @@
 #include "engine.h"
 #include "board.h"
 #include "parameters.h"
+#include "eval.h"
 
 const char *STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 enum {MAX_DEPTH = 8};
@@ -77,9 +78,9 @@ Eval_T Engine_evaluate (Engine_T oEngine)
     int score = 0;
     ChessBoard_onEachMap(oEngine->oBoard, Map_addUpPieces, &score);
 
-    Eval_T eval = Eval_new(COMP, score); // enum eval_type {COMP, MATE} eval_type;
+    Eval_T eval = Eval_new(CENTIPAWN, score);
     
-    return score;
+    return eval;
 }
 
 /* Search oEngine's position. CALLER FREE. */
@@ -99,7 +100,7 @@ Move_T Engine_bestMove (Engine_T oEngine)
     // copy the current engine
     Engine_T oeCopy = Engine_copy(oEngine);
     // search the move tree for the best move
-    Move_T bestMove = NULL;
+    Move_T bestMove = Move_new(Square_newNotation("e2"), Square_newNotation("e4"));
     Eval_T bestEval = NULL;
     Eval_T tempEval;
     /*
@@ -115,8 +116,9 @@ Move_T Engine_bestMove (Engine_T oEngine)
     */
     
     free(oeCopy);
-    free(bestEval);
-    free(tempEval);
+    //free(bestEval);
+    //free(tempEval);
+
     // return the best move
     return bestMove;
 }
@@ -129,7 +131,7 @@ void Engine_makeMove (Engine_T oEngine, Move_T oMove)
     CHECK_NULL(oMove);
 
     r_move result = ChessBoard_tryMove(oEngine->oBoard, oMove);
-    const char *s = Move_toString(oMove);
+    char *s = Move_toString(oMove);
 
     switch (result)
     {
@@ -137,7 +139,7 @@ void Engine_makeMove (Engine_T oEngine, Move_T oMove)
             PRINT("Succeeded in moving: %s\n", s);
             break;
         default:
-            ERROR("Invalid move: %s\n", s);
+            ERROR("Invalid move %s, reason %d\n", s, result);
     }
     free(s);
 }
@@ -167,7 +169,7 @@ char *Engine_toString (Engine_T oEngine)
     ptr += sprintf(ptr, "%s\n\n", params);
 
     char *eval = Eval_toString(Engine_evaluate(oEngine));
-    ptr += sprintf(ptr, "  Engine eval: %d", eval);
+    ptr += sprintf(ptr, "  Engine eval: %s", eval);
 
     free(board);
     free(params);

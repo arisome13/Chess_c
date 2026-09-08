@@ -3,7 +3,6 @@
 /*--------------------------------------------------------------------*/
 
 #include "parameters.h"
-//#include "helpers.h"
 
 struct ChessParameters
 {
@@ -17,14 +16,14 @@ struct ChessParameters
    Square_T oEnpSqr;
 
    /* half move count for 50 move rule */
-   int i50MoveCount;
+   size_t i50MoveCount;
 
    /* current full move */
-   int iCurrMove;
+   size_t iCurrMove;
 };
 
 ChessParameters_T ChessParameters_new(const char *pcFen) {
-   int fenIndex;
+   size_t fenIndex;
    char pcEnpTemp[3];
    char *pcEndStr;
 
@@ -104,11 +103,11 @@ Square_T ChessParameters_enpSqr(ChessParameters_T oParams) {
    return oParams->oEnpSqr;
 }
 
-int ChessParameters_50MoveRule(ChessParameters_T oParams) {
+size_t ChessParameters_50MoveRule(ChessParameters_T oParams) {
    return oParams->i50MoveCount;
 }
 
-int ChessParameters_numMoves(ChessParameters_T oParams) {
+size_t ChessParameters_numMoves(ChessParameters_T oParams) {
    return oParams->iCurrMove;
 }
 
@@ -119,7 +118,7 @@ char *ChessParameters_toString(ChessParameters_T oParams) {
    char *pcSqr = oParams->oEnpSqr == NULL ? "--" : Square_toString(oParams->oEnpSqr);
 
    asprintf(&pcStrRep, 
-      "  +-------+------+----+---+---+\n  | %s | %s | %s | %d | %d |\n  +-------+------+----+---+---+", 
+      "  +-------+------+----+---+---+\n  | %s | %s | %s | %zu | %zu |\n  +-------+------+----+---+---+", 
       Color_toString(oParams->cTurnColor), 
       Castles_toString(oParams->oCastles), 
       pcSqr,

@@ -95,12 +95,12 @@ void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
             case '6':
             case '7':
             case '8':
-                sqr->y += c - '0';
+                sqr->x += c - '0';
                 break;
             case '/':
-                assert(sqr->y == 8);
-                sqr->y = 0;
-                sqr->x++;
+                assert(sqr->x == 8);
+                sqr->x = 0;
+                sqr->y++;
                 break;
             case ' ': 
                 /* finished reading pcFen */
@@ -112,7 +112,7 @@ void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
                 Map_place(pMap, sqr);
 
                 /* index to the next column on the board */
-                sqr->y++;
+                sqr->x++;
         }
         c = pcFen[i++];
     }
@@ -149,7 +149,7 @@ r_move chessboard_handleMove(ChessBoard_T oBoard, Move_T oMove)
     
     // if there is no piece on the src square for the move, the move is INVALID
     if (srcMap == NULL)
-        return SAME_COLOR_DST;
+        return NO_PIECE_ON_SRC;
 
     // if the piece does not have the range to get the the dst square, the move is INVALID
     Mask_T traversed = Map_hasRangeTo(srcMap, oMove);
@@ -163,20 +163,34 @@ r_move chessboard_handleMove(ChessBoard_T oBoard, Move_T oMove)
     }
     
     // get the map that contains the piece on the dst square
-    Map_T dstMap = chessboard_getMapFromSqr(oBoard, Move_src(oMove));
+    Map_T dstMap = chessboard_getMapFromSqr(oBoard, Move_dst(oMove));
     
     // if there is a piece on the dst square...
     if (dstMap != NULL)
     {
         // if the piece is the same color as the moving piece, the move is INVALID
         if (Map_color(dstMap) == Map_color(srcMap))
-            return false;
+            return SAME_COLOR_DST;
         
         Map_remove(dstMap, Move_dst(oMove));
     }
-
+    
+    char *mapStr = Map_toString(srcMap);
+    PRINT("pre move:\n%s\n", mapStr);
+    free(mapStr);
+    
     Map_remove(srcMap, Move_src(oMove));
+
+    mapStr = Map_toString(srcMap);
+    PRINT("after removal:\n%s\n", mapStr);
+    free(mapStr);
+
     Map_place(srcMap, Move_dst(oMove));
+
+    mapStr = Map_toString(srcMap);
+    PRINT("after place:\n%s\n", mapStr);
+    free(mapStr);
+
     return SUCCESS;
 }
 /* USED FOR tryMove */
@@ -205,13 +219,13 @@ char *ChessBoard_toString(ChessBoard_T oBoard)
 
     ptr += sprintf(ptr, "  +---+---+---+---+---+---+---+---+\n");
 
-    for (int r = 0; r <= 7; r++) {
-        ptr += sprintf(ptr, "%d |", 8-r);
-        for (int f = 0; f <= 7; f++) {
+    for (size_t y = 0; y < 8; y++) {
+        ptr += sprintf(ptr, "%d |", 8-y);
+        for (size_t x = 0; x < 8; x++) {
             char bit = ' ';
             // go through all the bit maps
             for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
-                if (Map_isCovered_coords(oBoard->pmPieceMaps[m], r, f)) {
+                if (Map_isCovered_coords(oBoard->pmPieceMaps[m], y, x)) {
                     bit = Map_getName(oBoard->pmPieceMaps[m]);
                     break;
                 }

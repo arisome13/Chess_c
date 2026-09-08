@@ -53,7 +53,7 @@ char Map_getName(Map_T oMap) {
     CHECK_NULL(oMap);
     return oMap->name;
 }
-int Map_numPieces(Map_T oMap) {
+size_t Map_numPieces(Map_T oMap) {
     CHECK_NULL(oMap);
     return Mask_count(oMap->mask);
 }
@@ -69,21 +69,22 @@ color Map_color(Map_T oMap) {
 
 void Map_place(Map_T oMap, Square_T oSqr) {
     CHECK_NULL(oMap);
-    Mask_set(oMap->mask, oSqr->x, oSqr->y, true);
+    Mask_set(oMap->mask, oSqr->y, oSqr->x, ON);
 }
 void Map_remove(Map_T oMap, Square_T oSqr) {
     CHECK_NULL(oMap);
-    Mask_set(oMap->mask, oSqr->x, oSqr->y, false);
+    CHECK_NULL(oSqr);
+    Mask_set(oMap->mask, oSqr->y, oSqr->x, OFF);
 }
 
-bool Map_isCovered_coords(Map_T oMap, int x, int y) {
+bool Map_isCovered_coords(Map_T oMap, size_t y, size_t x) {
     CHECK_NULL(oMap);
-    return Mask_isSet(oMap->mask, x, y);
+    return Mask_isSet(oMap->mask, y, x);
 }
 bool Map_isCovered_sqr(Map_T oMap, Square_T oSqr) {
     CHECK_NULL(oMap);
     CHECK_NULL(oSqr);
-    return Mask_isSet(oMap->mask, oSqr->x, oSqr->y);
+    return Mask_isSet(oMap->mask, oSqr->y, oSqr->x);
 }
 
 /*--------------------------------------------------------------------*/
@@ -116,11 +117,11 @@ char *Map_toString(Map_T oMap) {
 
     ptr += sprintf(ptr, "Piece Type: \'%c\'", oMap->name);
 
-    for (int r = 0; r <= 7; r++) {
+    for (size_t y = 0; y < 8; y++) {
         ptr += sprintf(ptr, 
-            "\n  +---+---+---+---+---+---+---+---+\n%d |", 8-r);
-        for (int f = 0; f <= 7; f++) {
-            char *bit = Map_isCovered_coords(oMap, r, f) ? "X": " ";
+            "\n  +---+---+---+---+---+---+---+---+\n%d |", 8-y);
+        for (size_t x = 0; x < 8; x++) {
+            char *bit = Map_isCovered_coords(oMap, y, x) ? "X": " ";
             ptr += sprintf(ptr, " %s |", bit);
         }
     }

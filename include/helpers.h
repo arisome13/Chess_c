@@ -17,6 +17,6 @@
 #include "printers.h"
 
 // universal switch
-typedef enum ON_OFF {ON, OFF} ON_OFF;
+typedef enum ON_OFF {OFF, ON} ON_OFF;
 
 #endif

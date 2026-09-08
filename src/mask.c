@@ -47,10 +47,10 @@ size_t Mask_count(Mask_T oMask)
     CHECK_NULL(oMask);
     return __builtin_popcountll(oMask->ullMask);
 }
-bool Mask_isSet(Mask_T oMask, size_t x, size_t y)
+bool Mask_isSet(Mask_T oMask, size_t y, size_t x)
 {
     CHECK_NULL(oMask);
-    CHECK_COORDS(x, y);
+    CHECK_COORDS(y, x, "Mask_isSet");
     return (oMask->ullMask >> (8 * y + x)) & 1;
 }
 bool Mask_shareSqr(Mask_T oMask1, Mask_T oMask2) {
@@ -61,13 +61,21 @@ bool Mask_shareSqr(Mask_T oMask1, Mask_T oMask2) {
 
 /*--------------------------------------------------------------------*/
 
-void Mask_set(Mask_T oMask, size_t x, size_t y, enum ON_OFF ONorOFF) {
+void Mask_set(Mask_T oMask, size_t y, size_t x, enum ON_OFF ONorOFF) {
     CHECK_NULL(oMask);
-    CHECK_COORDS(x, y);
-    if (ONorOFF == ON)
-        oMask->ullMask |= 1ULL << (8 * y + x);
-    else
-        oMask->ullMask &= ~(1ULL << (8 * y + x));
+    CHECK_COORDS(y, x, "Mask_set");
+    switch (ONorOFF)
+    {
+        case ON:
+            oMask->ullMask |= 1ULL << (8 * y + x);
+            break;
+        case OFF:
+            oMask->ullMask &= ~(1ULL << (8 * y + x));
+            break;
+        default:
+            ERROR("Invalid switch type.");
+            break;
+    }
 }
 
 /*--------------------------------------------------------------------*/
@@ -84,7 +92,7 @@ char *Mask_toString(Mask_T oMask) {
         ptr += sprintf(ptr, 
             "\n  +---+---+---+---+---+---+---+---+\n%d |", 8-y);
         for (int x = 0; x < 8; x++) {
-            char *bit = Mask_isSet(oMask, x, y) ? "X": " ";
+            char *bit = Mask_isSet(oMask, y, x) ? "X": " ";
             ptr += sprintf(ptr, " %s |", bit);
         }
     }

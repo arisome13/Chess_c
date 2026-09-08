@@ -18,18 +18,18 @@ void ERROR(const char *pcMessage, ...)
     exit(EXIT_FAILURE);
 }
 
-void CHECK_NULL(void *pObject) {
+void CHECK_NULL(const void *pObject) {
     if (pObject == NULL)
         ERROR("Null error.\n");
 }
-void CHECK_MEM(void *pObject) {
+void CHECK_MEM(const void *pObject) {
     if (pObject == NULL)
         ERROR("Memory error.\n");
 }
 
-void CHECK_COORDS(size_t x, size_t y) {
+void CHECK_COORDS(size_t y, size_t x, const char *location) {
     if (!(0 <= x && x < 8 && 0 <= y && y < 8))
-        ERROR("Invalid coordinates. x, y must be in [0, 7]");
+        ERROR("Invalid coordinates from %s(). %zu, %zu must be in [0, 7]", location, y, x);
 }
 
 void PRINT(const char *pcMessage, ...)
@@ -40,5 +40,4 @@ void PRINT(const char *pcMessage, ...)
     vprintf(pcMessage, args);
     
     va_end(args);
-    exit(EXIT_FAILURE);
 }

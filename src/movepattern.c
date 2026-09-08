@@ -33,14 +33,14 @@ MovePattern_T MovePattern_copy (MovePattern_T oPattern) {
         if (oPattern->movetypes[i] == NULL) {
             break;
         }
-        MovePattern_add(opCopy, oPattern->movetypes[i]->dx, 
-            oPattern->movetypes[i]->dy, oPattern->movetypes[i]->repeating);
+        MovePattern_add(opCopy, oPattern->movetypes[i]->dy, 
+            oPattern->movetypes[i]->dx, oPattern->movetypes[i]->repeating);
     }
     
     return opCopy;
 }
 
-void MovePattern_add (MovePattern_T oPattern, int dx, int dy, bool repeating) {
+void MovePattern_add (MovePattern_T oPattern, int dy, int dx, bool repeating) {
     CHECK_MEM(oPattern);
 
     if (oPattern->NUM_MOVETYPES == 8)
@@ -61,11 +61,11 @@ void MovePattern_add (MovePattern_T oPattern, int dx, int dy, bool repeating) {
 MovePattern_T movepattern_pawn (color c) {
     MovePattern_T mpPiece = MovePattern_new();
     if (c == WHITE) {
-        MovePattern_add(mpPiece, 0, -1, false);
-        MovePattern_add(mpPiece, 0, -2, false);
+        MovePattern_add(mpPiece, -1, 0, false);
+        MovePattern_add(mpPiece, -2, 0, false);
     } else {
-        MovePattern_add(mpPiece, 0, 1, false);
-        MovePattern_add(mpPiece, 0, 2, false);
+        MovePattern_add(mpPiece, 1, 0, false);
+        MovePattern_add(mpPiece, 2, 0, false);
     }
     return mpPiece;
 }
@@ -144,10 +144,11 @@ MovePattern_T MovePattern_for (char pieceName) {
 }
 
 Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove) {
-    printf("Make sure to TEST THIS FUNCTION");
+    CHECK_NULL(oPattern);
+    CHECK_NULL(oMove);
 
-    int dx = Move_dst(oMove)->x - Move_src(oMove)->x;
-    int dy = Move_dst(oMove)->y - Move_src(oMove)->y;
+    int dx = (int)Move_dst(oMove)->x - (int)Move_src(oMove)->x;
+    int dy = (int)Move_dst(oMove)->y - (int)Move_src(oMove)->y;
 
     Mask_T traversedSqrs = Mask_new();
     for (size_t i = 0; i < oPattern->NUM_MOVETYPES; i++) 
@@ -164,12 +165,17 @@ Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove) {
             Mask_reset(traversedSqrs);
             
             // check if one can move like the other
-            for (int j = 1; j < 8; j++) 
+            for (int j = 2; j < 8; j++) 
             {
                 if (dx == j * oPattern->movetypes[i]->dx && dy == j * oPattern->movetypes[i]->dy)
                     return traversedSqrs;
 
-                Mask_set(traversedSqrs, Move_src(oMove)->x + j * oPattern->movetypes[i]->dx, Move_src(oMove)->y + j * oPattern->movetypes[i]->dy, ON);
+                int tempX = Move_src(oMove)->x + j * oPattern->movetypes[i]->dx;
+                int tempY = Move_src(oMove)->y + j * oPattern->movetypes[i]->dy;
+                if (!(0 <= tempX && tempX < 8 && 0 <= tempY && tempY < 8))
+                    break;
+                
+                Mask_set(traversedSqrs, tempY, tempX, ON);
             }
         }
     }
@@ -178,7 +184,7 @@ Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove) {
 }
 
 char *MovePattern_toString (MovePattern_T oPattern) {
-    assert(oPattern != NULL);
+    CHECK_NULL(oPattern);
 
     char *pcStrRep = malloc(200);
     if (pcStrRep == NULL)
@@ -194,7 +200,32 @@ char *MovePattern_toString (MovePattern_T oPattern) {
         ptr += sprintf(ptr, "\n");
     }
 
-    printf("%ld\n", ptr - pcStrRep);
+    return pcStrRep;
+}
+char *MovePattern_showMovesFrom (MovePattern_T oPattern, Square_T oSqr) {
+    CHECK_NULL(oPattern);
+
+    char *pcStrRep = malloc(800);
+    CHECK_MEM(pcStrRep);
+    char *ptr = pcStrRep;
+
+    ptr += sprintf(ptr, "  +---+---+---+---+---+---+---+---+\n");
+
+    Move_T move = Move_new(oSqr, Square_newCoords(0, 0));
+    for (Move_dst(move)->y = 0; Move_dst(move)->y <= 7; Move_dst(move)->y++) {
+        ptr += sprintf(ptr, "%zu |", 8-Move_dst(move)->y);
+        for (Move_dst(move)->x = 0; Move_dst(move)->x <= 7; Move_dst(move)->x++) {
+            char bit = ' ';
+            if (Square_equals(Move_dst(move), Move_src(move)))
+                bit = 'o';
+            else if (MovePattern_canMove(oPattern, move))
+                bit = 'X';
+            ptr += sprintf(ptr, " %c |", bit);
+        }
+        ptr += sprintf(ptr, "\n  +---+---+---+---+---+---+---+---+\n");
+    }
+    ptr += sprintf(ptr, "    a   b   c   d   e   f   g   h  ");
+
     return pcStrRep;
 }
 

@@ -32,7 +32,7 @@ Map_T Map_copy (Map_T oMap);
 char Map_getName(Map_T oMap);
 
 /* Return how many pieces are held in oMap. */
-int Map_numPieces(Map_T oMap);
+size_t Map_numPieces(Map_T oMap);
 
 /* Return the color of the piece type oMap holds. */
 color Map_color(Map_T oMap);
@@ -48,7 +48,7 @@ void Map_remove(Map_T oMap, Square_T oSqr);
 /*--------------------------------------------------------------------*/
 
 /* Returns whether the given location holds a piece. */
-bool Map_isCovered_coords(Map_T oMap, int x, int y);
+bool Map_isCovered_coords(Map_T oMap, size_t y, size_t x);
 bool Map_isCovered_sqr(Map_T oMap, Square_T oSqr);
 
 /* Add the value of the pieces in oMap to iTotal. */
