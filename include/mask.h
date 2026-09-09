@@ -43,7 +43,7 @@ bool Mask_shareSqr(Mask_T oMask1, Mask_T oMask2);
 // ALTERATION
 
 /* Set the square on oMask at (x, y): x, y in [0, 7] */
-void Mask_set(Mask_T oMask, size_t y, size_t x, enum ON_OFF onORoff);
+void Mask_set(Mask_T oMask, size_t y, size_t x, ON_OFF onORoff);
 
 /*--------------------------------------------------------------------*/
 // DESCRIPTION

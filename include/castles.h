@@ -23,6 +23,10 @@ Castles_T Castles_copy (Castles_T oCastles);
 /* Adds the given castleType to oCastles. Raises error if already added. */
 void Castles_add (Castles_T oCastles, char castleType);
 
+/* Removes the given castleType from oCastles. Raises error if nonexistant. */
+void Castles_remove (Castles_T oCastles, char castleType);
+
+
 /* Return a string representation of oCastles. */
 const char *Castles_toString (Castles_T oCastles);
 

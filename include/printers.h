@@ -12,7 +12,11 @@
 void CHECK_MEM(const void *pObject);
 
 /* use for: catching null parameters */
-void CHECK_NULL(const void *pObject);
+#define CHECK_NULL(pObject) \
+    do { \
+        if (pObject == NULL) \
+            ERROR("Null error @ %s\n", __func__); \
+    } while(0)
 
 /* use for: catching out of bounds errors */
 void CHECK_COORDS(size_t y, size_t x, const char *location);

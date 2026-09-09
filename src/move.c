@@ -34,9 +34,6 @@ Move_T Move_read(const char *pcNotation) {
     
     Move_T oNew = Move_new(src, dst);
     
-    free(src);
-    free(dst);
-    
     return oNew;
 }
 

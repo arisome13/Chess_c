@@ -7,7 +7,7 @@
 struct Eval
 {
     /* type of eval: centipawn or forced mate */
-    enum eval_type type;
+    eval_type type;
     
     /* eval score */
     int score;

@@ -1,38 +1,71 @@
-#include <type.h>
+
+#include "type.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-int Type_getValue (char name) {
+int Type_getValue (p_type type, p_color color) {
     int value = 0;
     int mod = -1;
 
-    /* switch upper case to lower case */
-    if ('A' <= name && name <= 'Z') {
-        name += 32;
+    if (color == WHITE)
         mod = 1;
-    }
 
-    switch (name)
+    switch (type)
     {
-        case 'p':
+        case PAWN:
             value = 1;
             break;
-        case 'n':
-        case 'b':
+        case KNIGHT:
+        case BISHOP:
             value = 3;
             break;
-        case 'r':
+        case ROOK:
             value = 5;
             break;
-        case 'q':
+        case QUEEN:
             value = 9;
             break;
-        case 'k':
+        case KING:
             return 0;
         default:
-            printf("Invalid type: %c", name);
+            printf("Invalid type: #%d", type);
             exit(1);
     }
 
     return value * mod;
+}
+
+char Type_toString(p_type type, p_color color) {
+
+    char tcStr;
+
+    switch (type)
+    {
+        case PAWN:
+            tcStr = 'p';
+            break;
+        case KNIGHT:
+            tcStr = 'n';
+            break;
+        case BISHOP:
+            tcStr = 'b';
+            break;
+        case ROOK:
+            tcStr = 'r';
+            break;
+        case QUEEN:
+            tcStr = 'q';
+            break;
+        case KING:
+            tcStr = 'k';
+            break;
+        default:
+            printf("Invalid type: %d", type);
+            exit(1);
+    }
+
+    if (color == WHITE)
+        tcStr -= 32;
+
+    return tcStr;
 }

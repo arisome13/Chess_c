@@ -27,7 +27,7 @@ ChessParameters_T ChessParameters_copy(ChessParameters_T oParams);
 /*--------------------------------------------------------------------*/
 
 /* Return the turn color. */
-color ChessParameters_turnColor(ChessParameters_T oParams);
+p_color ChessParameters_turnColor(ChessParameters_T oParams);
 
 /* Return the available castles as a castles struct. */
 Castles_T ChessParameters_castles(ChessParameters_T oParams);
@@ -41,6 +41,12 @@ size_t ChessParameters_50MoveRule(ChessParameters_T oParams);
 
 /* Return the move number of the current move being played. */
 size_t ChessParameters_numMoves(ChessParameters_T oParams);
+
+/*--------------------------------------------------------------------*/
+
+void ChessParameters_incrementMove (ChessParameters_T oParams, bool wasPawnOrCapture);
+void ChessParameters_setEnpSqr (ChessParameters_T oParams, Square_T oSqr);
+void ChessParameters_removeCastle (ChessParameters_T oParams, char castle);
 
 /*--------------------------------------------------------------------*/
 

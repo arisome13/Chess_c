@@ -11,8 +11,9 @@ struct Map
     /* piece mask */
     Mask_T mask;
 
-    /* piece name */
-    char name;
+    /* define the piece */
+    p_type type;
+    p_color color;
 
     /* move pattern */
     MovePattern_T moves;
@@ -26,8 +27,40 @@ Map_T Map_new(char name) {
     CHECK_MEM(oMap);
 
     oMap->mask = Mask_new();
-    oMap->name = name;
-    oMap->moves = MovePattern_for(oMap->name);
+
+    oMap->color = BLACK;
+    if ('A' <= name && name <= 'Z') {
+        /* switch upper case to lower case */
+        name += 32;
+        oMap->color = WHITE;
+    }
+
+    switch (name)
+    {
+        case 'p':
+            oMap->type = PAWN;
+            break;
+        case 'n':
+            oMap->type = KNIGHT;
+            break;
+        case 'b':
+            oMap->type = BISHOP;
+            break;
+        case 'r':
+            oMap->type = ROOK;
+            break;
+        case 'q':
+            oMap->type = QUEEN;
+            break;
+        case 'k':
+            oMap->type = KING;
+            break;
+        default:
+            printf("Invalid type: %c", name);
+            exit(1);
+    }
+
+    oMap->moves = MovePattern_for(oMap->type, oMap->color);
 
     return oMap;
 }
@@ -41,28 +74,36 @@ void Map_free(Map_T oMap) {
 Map_T Map_copy (Map_T oMap) {
     CHECK_NULL(oMap);
 
-    Map_T omCopy = Map_new(oMap->name); // omCopy->moves is taken care of with Map_new()
+    Map_T omCopy = (Map_T)calloc(1, sizeof(struct Map));
+    CHECK_MEM(omCopy);
+
     omCopy->mask = Mask_copy(oMap->mask);
+    omCopy->color = oMap->color;
+    omCopy->type = oMap->type;
+    omCopy->moves = MovePattern_for(omCopy->type, omCopy->color);
 
     return omCopy;
 }
 
 /*--------------------------------------------------------------------*/
 
-char Map_getName(Map_T oMap) {
+p_type Map_getType(Map_T oMap) {
     CHECK_NULL(oMap);
-    return oMap->name;
+    return oMap->type;
 }
 size_t Map_numPieces(Map_T oMap) {
     CHECK_NULL(oMap);
     return Mask_count(oMap->mask);
 }
-color Map_color(Map_T oMap) {
+int map_getPieceValue(Map_T oMap) {
+    return Type_getValue(oMap->type, oMap->color);
+}
+p_color Map_getColor(Map_T oMap) {
     CHECK_NULL(oMap);
-    if (isupper(oMap->name))
-        return WHITE;
-    else
-        return BLACK;
+    return oMap->color;
+}
+char Map_getName(Map_T oMap) {
+    return Type_toString(oMap->type, oMap->color);
 }
 
 /*--------------------------------------------------------------------*/
@@ -92,7 +133,7 @@ bool Map_isCovered_sqr(Map_T oMap, Square_T oSqr) {
 void Map_addUpPieces (Map_T oMap, int *iTotal) {
     CHECK_NULL(oMap);
     CHECK_NULL(iTotal);
-    *iTotal += Type_getValue(Map_getName(oMap)) * Map_numPieces(oMap);
+    *iTotal += map_getPieceValue(oMap) * Map_numPieces(oMap);
 }
 Mask_T Map_hasRangeTo (Map_T oMap, Move_T oMove) {
     CHECK_NULL(oMap);
@@ -115,11 +156,11 @@ char *Map_toString(Map_T oMap) {
     
     char *ptr = pcStrRep;
 
-    ptr += sprintf(ptr, "Piece Type: \'%c\'", oMap->name);
+    ptr += sprintf(ptr, "Piece Type: \'%c\'", Type_toString(oMap->type, oMap->color));
 
     for (size_t y = 0; y < 8; y++) {
         ptr += sprintf(ptr, 
-            "\n  +---+---+---+---+---+---+---+---+\n%d |", 8-y);
+            "\n  +---+---+---+---+---+---+---+---+\n%zu |", 8-y);
         for (size_t x = 0; x < 8; x++) {
             char *bit = Map_isCovered_coords(oMap, y, x) ? "X": " ";
             ptr += sprintf(ptr, " %s |", bit);

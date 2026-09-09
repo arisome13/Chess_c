@@ -6,13 +6,13 @@
 
 struct ChessParameters
 {
-   /* color of the current play*/
-   color cTurnColor;
+   /* color of the current play */
+   p_color cTurnColor;
 
    /* available castle indicators */
    Castles_T oCastles;
 
-   /* enpassant square */
+   /* enpassant square or NULL */
    Square_T oEnpSqr;
 
    /* half move count for 50 move rule */
@@ -91,7 +91,7 @@ ChessParameters_T ChessParameters_copy(ChessParameters_T oParams) {
 
 /*--------------------------------------------------------------------*/
 
-enum color ChessParameters_turnColor(ChessParameters_T oParams) {
+p_color ChessParameters_turnColor(ChessParameters_T oParams) {
    return oParams->cTurnColor;
 }
 
@@ -109,6 +109,40 @@ size_t ChessParameters_50MoveRule(ChessParameters_T oParams) {
 
 size_t ChessParameters_numMoves(ChessParameters_T oParams) {
    return oParams->iCurrMove;
+}
+
+/*--------------------------------------------------------------------*/
+
+void ChessParameters_incrementMove (
+   ChessParameters_T oParams, bool wasPawnOrCapture) {
+      CHECK_NULL(oParams);
+
+      /* increment move count */
+      oParams->iCurrMove++;
+      if (!wasPawnOrCapture)
+         oParams->i50MoveCount++;
+      
+      /* change turn color */
+      if (oParams->cTurnColor == BLACK)
+         oParams->cTurnColor = WHITE;
+      else
+         oParams->cTurnColor = BLACK;
+      
+      oParams->oEnpSqr = NULL;
+}
+
+void ChessParameters_setEnpSqr (
+   ChessParameters_T oParams, Square_T oSqr) {
+      CHECK_NULL(oParams);
+      CHECK_NULL(oSqr);
+      Square_free(oParams->oEnpSqr);
+      oParams->oEnpSqr = oSqr;
+}
+
+void ChessParameters_removeCastle (
+   ChessParameters_T oParams, char castle) {
+      CHECK_NULL(oParams);
+      Castles_remove(oParams->oCastles, castle);
 }
 
 /*--------------------------------------------------------------------*/

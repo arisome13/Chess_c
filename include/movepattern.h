@@ -35,8 +35,8 @@ void MovePattern_add (MovePattern_T oPattern,
     move cannot be made with oPattern. CALLER FREE. */
 Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove);
 
-/* Returns the move pattern for the given pieceName. CALLER FREE. */
-MovePattern_T MovePattern_for (char pieceName);
+/* Returns the move pattern for type and color. CALLER FREE. */
+MovePattern_T MovePattern_for (p_type type, p_color color);
 
 /*--------------------------------------------------------------------*/
 

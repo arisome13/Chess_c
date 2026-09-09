@@ -58,7 +58,7 @@ void MovePattern_add (MovePattern_T oPattern, int dy, int dx, bool repeating) {
     oPattern->NUM_MOVETYPES++;
 }
 
-MovePattern_T movepattern_pawn (color c) {
+MovePattern_T movepattern_pawn (p_color c) {
     MovePattern_T mpPiece = MovePattern_new();
     if (c == WHITE) {
         MovePattern_add(mpPiece, -1, 0, false);
@@ -122,23 +122,21 @@ MovePattern_T movepattern_king (void) {
     return mpPiece;
 }
 
-MovePattern_T MovePattern_for (char pieceName) {
-    if (pieceName == 'p')
-        return movepattern_pawn(BLACK);
-    else if (pieceName == 'P')
-        return movepattern_pawn(WHITE);
-    else if (pieceName == 'n' || pieceName == 'N')
+MovePattern_T MovePattern_for (p_type type, p_color color) {
+    if (type == PAWN)
+        return movepattern_pawn(color);
+    else if (type == KNIGHT)
         return movepattern_knight();
-    else if (pieceName == 'b' || pieceName == 'B')
+    else if (type == BISHOP)
         return movepattern_bishop();
-    else if (pieceName == 'r' || pieceName == 'R')
+    else if (type == ROOK)
         return movepattern_rook();
-    else if (pieceName == 'q' || pieceName == 'Q')
+    else if (type == QUEEN)
         return movepattern_queen();
-    else if (pieceName == 'k' || pieceName == 'K')
+    else if (type == KING)
         return movepattern_king();
     else {
-        ERROR("Invalid piece \'%s\'. Should implement its move pattern.", pieceName);
+        ERROR("Invalid piece type(%d), color(%d). Should implement its move pattern.", type, color);
         return NULL;
     }
 }

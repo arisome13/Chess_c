@@ -57,21 +57,22 @@ ChessBoard_T ChessBoard_copy(ChessBoard_T oBoard) {
 
 /* Return the map from oBoard matching cName. Create a new one if one
    hasn't already been created. */
-Map_T chessboard_getOrMakeMap(ChessBoard_T oBoard, char cName) {
+Map_T chessboard_getOrMakeMap(ChessBoard_T oBoard, p_type type) {
     CHECK_NULL(oBoard);
     for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
-        if (Map_getName(oBoard->pmPieceMaps[m]) == cName)
+        if (Map_getType(oBoard->pmPieceMaps[m]) == type)
             return oBoard->pmPieceMaps[m];
     }
     if (oBoard->NUM_MAPS == MAX_PIECE_TYPES)
         ERROR("ChessBoard does not have the piece requested and not space for more.");
     
-    oBoard->pmPieceMaps[oBoard->NUM_MAPS] = Map_new(cName);
+    oBoard->pmPieceMaps[oBoard->NUM_MAPS] = Map_new(type);
     Map_T madeMap = oBoard->pmPieceMaps[oBoard->NUM_MAPS];
     oBoard->NUM_MAPS++;
     return madeMap;
 }
 /* USED FOR setFen */
+
 void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
 {
     CHECK_NULL(pcFen);
@@ -121,14 +122,6 @@ void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
     free(sqr);
 }
 
-void ChessBoard_onEachMap(ChessBoard_T oBoard, MapFunction func, int *data) {
-    assert(oBoard != NULL);
-    assert(func != NULL);
-
-    for (size_t m = 0; m < oBoard->NUM_MAPS; m++)
-        func(oBoard->pmPieceMaps[m], data);
-}
-
 /* Return the map from oBoard that has a piece on oSqr. Return NULL if 
    none like that exist. */
 Map_T chessboard_getMapFromSqr(ChessBoard_T oBoard, Square_T oSqr) {
@@ -169,31 +162,18 @@ r_move chessboard_handleMove(ChessBoard_T oBoard, Move_T oMove)
     if (dstMap != NULL)
     {
         // if the piece is the same color as the moving piece, the move is INVALID
-        if (Map_color(dstMap) == Map_color(srcMap))
+        if (Map_getColor(dstMap) == Map_getColor(srcMap))
             return SAME_COLOR_DST;
         
         Map_remove(dstMap, Move_dst(oMove));
     }
     
-    char *mapStr = Map_toString(srcMap);
-    PRINT("pre move:\n%s\n", mapStr);
-    free(mapStr);
-    
     Map_remove(srcMap, Move_src(oMove));
-
-    mapStr = Map_toString(srcMap);
-    PRINT("after removal:\n%s\n", mapStr);
-    free(mapStr);
-
     Map_place(srcMap, Move_dst(oMove));
-
-    mapStr = Map_toString(srcMap);
-    PRINT("after place:\n%s\n", mapStr);
-    free(mapStr);
-
     return SUCCESS;
 }
 /* USED FOR tryMove */
+
 r_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove)
 {
     /* currently configured as a king capture game */
@@ -209,6 +189,35 @@ r_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove)
 
 /*--------------------------------------------------------------------*/
 
+p_type ChessBoard_typeOnSqr(ChessBoard_T oBoard, Square_T oSqr) {
+    CHECK_NULL(oBoard);
+    CHECK_NULL(oSqr);
+    for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
+        if (Map_isCovered_sqr(oBoard->pmPieceMaps[m], oSqr))
+            return Map_getType(oBoard->pmPieceMaps[m]);
+    }
+    return NO_TYPE;
+}
+p_color ChessBoard_colorOnSqr(ChessBoard_T oBoard, Square_T oSqr) {
+    CHECK_NULL(oBoard);
+    CHECK_NULL(oSqr);
+    for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
+        if (Map_isCovered_sqr(oBoard->pmPieceMaps[m], oSqr))
+            return Map_getColor(oBoard->pmPieceMaps[m]);
+    }
+    return NO_COLOR;
+}
+
+void ChessBoard_onEachMap(ChessBoard_T oBoard, MapFunction func, int *data) {
+    assert(oBoard != NULL);
+    assert(func != NULL);
+
+    for (size_t m = 0; m < oBoard->NUM_MAPS; m++)
+        func(oBoard->pmPieceMaps[m], data);
+}
+
+/*--------------------------------------------------------------------*/
+
 char *ChessBoard_toString(ChessBoard_T oBoard)
 {
     CHECK_NULL(oBoard);
@@ -220,7 +229,7 @@ char *ChessBoard_toString(ChessBoard_T oBoard)
     ptr += sprintf(ptr, "  +---+---+---+---+---+---+---+---+\n");
 
     for (size_t y = 0; y < 8; y++) {
-        ptr += sprintf(ptr, "%d |", 8-y);
+        ptr += sprintf(ptr, "%zu |", 8-y);
         for (size_t x = 0; x < 8; x++) {
             char bit = ' ';
             // go through all the bit maps

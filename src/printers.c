@@ -18,10 +18,6 @@ void ERROR(const char *pcMessage, ...)
     exit(EXIT_FAILURE);
 }
 
-void CHECK_NULL(const void *pObject) {
-    if (pObject == NULL)
-        ERROR("Null error.\n");
-}
 void CHECK_MEM(const void *pObject) {
     if (pObject == NULL)
         ERROR("Memory error.\n");

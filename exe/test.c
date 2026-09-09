@@ -7,7 +7,7 @@ int main (void) {
     MovePattern_T tempMP;
     Square_T start = Square_newNotation("e2");
 
-    tempMP = MovePattern_for('P');
+    tempMP = MovePattern_for(PAWN, WHITE);
     str = MovePattern_showMovesFrom(tempMP, start);
     printf("Pawn\n%s\n", str);
     MovePattern_free(tempMP);

@@ -64,6 +64,36 @@ void Castles_add (Castles_T oCastles, char castleType) {
     ERROR("Tried to turn on an already on castle type: %c", castleType);
 }
 
+void Castles_remove (Castles_T oCastles, char castleType) {
+    CHECK_NULL(oCastles);
+    switch (castleType)
+    {
+        case 'K':
+            if (!oCastles->bKW)
+                break; /* go to after switch */
+            oCastles->bKW = false;
+            return;
+        case 'Q':
+            if (!oCastles->bQW)
+                break; /* go to after switch */
+            oCastles->bQW = false;
+            return;
+        case 'k':
+            if (!oCastles->bKB)
+                break; /* go to after switch */
+            oCastles->bKB = false;
+            return;
+        case 'q':
+            if (!oCastles->bQB)
+                break; /* go to after switch */
+            oCastles->bQB = false;
+            return;
+        default:
+            ERROR("Invalid castle type: %c", castleType);
+    }
+    ERROR("Tried to turn off an already off castle type: %c", castleType);
+}
+
 Castles_T Castles_copy (Castles_T oCastles) {
     CHECK_NULL(oCastles);
 

@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/* results.h                                                           */
+/* results.h                                                          */
 /*--------------------------------------------------------------------*/
 
 #ifndef RESULTS_INCLUDED
@@ -7,7 +7,7 @@
 
 /* describes the end result of an attempted move */
 typedef enum r_move {
-    SUCCESS, NO_PIECE_ON_SRC, DOESNT_HAVE_RANGE, 
+    SUCCESS, WRONG_COLOR, NO_PIECE_ON_SRC, DOESNT_HAVE_RANGE, 
     BLOCKED_PATH, SAME_COLOR_DST, FAIL
 } r_move;
 

@@ -29,13 +29,16 @@ Map_T Map_copy (Map_T oMap);
 /*--------------------------------------------------------------------*/
 
 /* Return oMap's corresponding char name. */
-char Map_getName(Map_T oMap);
+p_type Map_getType(Map_T oMap);
 
 /* Return how many pieces are held in oMap. */
 size_t Map_numPieces(Map_T oMap);
 
 /* Return the color of the piece type oMap holds. */
-color Map_color(Map_T oMap);
+p_color Map_getColor(Map_T oMap);
+
+/* return a char representation of oMap's piece */
+char Map_getName(Map_T oMap);
 
 /*--------------------------------------------------------------------*/
 

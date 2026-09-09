@@ -100,7 +100,7 @@ Move_T Engine_bestMove (Engine_T oEngine)
     // copy the current engine
     Engine_T oeCopy = Engine_copy(oEngine);
     // search the move tree for the best move
-    Move_T bestMove = Move_new(Square_newNotation("e2"), Square_newNotation("e4"));
+    Move_T bestMove = Move_new(Square_newNotation("b2"), Square_newNotation("c3"));
     Eval_T bestEval = NULL;
     Eval_T tempEval;
     /*
@@ -129,18 +129,39 @@ void Engine_makeMove (Engine_T oEngine, Move_T oMove)
 {
     CHECK_NULL(oEngine);
     CHECK_NULL(oMove);
-
-    r_move result = ChessBoard_tryMove(oEngine->oBoard, oMove);
     char *s = Move_toString(oMove);
 
-    switch (result)
+    // check if the turn color matches the selected piece
+    if (ChessParameters_turnColor(oEngine->oParams) 
+        != ChessBoard_colorOnSqr(oEngine->oBoard, Move_src(oMove)))
+            ERROR("Invalid move %s, reason %d\n", s, WRONG_COLOR);
+
+    // run chessboard to try and make the requested move
+    r_move result = ChessBoard_tryMove(oEngine->oBoard, oMove);
+
+    // raise error if the move could not be made
+    if (result != SUCCESS) 
+        ERROR("Invalid move %s, reason %d\n", s, result);
+    
+    PRINT("Succeeded in moving: %s\n", s);
+
+    bool movedTwoSqrsForward = 
+        Move_dst(oMove)->x == Move_src(oMove)->x 
+        && abs(
+            (int)Move_dst(oMove)->y - (int)Move_src(oMove)->x
+        ) == 2;
+    p_type piece = ChessBoard_typeOnSqr(oEngine->oBoard, Move_dst(oMove));
+    if (movedTwoSqrsForward && piece == PAWN) 
     {
-        case SUCCESS:
-            PRINT("Succeeded in moving: %s\n", s);
-            break;
-        default:
-            ERROR("Invalid move %s, reason %d\n", s, result);
+        size_t yEnpCoord = 
+            (Move_dst(oMove)->y - Move_src(oMove)->y) / 2 
+            + Move_src(oMove)->y;
+        Square_T enp = Square_newCoords(yEnpCoord, Move_dst(oMove)->x);
+        ChessParameters_setEnpSqr(oEngine->oParams, enp);
     }
+    
+    ChessParameters_incrementMove(oEngine->oParams, piece == PAWN);
+
     free(s);
 }
 

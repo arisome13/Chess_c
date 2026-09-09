@@ -61,7 +61,7 @@ bool Mask_shareSqr(Mask_T oMask1, Mask_T oMask2) {
 
 /*--------------------------------------------------------------------*/
 
-void Mask_set(Mask_T oMask, size_t y, size_t x, enum ON_OFF ONorOFF) {
+void Mask_set(Mask_T oMask, size_t y, size_t x, ON_OFF ONorOFF) {
     CHECK_NULL(oMask);
     CHECK_COORDS(y, x, "Mask_set");
     switch (ONorOFF)

@@ -37,6 +37,10 @@ void ChessBoard_onEachMap(ChessBoard_T oBoard, MapFunction func, int *data);
    untouched. */
 r_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove);
 
+/* Return info about the piece currently on square oSqr. */
+p_type ChessBoard_typeOnSqr(ChessBoard_T oBoard, Square_T oSqr);
+p_color ChessBoard_colorOnSqr(ChessBoard_T oBoard, Square_T oSqr);
+
 /*--------------------------------------------------------------------*/
 
 /* Return the string representation of oBoard. CALLER FREE. */
