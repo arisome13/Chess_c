@@ -135,7 +135,8 @@ void ChessParameters_setEnpSqr (
    ChessParameters_T oParams, Square_T oSqr) {
       CHECK_NULL(oParams);
       CHECK_NULL(oSqr);
-      Square_free(oParams->oEnpSqr);
+      if (oParams->oEnpSqr != NULL)
+         Square_free(oParams->oEnpSqr);
       oParams->oEnpSqr = oSqr;
 }
 

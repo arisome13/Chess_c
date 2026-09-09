@@ -154,7 +154,7 @@ void Engine_makeMove (Engine_T oEngine, Move_T oMove)
     if (movedTwoSqrsForward && piece == PAWN) 
     {
         size_t yEnpCoord = 
-            (Move_dst(oMove)->y - Move_src(oMove)->y) / 2 
+            ((int)Move_dst(oMove)->y - (int)Move_src(oMove)->y) / 2 
             + Move_src(oMove)->y;
         Square_T enp = Square_newCoords(yEnpCoord, Move_dst(oMove)->x);
         ChessParameters_setEnpSqr(oEngine->oParams, enp);
