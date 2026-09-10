@@ -125,7 +125,7 @@ Move_T Engine_bestMove (Engine_T oEngine)
 
 /*--------------------------------------------------------------------*/
 
-void Engine_makeMove (Engine_T oEngine, Move_T oMove)
+r_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
 {
     CHECK_NULL(oEngine);
     CHECK_NULL(oMove);
@@ -134,23 +134,23 @@ void Engine_makeMove (Engine_T oEngine, Move_T oMove)
     // check if the turn color matches the selected piece
     if (ChessParameters_turnColor(oEngine->oParams) 
         != ChessBoard_colorOnSqr(oEngine->oBoard, Move_src(oMove)))
-            ERROR("Invalid move %s, reason %d\n", s, WRONG_COLOR);
+            return WRONG_COLOR;
 
     // run chessboard to try and make the requested move
     r_move result = ChessBoard_tryMove(oEngine->oBoard, oMove);
 
     // raise error if the move could not be made
     if (result != SUCCESS) 
-        ERROR("Invalid move %s, reason %d\n", s, result);
+        return result;
     
     PRINT("Succeeded in moving: %s\n", s);
 
+    p_type piece = ChessBoard_typeOnSqr(oEngine->oBoard, Move_dst(oMove));
     bool movedTwoSqrsForward = 
         Move_dst(oMove)->x == Move_src(oMove)->x 
         && abs(
             (int)Move_dst(oMove)->y - (int)Move_src(oMove)->x
         ) == 2;
-    p_type piece = ChessBoard_typeOnSqr(oEngine->oBoard, Move_dst(oMove));
     if (movedTwoSqrsForward && piece == PAWN) 
     {
         size_t yEnpCoord = 
@@ -163,6 +163,7 @@ void Engine_makeMove (Engine_T oEngine, Move_T oMove)
     ChessParameters_incrementMove(oEngine->oParams, piece == PAWN);
 
     free(s);
+    return SUCCESS;
 }
 
 void Engine_setDepth (Engine_T oEngine, size_t d) {

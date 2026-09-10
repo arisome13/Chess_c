@@ -3,6 +3,7 @@
 /*--------------------------------------------------------------------*/
 
 #include "move.h"
+#include "results.h"
 
 #ifndef ENGINE_INCLUDED
 #define ENGINE_INCLUDED
@@ -31,7 +32,7 @@ Engine_T Engine_copy (Engine_T oEngine);
 Move_T Engine_bestMove (Engine_T oEngine);
 
 /* Make oMove on oEngine's chess board. */
-void Engine_makeMove (Engine_T oEngine, Move_T oMove);
+r_move Engine_makeMove (Engine_T oEngine, Move_T oMove);
 
 /* Set how deep the engine searches to find the best move. 0 < d < 8 */
 void Engine_setDepth (Engine_T oEngine, size_t d);

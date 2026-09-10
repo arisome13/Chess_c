@@ -1,5 +1,6 @@
 
 #include "engine.h"
+#include <results.h>
 
 int main(void)
 {
@@ -23,7 +24,11 @@ int main(void)
         }
 
         Move_T usrMove = Move_read(usrStr);
-        Engine_makeMove(eng, usrMove);
+        r_move moveResult = Engine_makeMove(eng, usrMove);
+        if (moveResult != SUCCESS)    
+            ERROR("Invalid move for reason: %s\n", MoveResult_toString(moveResult));
+        else
+            PRINT("Succeeded in moving.\n");
 
         tempStr = Engine_toString(eng);
         printf("%s\n", tempStr);

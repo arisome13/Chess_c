@@ -17,4 +17,7 @@ typedef enum r_game {
     THREEFOLD_REP, STALEMATE
 } r_game;
 
+char *MoveResult_toString(r_move r);
+char *GameResult_toString(r_game r);
+
 #endif
