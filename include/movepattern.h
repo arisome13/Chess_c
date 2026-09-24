@@ -9,9 +9,18 @@
 #ifndef MOVEPATTERN_INCLUDED
 #define MOVEPATTERN_INCLUDED
 
+/* A MoveType is a direction a piece can move in and if it can repeat 
+    that move. */
+struct MoveType
+{
+    int dx, dy;
+    bool repeating;
+};
 /* A MovePattern_T object holds the different types of moves a piece 
     can make. */
 typedef struct MovePattern *MovePattern_T;
+
+enum {MAX_MOVE_TYPES = 8};
 
 /*--------------------------------------------------------------------*/
 
@@ -37,6 +46,9 @@ Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove);
 
 /* Returns the move pattern for type and color. CALLER FREE. */
 MovePattern_T MovePattern_for (p_type type, p_color color);
+
+/* Returns the ith MoveType held by oPattern. */
+struct MoveType *MovePattern_getMoveType(MovePattern_T oPattern, int i);
 
 /*--------------------------------------------------------------------*/
 

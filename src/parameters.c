@@ -119,7 +119,9 @@ void ChessParameters_incrementMove (
 
       /* increment move count */
       oParams->iCurrMove++;
-      if (!wasPawnOrCapture)
+      if (wasPawnOrCapture)
+         oParams->i50MoveCount = 0;
+      else
          oParams->i50MoveCount++;
       
       /* change turn color */

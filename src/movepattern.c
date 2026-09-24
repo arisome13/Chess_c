@@ -4,14 +4,9 @@
 
 #include "movepattern.h"
 
-struct MoveType
-{
-    int dx, dy;
-    bool repeating;
-};
 struct MovePattern
 {
-    struct MoveType *movetypes[8];
+    struct MoveType *movetypes[MAX_MOVE_TYPES];
     size_t NUM_MOVETYPES;
 };
 
@@ -179,6 +174,10 @@ Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove) {
     }
     free(traversedSqrs);
     return NULL;
+}
+
+struct MoveType *MovePattern_getMoveType(MovePattern_T oPattern, int i) {
+    return oPattern->movetypes[i];
 }
 
 char *MovePattern_toString (MovePattern_T oPattern) {

@@ -11,7 +11,7 @@
 /* A Map_T object holds the piece positions of a single piece on 
     a chess board. */
 typedef struct Map *Map_T;
-/* A MapFunction is a function with a single map pointer parameter
+/* A MapFunction performs an function on a map with some data
     and returns nothing. */
 typedef void (*MapFunction)(Map_T, int*);
 

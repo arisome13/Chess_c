@@ -17,7 +17,8 @@ int main(void)
     printf("\nBest move: %s\n", tempStr);
     free(tempStr);
 
-    Engine_makeMove(eng, bestM);
+    r_move result = Engine_makeMove(eng, bestM);
+    PRINT("%s\n\n", MoveResult_toString(result));
     tempStr = Engine_toString(eng);
     printf("%s\n", tempStr);
     free(tempStr);

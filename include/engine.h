@@ -4,13 +4,14 @@
 
 #include "move.h"
 #include "results.h"
+#include "eval.h"
 
 #ifndef ENGINE_INCLUDED
 #define ENGINE_INCLUDED
 
 /* An Engine_T is a pointer to a chess engine capable of both holding a 
-    chess position and finding the best possible move from that 
-    position. */
+   chess position and finding the best possible move from that 
+   position. */
 typedef struct Engine *Engine_T;
 
 /*--------------------------------------------------------------------*/
@@ -26,6 +27,14 @@ void Engine_free(Engine_T oEngine);
 Engine_T Engine_copy (Engine_T oEngine);
 
 /*--------------------------------------------------------------------*/
+
+/* Fill aMoves[] with the legal moves for oEngine and return the 
+   size of arrMoveList. CALLER FREE each move in aMoves[]. */
+size_t Engine_legalMoves (Engine_T oEngine, Move_T aMoves[]);
+
+/* Evaluate oEngine's position by searching possible moves. Returns NULL
+   if there are no legal moves. CALLER FREE. */
+Eval_T Engine_evaluate (Engine_T oEngine);
 
 /* Returns the best move in the chess position held by the engine's
    chess board. CALLER FREE. */

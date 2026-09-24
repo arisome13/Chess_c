@@ -57,7 +57,7 @@ ChessBoard_T ChessBoard_copy(ChessBoard_T oBoard) {
 
 /* Return the map from oBoard matching cName. Create a new one if one
    hasn't already been created. */
-Map_T chessboard_getOrMakeMap(ChessBoard_T oBoard, p_type type) {
+static Map_T Chessboard_getOrMakeMap(ChessBoard_T oBoard, p_type type) {
     CHECK_NULL(oBoard);
     for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
         if (Map_getType(oBoard->pmPieceMaps[m]) == type)
@@ -107,7 +107,7 @@ void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
                 /* finished reading pcFen */
                 goto finishedParsing;
             default:
-                pMap = chessboard_getOrMakeMap(oBoard, c);
+                pMap = Chessboard_getOrMakeMap(oBoard, c);
                 
                 /* place the piece */
                 Map_place(pMap, sqr);
@@ -124,7 +124,7 @@ void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
 
 /* Return the map from oBoard that has a piece on oSqr. Return NULL if 
    none like that exist. */
-Map_T chessboard_getMapFromSqr(ChessBoard_T oBoard, Square_T oSqr) {
+static Map_T Chessboard_getMapFromSqr(ChessBoard_T oBoard, Square_T oSqr) {
     CHECK_NULL(oBoard);
     //Validate_chessboard(oBoard);
     for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
@@ -135,10 +135,10 @@ Map_T chessboard_getMapFromSqr(ChessBoard_T oBoard, Square_T oSqr) {
 }
 /* Returns SUCCESS if move could be completed, some other move result 
     otherwise and leaves the chessboard untouched. */
-r_move chessboard_handleMove(ChessBoard_T oBoard, Move_T oMove) 
+static r_move Chessboard_handleMove(ChessBoard_T oBoard, Move_T oMove) 
 {
     // get the map that contains the piece on the src square
-    Map_T srcMap = chessboard_getMapFromSqr(oBoard, Move_src(oMove));
+    Map_T srcMap = Chessboard_getMapFromSqr(oBoard, Move_src(oMove));
     
     // if there is no piece on the src square for the move, the move is INVALID
     if (srcMap == NULL)
@@ -156,7 +156,7 @@ r_move chessboard_handleMove(ChessBoard_T oBoard, Move_T oMove)
     }
     
     // get the map that contains the piece on the dst square
-    Map_T dstMap = chessboard_getMapFromSqr(oBoard, Move_dst(oMove));
+    Map_T dstMap = Chessboard_getMapFromSqr(oBoard, Move_dst(oMove));
     
     // if there is a piece on the dst square...
     if (dstMap != NULL)
@@ -178,7 +178,7 @@ r_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove)
 {
     /* currently configured as a king capture game */
     
-    r_move result = chessboard_handleMove(oBoard, oMove);
+    r_move result = Chessboard_handleMove(oBoard, oMove);
     
     if (result != SUCCESS)
         /* try the move as a special move */;
@@ -192,6 +192,7 @@ r_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove)
 p_type ChessBoard_typeOnSqr(ChessBoard_T oBoard, Square_T oSqr) {
     CHECK_NULL(oBoard);
     CHECK_NULL(oSqr);
+    
     for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
         if (Map_isCovered_sqr(oBoard->pmPieceMaps[m], oSqr))
             return Map_getType(oBoard->pmPieceMaps[m]);
@@ -208,12 +209,12 @@ p_color ChessBoard_colorOnSqr(ChessBoard_T oBoard, Square_T oSqr) {
     return NO_COLOR;
 }
 
-void ChessBoard_onEachMap(ChessBoard_T oBoard, MapFunction func, int *data) {
+void ChessBoard_onEachMap(ChessBoard_T oBoard, MapFunction mapfunc, int *data) {
     assert(oBoard != NULL);
-    assert(func != NULL);
+    assert(mapfunc != NULL);
 
     for (size_t m = 0; m < oBoard->NUM_MAPS; m++)
-        func(oBoard->pmPieceMaps[m], data);
+        mapfunc(oBoard->pmPieceMaps[m], data);
 }
 
 /*--------------------------------------------------------------------*/

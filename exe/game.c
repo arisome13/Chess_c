@@ -9,12 +9,12 @@ int main(void)
     // create the engine
     Engine_T eng = Engine_new(NULL);
     tempStr = Engine_toString(eng);
-    printf("%s\n", tempStr);
+    printf("\n%s\n", tempStr);
     free(tempStr);
 
     char *usrStr = malloc(6);
     size_t moves = 0;
-    while (moves < 10) 
+    while (moves < 10)
     {
         printf("Enter a move: ");
         fgets(usrStr, 6, stdin);
@@ -25,15 +25,18 @@ int main(void)
 
         Move_T usrMove = Move_read(usrStr);
         r_move moveResult = Engine_makeMove(eng, usrMove);
-        if (moveResult != SUCCESS)    
-            ERROR("Invalid move for reason: %s\n", MoveResult_toString(moveResult));
-        else
+        if (moveResult != SUCCESS)
+        {
+            PRINT("Invalid move for reason: %s\n", MoveResult_toString(moveResult));
+        }
+        else 
+        {
             PRINT("Succeeded in moving.\n");
-
-        tempStr = Engine_toString(eng);
-        printf("%s\n", tempStr);
-        free(tempStr);
-        moves++;
+            tempStr = Engine_toString(eng);
+            printf("\n%s\n", tempStr);
+            free(tempStr);
+            moves++;
+        }
     }
 
     free(usrStr);

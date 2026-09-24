@@ -20,9 +20,18 @@ Move_T Move_new(Square_T src, Square_T dst);
 /* Return a new Move_T object initialized to the given pcNotation. 
     CALLER FREE. */
 Move_T Move_read(const char *pcNotation);
-  
+
 /* Free oMove. */
 void Move_free(Move_T oMove);
+
+/* Free oMove without freeing oMove's squares. */
+void Move_free_minimal(Move_T oMove);
+
+/* Return a copy of oMove. CALLER FREE. */
+Move_T Move_copy (Move_T oMove);
+
+/* Place a copy of mSrc into mDst. */
+void Move_copyTo (Move_T mSrc, Move_T mDst);
 
 /*--------------------------------------------------------------------*/
 

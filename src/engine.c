@@ -5,10 +5,12 @@
 #include "engine.h"
 #include "board.h"
 #include "parameters.h"
-#include "eval.h"
+#include "movepattern.h"
+#include "validation.h"
 
-const char *STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-enum {MAX_DEPTH = 8};
+#define STARTING_FEN    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+#define MAX_DEPTH       8
+#define MAX_MOVES       256
 
 struct Engine
 {
@@ -17,6 +19,9 @@ struct Engine
    
     /* A chess parameters object holding the state of the chess game. */
     ChessParameters_T oParams;
+
+    /* Enables and disables castling. */
+    bool CASTLING;
 
     /* search depth: alter when testing. 0 < iDepth <= 8 */
     size_t iDepth;
@@ -37,6 +42,7 @@ Engine_T Engine_new(const char *pcFen)
     oEngine->oParams = ChessParameters_new(pcFen);
     CHECK_MEM(oEngine->oParams);
     
+    oEngine->CASTLING = false;
     Engine_setDepth(oEngine, 1);
 
     return oEngine;
@@ -44,9 +50,8 @@ Engine_T Engine_new(const char *pcFen)
 void Engine_free(Engine_T oEngine) 
 {
     assert(oEngine != NULL);
-
-    free(oEngine->oBoard);
-    free(oEngine->oParams);
+    ChessBoard_free(oEngine->oBoard);
+    ChessParameters_free(oEngine->oParams);
     free(oEngine);
 }
 Engine_T Engine_copy (Engine_T oEngine)
@@ -61,6 +66,7 @@ Engine_T Engine_copy (Engine_T oEngine)
     oeCopy->oParams = ChessParameters_copy(oEngine->oParams);
     CHECK_MEM(oeCopy->oParams);
 
+    oeCopy->CASTLING = oEngine->CASTLING;
     oeCopy->iDepth = oEngine->iDepth;
 
     return oeCopy;
@@ -68,9 +74,52 @@ Engine_T Engine_copy (Engine_T oEngine)
 
 /*--------------------------------------------------------------------*/
 
-/* Return an evaluation for the position held by oEngine. + if it is in 
+size_t Engine_legalMoves (Engine_T oEngine, Move_T aMoves[])
+{
+    CHECK_NULL(oEngine);
+    CHECK_NULL(aMoves);
+
+    Square_T src = Square_newCoords(0, 0);
+    Square_T dst = Square_newCoords(0, 0);
+    Move_T move = Move_new(src, dst);
+    size_t uiCount = 0;
+
+    p_color moveColor = ChessParameters_turnColor(oEngine->oParams);
+    assert(moveColor != NO_COLOR);
+    
+    // for every single square pair
+    for (int src_y = 0; src_y < 8; src_y++) { src->y = src_y;
+    for (int src_x = 0; src_x < 8; src_x++) { src->x = src_x;
+
+        // discard source locations that don't have the correct 
+        // color of piece on it
+        if (moveColor != ChessBoard_colorOnSqr(oEngine->oBoard, src))
+            continue;
+
+        for (int dst_y = 0; dst_y < 8; dst_y++) { dst->y = dst_y; 
+        for (int dst_x = 0; dst_x < 8; dst_x++) { dst->x = dst_x;
+            Engine_T oeCopy = Engine_copy(oEngine);
+
+            // check if the move is valid and add to the move list
+            if (Engine_makeMove(oeCopy, move) == SUCCESS)
+                aMoves[uiCount++] = Move_copy(move);
+
+            // reset engine set up
+            Engine_free(oeCopy);
+
+            // break out if 
+            if (uiCount >= MAX_MOVES)
+                goto got_max_moves;
+        }}
+    }} got_max_moves:
+
+    Move_free(move);
+    return uiCount;
+}
+
+/* Return a score for the position held by oEngine. + if it is in 
     favor of white, - if it is in favor of black. CALLER FREE. */
-Eval_T Engine_evaluate (Engine_T oEngine)
+static Eval_T Engine_score (Engine_T oEngine)
 {
     CHECK_NULL(oEngine);
 
@@ -82,44 +131,96 @@ Eval_T Engine_evaluate (Engine_T oEngine)
     
     return eval;
 }
-
-/* Search oEngine's position. CALLER FREE. */
-Eval_T Engine_search (Engine_T oEngine)
+static Eval_T Engine_search (Engine_T oEngine, size_t depth, 
+        Eval_T bestWhite, Eval_T bestBlack, Move_T outputBestMove)
 {
     CHECK_NULL(oEngine);
-    
-    printf("NOT IMPLEMENTED: Engine_search");
-    
-    return NULL;
-}
 
+    // base case
+    if (depth-- == 0)
+        return Engine_score(oEngine);
+    // else, search the move tree one level lower
+
+    Eval_T bestEval = NULL;
+    size_t bestIndex = 0;
+    Move_T legalMoves[MAX_MOVES];
+    r_move result;
+
+    // preemptively get this move's color
+    p_color moveColor = ChessParameters_turnColor(oEngine->oParams);
+    // get all the legal moves from this position
+    size_t moveListSize = Engine_legalMoves(oEngine, legalMoves);
+    // if there are no legal moves, return a forced mate (update this for later)
+    if (moveListSize == 0) {
+        // if (in check) {
+            int value = oEngine->iDepth - depth;
+            if (moveColor == WHITE) 
+                value = -value;
+            return Eval_new(FORCED_MATE, value); // checkmate
+        //} else 
+            // return Eval_new(CENTIPAWN, 0); // stalemate
+    }
+
+
+    // cycle through each move, checking for a better eval
+    for (size_t i = 0; i < moveListSize; i++) {
+        Engine_T oeCopy = Engine_copy(oEngine);
+        result = Engine_makeMove(oeCopy, legalMoves[i]);
+        assert(result == SUCCESS);
+        (void)result; // silences a compiler warning about an unused var
+
+        // recurse to find the evaluation for this move sequence
+        Eval_T tempEval = Engine_search(oeCopy, depth, bestWhite, bestBlack, NULL);
+        Engine_free(oeCopy);
+
+        if (bestEval == NULL
+            || (moveColor == WHITE && Eval_compare(tempEval, bestEval) > 0)
+            || (moveColor == BLACK && Eval_compare(tempEval, bestEval) < 0)) {
+            if (bestEval != NULL)
+                Eval_free(bestEval);
+            bestEval = tempEval;
+            bestIndex = i;
+            
+            // alter bestWhite bestBlack
+            if (moveColor == WHITE) {
+                if (bestWhite == NULL || Eval_compare(bestEval, bestWhite) > 0)
+                    bestWhite = bestEval;
+            } else {
+                if (bestBlack == NULL || Eval_compare(bestEval, bestBlack) < 0)
+                    bestBlack = bestEval;
+            }
+        } else {
+            Eval_free(tempEval);
+        }
+
+        if (bestWhite != NULL && bestBlack != NULL && Eval_compare(bestWhite, bestBlack) >= 0)
+            break;
+    }
+
+    // return the best move
+    if (outputBestMove != NULL)
+        Move_copyTo(legalMoves[bestIndex], outputBestMove);
+    
+    // free the used pointers
+    for (size_t i = 0; i < moveListSize; i++) 
+        Move_free(legalMoves[i]);
+    // return the maximum possible evaluation
+    return bestEval;
+}
+Eval_T Engine_evaluate (Engine_T oEngine)
+{
+    CHECK_NULL(oEngine);
+    return Engine_search(oEngine, oEngine->iDepth, NULL, NULL, NULL);
+}
 Move_T Engine_bestMove (Engine_T oEngine)
 {
     CHECK_NULL(oEngine);
-
-    // copy the current engine
-    Engine_T oeCopy = Engine_copy(oEngine);
-    // search the move tree for the best move
-    Move_T bestMove = Move_new(Square_newNotation("b2"), Square_newNotation("c3"));
-    Eval_T bestEval = NULL;
-    Eval_T tempEval;
-    /*
-    for (piece in pieces)
-        for (move in moves)
-            if (move is possible)
-                oeCopy = Engine_copy(oEngine)
-                Engine_makeMove(move)
-                tempEval = Engine_search(oeCopy)
-                if (Eval_compare(tempEval, bestEval) > 0)
-                    bestEval = tempEval
-                    bestMove = move
-    */
-    
-    free(oeCopy);
-    //free(bestEval);
-    //free(tempEval);
-
-    // return the best move
+    Move_T bestMove = Move_new(Square_newCoords(0, 0), Square_newCoords(0, 0));
+    Eval_free(Engine_search(oEngine, oEngine->iDepth, NULL, NULL, bestMove));
+    if (!Validate_move(bestMove)) {
+        Move_free(bestMove);
+        return NULL;
+    }
     return bestMove;
 }
 
@@ -129,7 +230,6 @@ r_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
 {
     CHECK_NULL(oEngine);
     CHECK_NULL(oMove);
-    char *s = Move_toString(oMove);
 
     // check if the turn color matches the selected piece
     if (ChessParameters_turnColor(oEngine->oParams) 
@@ -142,14 +242,12 @@ r_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
     // raise error if the move could not be made
     if (result != SUCCESS) 
         return result;
-    
-    PRINT("Succeeded in moving: %s\n", s);
 
     p_type piece = ChessBoard_typeOnSqr(oEngine->oBoard, Move_dst(oMove));
     bool movedTwoSqrsForward = 
         Move_dst(oMove)->x == Move_src(oMove)->x 
         && abs(
-            (int)Move_dst(oMove)->y - (int)Move_src(oMove)->x
+            (int)Move_dst(oMove)->y - (int)Move_src(oMove)->y
         ) == 2;
     if (movedTwoSqrsForward && piece == PAWN) 
     {
@@ -159,10 +257,11 @@ r_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
         Square_T enp = Square_newCoords(yEnpCoord, Move_dst(oMove)->x);
         ChessParameters_setEnpSqr(oEngine->oParams, enp);
     }
-    
-    ChessParameters_incrementMove(oEngine->oParams, piece == PAWN);
 
-    free(s);
+    bool isCapture = false;
+    
+    ChessParameters_incrementMove(oEngine->oParams, piece == PAWN || isCapture);
+
     return SUCCESS;
 }
 
@@ -190,7 +289,7 @@ char *Engine_toString (Engine_T oEngine)
     char *params = ChessParameters_toString(oEngine->oParams);
     ptr += sprintf(ptr, "%s\n\n", params);
 
-    char *eval = Eval_toString(Engine_evaluate(oEngine));
+    char *eval = Eval_toString(Engine_score(oEngine));
     ptr += sprintf(ptr, "  Engine eval: %s", eval);
 
     free(board);
