@@ -134,10 +134,10 @@ void Map_addUpPieces (Map_T oMap, int *iTotal) {
     CHECK_NULL(iTotal);
     *iTotal += map_getPieceValue(oMap) * Map_numPieces(oMap);
 }
-Mask_T Map_hasRangeTo (Map_T oMap, Move_T oMove) {
+Mask_T Map_hasRangeTo (Map_T oMap, Move_T oMove, bool isCapture) {
     CHECK_NULL(oMap);
     CHECK_NULL(oMove);
-    return MovePattern_canMove(oMap->moves, oMove);
+    return MovePattern_canMove(oMap->moves, oMove, isCapture);
 }
 bool Map_shareSqr (Map_T oMap, Mask_T oMask) {
     CHECK_NULL(oMap);

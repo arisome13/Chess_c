@@ -9,13 +9,20 @@
 #ifndef MOVEPATTERN_H
 #define MOVEPATTERN_H
 
+/* defines the three type of moves you can have: 1) a move that has to 
+    capture, 2) a move that can't capture, 3) and a move that can do 
+    either. */
+typedef enum CaptureRule {ONLY_CAPTURE, CANT_CAPTURE, BOTH} CaptureRule;
+
 /* A MoveType is a direction a piece can move in and if it can repeat 
     that move. */
 struct MoveType
 {
     int dx, dy;
     bool repeating;
+    CaptureRule end;
 };
+
 /* A MovePattern_T object holds the different types of moves a piece 
     can make. */
 typedef struct MovePattern *MovePattern_T;
@@ -38,11 +45,11 @@ MovePattern_T MovePattern_copy (MovePattern_T oPattern);
 
 /* Adds a move in direction (dx, dy) to oPattern. */
 void MovePattern_add (MovePattern_T oPattern, 
-    int dy, int dx, bool repeating);
+    int dy, int dx, bool repeating, CaptureRule end);
 
 /* Returns a mask of the squares oMove goes through, or NULL if the 
     move cannot be made with oPattern. CALLER FREE. */
-Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove);
+Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove, bool isCapture);
 
 /* Returns the move pattern for type and color. CALLER FREE. */
 MovePattern_T MovePattern_for (p_type type, p_color color);

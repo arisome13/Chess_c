@@ -29,13 +29,14 @@ MovePattern_T MovePattern_copy (MovePattern_T oPattern) {
             break;
         }
         MovePattern_add(opCopy, oPattern->movetypes[i]->dy, 
-            oPattern->movetypes[i]->dx, oPattern->movetypes[i]->repeating);
+            oPattern->movetypes[i]->dx, oPattern->movetypes[i]->repeating, 
+            oPattern->movetypes[i]->end);
     }
     
     return opCopy;
 }
 
-void MovePattern_add (MovePattern_T oPattern, int dy, int dx, bool repeating) {
+void MovePattern_add (MovePattern_T oPattern, int dy, int dx, bool repeating, CaptureRule end) {
     CHECK_MEM(oPattern);
 
     if (oPattern->NUM_MOVETYPES == 8)
@@ -49,6 +50,7 @@ void MovePattern_add (MovePattern_T oPattern, int dy, int dx, bool repeating) {
     oPattern->movetypes[i]->dx = dx;
     oPattern->movetypes[i]->dy = dy;
     oPattern->movetypes[i]->repeating = repeating;
+    oPattern->movetypes[i]->end = end;
 
     oPattern->NUM_MOVETYPES++;
 }
@@ -56,64 +58,68 @@ void MovePattern_add (MovePattern_T oPattern, int dy, int dx, bool repeating) {
 MovePattern_T movepattern_pawn (p_color c) {
     MovePattern_T mpPiece = MovePattern_new();
     if (c == WHITE) {
-        MovePattern_add(mpPiece, -1, 0, false);
-        MovePattern_add(mpPiece, -2, 0, false);
+        MovePattern_add(mpPiece, -1, 0, false, CANT_CAPTURE);
+        MovePattern_add(mpPiece, -2, 0, false, CANT_CAPTURE);
+        MovePattern_add(mpPiece, -1, 1, false, ONLY_CAPTURE);
+        MovePattern_add(mpPiece, -1, -1, false, ONLY_CAPTURE);
     } else {
-        MovePattern_add(mpPiece, 1, 0, false);
-        MovePattern_add(mpPiece, 2, 0, false);
+        MovePattern_add(mpPiece, 1, 0, false, CANT_CAPTURE);
+        MovePattern_add(mpPiece, 2, 0, false, CANT_CAPTURE);
+        MovePattern_add(mpPiece, 1, 1, false, ONLY_CAPTURE);
+        MovePattern_add(mpPiece, 1, -1, false, ONLY_CAPTURE);
     }
     return mpPiece;
 }
 MovePattern_T movepattern_knight (void) {
     MovePattern_T mpPiece = MovePattern_new();
-    MovePattern_add(mpPiece, 1, 2, false);
-    MovePattern_add(mpPiece, 1, -2, false);
-    MovePattern_add(mpPiece, -1, 2, false);
-    MovePattern_add(mpPiece, -1, -2, false);
-    MovePattern_add(mpPiece, 2, 1, false);
-    MovePattern_add(mpPiece, -2, 1, false);
-    MovePattern_add(mpPiece, 2, -1, false);
-    MovePattern_add(mpPiece, -2, -1, false);
+    MovePattern_add(mpPiece, 1, 2, false, BOTH);
+    MovePattern_add(mpPiece, 1, -2, false, BOTH);
+    MovePattern_add(mpPiece, -1, 2, false, BOTH);
+    MovePattern_add(mpPiece, -1, -2, false, BOTH);
+    MovePattern_add(mpPiece, 2, 1, false, BOTH);
+    MovePattern_add(mpPiece, -2, 1, false, BOTH);
+    MovePattern_add(mpPiece, 2, -1, false, BOTH);
+    MovePattern_add(mpPiece, -2, -1, false, BOTH);
     return mpPiece;
 }
 MovePattern_T movepattern_bishop (void) {
     MovePattern_T mpPiece = MovePattern_new();
-    MovePattern_add(mpPiece, 1, 1, true);
-    MovePattern_add(mpPiece, 1, -1, true);
-    MovePattern_add(mpPiece, -1, 1, true);
-    MovePattern_add(mpPiece, -1, -1, true);
+    MovePattern_add(mpPiece, 1, 1, true, BOTH);
+    MovePattern_add(mpPiece, 1, -1, true, BOTH);
+    MovePattern_add(mpPiece, -1, 1, true, BOTH);
+    MovePattern_add(mpPiece, -1, -1, true, BOTH);
     return mpPiece;
 }
 MovePattern_T movepattern_rook (void) {
     MovePattern_T mpPiece = MovePattern_new();
-    MovePattern_add(mpPiece, 1, 0, true);
-    MovePattern_add(mpPiece, 0, 1, true);
-    MovePattern_add(mpPiece, -1, 0, true);
-    MovePattern_add(mpPiece, 0, -1, true);
+    MovePattern_add(mpPiece, 1, 0, true, BOTH);
+    MovePattern_add(mpPiece, 0, 1, true, BOTH);
+    MovePattern_add(mpPiece, -1, 0, true, BOTH);
+    MovePattern_add(mpPiece, 0, -1, true, BOTH);
     return mpPiece;
 }
 MovePattern_T movepattern_queen (void) {
     MovePattern_T mpPiece = MovePattern_new();
-    MovePattern_add(mpPiece, 1, 0, true);
-    MovePattern_add(mpPiece, 0, 1, true);
-    MovePattern_add(mpPiece, -1, 0, true);
-    MovePattern_add(mpPiece, 0, -1, true);
-    MovePattern_add(mpPiece, 1, 1, true);
-    MovePattern_add(mpPiece, 1, -1, true);
-    MovePattern_add(mpPiece, -1, 1, true);
-    MovePattern_add(mpPiece, -1, -1, true);
+    MovePattern_add(mpPiece, 1, 0, true, BOTH);
+    MovePattern_add(mpPiece, 0, 1, true, BOTH);
+    MovePattern_add(mpPiece, -1, 0, true, BOTH);
+    MovePattern_add(mpPiece, 0, -1, true, BOTH);
+    MovePattern_add(mpPiece, 1, 1, true, BOTH);
+    MovePattern_add(mpPiece, 1, -1, true, BOTH);
+    MovePattern_add(mpPiece, -1, 1, true, BOTH);
+    MovePattern_add(mpPiece, -1, -1, true, BOTH);
     return mpPiece;
 }
 MovePattern_T movepattern_king (void) {
     MovePattern_T mpPiece = MovePattern_new();
-    MovePattern_add(mpPiece, 1, 0, false);
-    MovePattern_add(mpPiece, 0, 1, false);
-    MovePattern_add(mpPiece, -1, 0, false);
-    MovePattern_add(mpPiece, 0, -1, false);
-    MovePattern_add(mpPiece, 1, 1, false);
-    MovePattern_add(mpPiece, 1, -1, false);
-    MovePattern_add(mpPiece, -1, 1, false);
-    MovePattern_add(mpPiece, -1, -1, false);
+    MovePattern_add(mpPiece, 1, 0, false, BOTH);
+    MovePattern_add(mpPiece, 0, 1, false, BOTH);
+    MovePattern_add(mpPiece, -1, 0, false, BOTH);
+    MovePattern_add(mpPiece, 0, -1, false, BOTH);
+    MovePattern_add(mpPiece, 1, 1, false, BOTH);
+    MovePattern_add(mpPiece, 1, -1, false, BOTH);
+    MovePattern_add(mpPiece, -1, 1, false, BOTH);
+    MovePattern_add(mpPiece, -1, -1, false, BOTH);
     return mpPiece;
 }
 
@@ -136,7 +142,7 @@ MovePattern_T MovePattern_for (p_type type, p_color color) {
     }
 }
 
-Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove) {
+Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove, bool isCapture) {
     CHECK_NULL(oPattern);
     CHECK_NULL(oMove);
 
@@ -146,8 +152,13 @@ Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove) {
     Mask_T traversedSqrs = Mask_new();
     for (size_t i = 0; i < oPattern->NUM_MOVETYPES; i++) 
     {
-        if (dx == oPattern->movetypes[i]->dx && dy == oPattern->movetypes[i]->dy)
-            return Mask_new();
+        struct MoveType *mtype = oPattern->movetypes[i];
+        
+        if (isCapture && mtype->end == CANT_CAPTURE)
+            continue;
+
+        if (dx == mtype->dx && dy == mtype->dy)
+            return traversedSqrs;
         
         if (!oPattern->movetypes[i]->repeating)
             continue;
@@ -172,6 +183,7 @@ Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove) {
             }
         }
     }
+
     free(traversedSqrs);
     return NULL;
 }
@@ -194,6 +206,10 @@ char *MovePattern_toString (MovePattern_T oPattern) {
             oPattern->movetypes[i]->dx, oPattern->movetypes[i]->dy);
         if (oPattern->movetypes[i]->repeating)
             ptr += sprintf(ptr, ": repeats ");
+        if (oPattern->movetypes[i]->end == CANT_CAPTURE)
+            ptr += sprintf(ptr, ": can't capture ");
+        if (oPattern->movetypes[i]->end == ONLY_CAPTURE)
+            ptr += sprintf(ptr, ": only captures ");
         ptr += sprintf(ptr, "\n");
     }
 
@@ -214,9 +230,11 @@ char *MovePattern_showMovesFrom (MovePattern_T oPattern, Square_T oSqr) {
         for (Move_dst(move)->x = 0; Move_dst(move)->x <= 7; Move_dst(move)->x++) {
             char bit = ' ';
             if (Square_equals(Move_dst(move), Move_src(move)))
-                bit = 'o';
-            else if (MovePattern_canMove(oPattern, move))
+                bit = '~';
+            else if (MovePattern_canMove(oPattern, move, true))
                 bit = 'X';
+            else if (MovePattern_canMove(oPattern, move, false))
+                bit = 'O';
             ptr += sprintf(ptr, " %c |", bit);
         }
         ptr += sprintf(ptr, "\n  +---+---+---+---+---+---+---+---+\n");

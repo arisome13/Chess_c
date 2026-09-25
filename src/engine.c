@@ -11,7 +11,7 @@
 #define STARTING_FEN    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 #define MAX_DEPTH       8
 #define MAX_MOVES       256
-#define DEFAULT_DEPTH   2
+#define DEFAULT_DEPTH   1
 
 struct Engine
 {

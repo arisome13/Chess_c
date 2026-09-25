@@ -139,15 +139,33 @@ static Map_T Chessboard_getMapFromSqr(ChessBoard_T oBoard, Square_T oSqr) {
     otherwise and leaves the chessboard untouched. */
 static r_move Chessboard_handleMove(ChessBoard_T oBoard, Move_T oMove) 
 {
+    CHECK_NULL(oBoard);
+    CHECK_NULL(oMove);
+
+    // variable with default value
+    bool isCapture = false;
+
     // get the map that contains the piece on the src square
     Map_T srcMap = Chessboard_getMapFromSqr(oBoard, Move_src(oMove));
+    // get the map that contains the piece on the dst square
+    Map_T dstMap = Chessboard_getMapFromSqr(oBoard, Move_dst(oMove));
     
     // if there is no piece on the src square for the move, the move is INVALID
     if (srcMap == NULL)
         return NO_PIECE_ON_SRC;
 
+    // if there is a piece on the dst square...
+    if (dstMap != NULL)
+    {
+        isCapture = true;
+        
+        // if the piece is the same color as the moving piece, the move is INVALID
+        if (Map_getColor(dstMap) == Map_getColor(srcMap))
+            return SAME_COLOR_DST;
+    }
+
     // if the piece does not have the range to get the the dst square, the move is INVALID
-    Mask_T traversed = Map_hasRangeTo(srcMap, oMove);
+    Mask_T traversed = Map_hasRangeTo(srcMap, oMove, isCapture);
     if (traversed == NULL)
         return DOESNT_HAVE_RANGE;
 
@@ -157,19 +175,8 @@ static r_move Chessboard_handleMove(ChessBoard_T oBoard, Move_T oMove)
             return BLOCKED_PATH;
     }
     
-    // get the map that contains the piece on the dst square
-    Map_T dstMap = Chessboard_getMapFromSqr(oBoard, Move_dst(oMove));
-    
-    // if there is a piece on the dst square...
-    if (dstMap != NULL)
-    {
-        // if the piece is the same color as the moving piece, the move is INVALID
-        if (Map_getColor(dstMap) == Map_getColor(srcMap))
-            return SAME_COLOR_DST;
-        
+    if (dstMap != NULL)   
         Map_remove(dstMap, Move_dst(oMove));
-    }
-    
     Map_remove(srcMap, Move_src(oMove));
     Map_place(srcMap, Move_dst(oMove));
     return SUCCESS;
@@ -223,7 +230,7 @@ void ChessBoard_onEachMap(ChessBoard_T oBoard, MapFunction mapfunc, int *data) {
 char *ChessBoard_getFen(ChessBoard_T oBoard) {
     CHECK_NULL(oBoard);
 
-    char *pcStrRep = malloc(100);
+    char *pcStrRep = malloc(80);
     CHECK_MEM(pcStrRep);
     char *ptr = pcStrRep;
 
@@ -242,8 +249,10 @@ char *ChessBoard_getFen(ChessBoard_T oBoard) {
             if (name == '#')
                 i++;
             else {
-                if (i != 0)
+                if (i != 0) {
                     ptr += sprintf(ptr, "%d", i);
+                    i = 0;
+                }
                 ptr += sprintf(ptr, "%c", name);
             }
         }

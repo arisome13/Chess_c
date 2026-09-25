@@ -60,7 +60,7 @@ void Map_addUpPieces (Map_T oMap, int *iTotal);
 /* Returns an empty or populated list of the squares oMap's piece would 
     have to cross to get to the destination. If it is NULL, the move 
     cannot be made. CALLER FREE. */
-Mask_T Map_hasRangeTo (Map_T oMap, Move_T oMove);
+Mask_T Map_hasRangeTo (Map_T oMap, Move_T oMove, bool isCapture);
 
 /* Returns true if both oMap and oMask have at least one filled sqr in 
     the same location, false otherwise. */

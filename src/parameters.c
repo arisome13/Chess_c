@@ -16,10 +16,10 @@ struct ChessParameters
    Square_T oEnpSqr;
 
    /* half move count for 50 move rule */
-   size_t i50MoveCount;
+   size_t ul50MoveCount;
 
    /* current full move */
-   size_t iCurrMove;
+   size_t ulCurrMove;
 };
 
 ChessParameters_T ChessParameters_new(const char *pcFen) {
@@ -47,6 +47,10 @@ ChessParameters_T ChessParameters_new(const char *pcFen) {
 
    oParams->oCastles = Castles_new();
    while (pcFen[fenIndex] != ' ') {
+      if (pcFen[fenIndex] == '-') {
+         fenIndex++;
+         break;
+      }
       Castles_add(oParams->oCastles, pcFen[fenIndex]);
       fenIndex++;
    }
@@ -60,8 +64,8 @@ ChessParameters_T ChessParameters_new(const char *pcFen) {
    }
    fenIndex += 2; /* move index to 50 move rule section */
 
-   oParams->i50MoveCount = strtol(pcFen + fenIndex, &pcEndStr, 10);
-   oParams->iCurrMove = strtol(pcEndStr, &pcEndStr, 10);
+   oParams->ul50MoveCount = strtol(pcFen + fenIndex, &pcEndStr, 10);
+   oParams->ulCurrMove = strtol(pcEndStr, &pcEndStr, 10);
 
    return oParams;
 }
@@ -83,8 +87,8 @@ ChessParameters_T ChessParameters_copy(ChessParameters_T oParams) {
       opCopy->oEnpSqr = Square_copy(oParams->oEnpSqr);
    else
       opCopy->oEnpSqr = NULL;
-   opCopy->i50MoveCount = oParams->i50MoveCount;
-   opCopy->iCurrMove = oParams->iCurrMove;
+   opCopy->ul50MoveCount = oParams->ul50MoveCount;
+   opCopy->ulCurrMove = oParams->ulCurrMove;
 
    return opCopy;
 }
@@ -104,11 +108,11 @@ Square_T ChessParameters_enpSqr(ChessParameters_T oParams) {
 }
 
 size_t ChessParameters_50MoveRule(ChessParameters_T oParams) {
-   return oParams->i50MoveCount;
+   return oParams->ul50MoveCount;
 }
 
 size_t ChessParameters_numMoves(ChessParameters_T oParams) {
-   return oParams->iCurrMove;
+   return oParams->ulCurrMove;
 }
 
 /*--------------------------------------------------------------------*/
@@ -118,11 +122,11 @@ void ChessParameters_incrementMove (
       CHECK_NULL(oParams);
 
       /* increment move count */
-      oParams->iCurrMove++;
+      oParams->ulCurrMove++;
       if (wasPawnOrCapture)
-         oParams->i50MoveCount = 0;
+         oParams->ul50MoveCount = 0;
       else
-         oParams->i50MoveCount++;
+         oParams->ul50MoveCount++;
       
       /* change turn color */
       if (oParams->cTurnColor == BLACK)
@@ -151,19 +155,43 @@ void ChessParameters_removeCastle (
 /*--------------------------------------------------------------------*/
 
 char *ChessParameters_toString(ChessParameters_T oParams) {
-   char *pcStrRep;
-   char *pcSqr = oParams->oEnpSqr == NULL ? "--" : Square_toString(oParams->oEnpSqr);
+   char *pcStrRep = malloc(500);
+   CHECK_MEM(pcStrRep);
+   char *ptr = pcStrRep;
 
-   asprintf(&pcStrRep, 
-      "  +-------+------+----+---+---+\n  | %s | %s | %s | %zu | %zu |\n  +-------+------+----+---+---+", 
-      Color_toString(oParams->cTurnColor), 
-      Castles_toString(oParams->oCastles), 
-      pcSqr,
-      oParams->i50MoveCount, 
-      oParams->iCurrMove);
+   char buf50Count[21];
+   char bufCurMove[21];
+   
+   char *pcEnpSqr = oParams->oEnpSqr == NULL ? "--" : Square_toString(oParams->oEnpSqr);
+   const char *pcCastleStr = Castles_toString(oParams->oCastles);
+   snprintf(buf50Count, sizeof(buf50Count), "%zu", oParams->ul50MoveCount);
+   snprintf(bufCurMove, sizeof(bufCurMove), "%zu", oParams->ulCurrMove);
+
+   // print the top row
+   char *rowPtr = ptr;
+   ptr += sprintf(ptr, "  +-------+-");
+   for (size_t i = 0; i < strlen(pcCastleStr); i++) {
+      ptr += sprintf(ptr, "-");
+   }
+   ptr += sprintf(ptr, "-+----+-");
+   for (size_t i = 0; i < strlen(buf50Count); i++) {
+      ptr += sprintf(ptr, "-");
+   }
+   ptr += sprintf(ptr, "-+-");
+   for (size_t i = 0; i < strlen(bufCurMove); i++) {
+      ptr += sprintf(ptr, "-");
+   }
+   ptr += sprintf(ptr, "-+\n");
+   char *endRow = ptr;
+   
+   // print the parameter data
+   ptr += sprintf(ptr, "  | %s | %s | %s | %s | %s |\n", 
+      Color_toString(oParams->cTurnColor), pcCastleStr, pcEnpSqr, buf50Count, bufCurMove);
+   
+   ptr += snprintf(ptr, endRow - rowPtr, "%s", rowPtr);
 
    if (oParams->oEnpSqr != NULL)
-      free(pcSqr);
+      free(pcEnpSqr);
 
    return pcStrRep;
 }
