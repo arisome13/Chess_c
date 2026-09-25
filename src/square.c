@@ -7,7 +7,7 @@
 Square_T Square_newCoords(size_t y, size_t x) {
     Square_T oSqr;
 
-    CHECK_COORDS(y, x, "Square_newCoords");
+    CHECK_COORDS(y, x);
 
     oSqr = (Square_T)calloc(1, sizeof(struct Square));
     CHECK_MEM(oSqr);

@@ -5,8 +5,8 @@
 #include "move.h"
 #include "mask.h"
 
-#ifndef MAP_INCLUDED
-#define MAP_INCLUDED
+#ifndef MAP_H
+#define MAP_H
 
 /* A Map_T object holds the piece positions of a single piece on 
     a chess board. */

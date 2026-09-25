@@ -9,7 +9,7 @@ TEST_OBJS = obj/test.o $(OBJECTS)
 MAIN_OBJS = obj/main.o $(OBJECTS)
 GAME_OBJS = obj/game.o $(OBJECTS)
 
-CFLAGS = -Wall -Wextra -Wpedantic -Wshadow -I include
+CFLAGS = -std=c23 -Wall -Wextra -Wpedantic -Wshadow -I include
 
 # make both executables
 all: bin/test bin/main bin/game

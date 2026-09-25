@@ -6,8 +6,8 @@
 #include "results.h"
 #include "eval.h"
 
-#ifndef ENGINE_INCLUDED
-#define ENGINE_INCLUDED
+#ifndef ENGINE_H
+#define ENGINE_H
 
 /* An Engine_T is a pointer to a chess engine capable of both holding a 
    chess position and finding the best possible move from that 

@@ -6,8 +6,8 @@
 #include "castles.h"
 #include "color.h"
 
-#ifndef PARAMETERS_INCLUDED
-#define PARAMETERS_INCLUDED
+#ifndef PARAMETERS_H
+#define PARAMETERS_H
 
 /* A ChessParameters_T object defines the state of a chess game. */
 typedef struct ChessParameters *ChessParameters_T;

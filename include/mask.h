@@ -4,8 +4,8 @@
 
 #include "helpers.h"
 
-#ifndef MASK_INCLUDED
-#define MASK_INCLUDED
+#ifndef MASK_H
+#define MASK_H
 
 /* A Mask_T object holds a bit (either 0 or 1) of information for each 
     square on an 8x8 grid. The grid is accessed using the coordinates

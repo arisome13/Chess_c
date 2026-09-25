@@ -56,8 +56,7 @@ Map_T Map_new(char name) {
             oMap->type = KING;
             break;
         default:
-            printf("Invalid type: %c", name);
-            exit(1);
+            ERROR("Invalid type: %c", name);\
     }
 
     oMap->moves = MovePattern_for(oMap->type, oMap->color);

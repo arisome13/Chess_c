@@ -4,8 +4,8 @@
 
 #include "helpers.h"
 
-#ifndef EVAL_INCLUDED
-#define EVAL_INCLUDED
+#ifndef EVAL_H
+#define EVAL_H
 
 /* An Eval_T object holds an evaluation of a chess position. + if 
     the position is favorable for white, - if it is favorable for 

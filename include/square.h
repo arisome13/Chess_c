@@ -4,8 +4,8 @@
 
 #include "helpers.h"
 
-#ifndef SQUARE_INCLUDED
-#define SQUARE_INCLUDED
+#ifndef SQUARE_H
+#define SQUARE_H
 
 /* A Square_T object holds the location of a square on a chess board. */
 struct Square

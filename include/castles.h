@@ -4,8 +4,8 @@
 
 #include "helpers.h"
 
-#ifndef CASTLES_INCLUDED
-#define CASTLES_INCLUDED
+#ifndef CASTLES_H
+#define CASTLES_H
 
 /* A Castles_T object holds the castles a given chess position can 
     allow. */

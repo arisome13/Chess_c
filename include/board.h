@@ -6,8 +6,8 @@
 #include "move.h"
 #include "results.h"
 
-#ifndef BOARD_INCLUDED
-#define BOARD_INCLUDED
+#ifndef BOARD_H
+#define BOARD_H
 
 /* A ChessBoard_T object holds the piece positions on a chess board. */
 typedef struct ChessBoard *ChessBoard_T;
@@ -42,6 +42,13 @@ p_type ChessBoard_typeOnSqr(ChessBoard_T oBoard, Square_T oSqr);
 p_color ChessBoard_colorOnSqr(ChessBoard_T oBoard, Square_T oSqr);
 
 /*--------------------------------------------------------------------*/
+
+/* Return the chess board part of a fen for oBoard. */
+char *ChessBoard_getFen(ChessBoard_T oBoard);
+
+/* Return the proper notation for oMove on oBoard. NULL if the move 
+   can't be made. Is NOT a validator of moves. CALLER FREE. */
+char *ChessBoard_notation(ChessBoard_T oBoard, Move_T oMove);
 
 /* Return the string representation of oBoard. CALLER FREE. */
 char *ChessBoard_toString(ChessBoard_T oBoard);

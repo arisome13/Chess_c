@@ -2,8 +2,8 @@
 /* color.h                                                           */
 /*--------------------------------------------------------------------*/
 
-#ifndef COLOR_INCLUDED
-#define COLOR_INCLUDED
+#ifndef COLOR_H
+#define COLOR_H
 
 typedef enum p_color {BLACK, WHITE, NO_COLOR} p_color;
 

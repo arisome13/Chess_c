@@ -4,8 +4,8 @@
 
 #include "board.h"
 
-#ifndef VALIDATION_INCLUDED
-#define VALIDATION_INCLUDED
+#ifndef VALIDATION_H
+#define VALIDATION_H
 
 /* raises an error if the chessboard is invalid */
 void Validate_chessboard(ChessBoard_T oBoard);

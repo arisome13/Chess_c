@@ -158,7 +158,7 @@ Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove) {
             Mask_reset(traversedSqrs);
             
             // check if one can move like the other
-            for (int j = 2; j < 8; j++) 
+            for (int j = 1; j < 8; j++) 
             {
                 if (dx == j * oPattern->movetypes[i]->dx && dy == j * oPattern->movetypes[i]->dy)
                     return traversedSqrs;

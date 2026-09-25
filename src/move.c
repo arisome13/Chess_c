@@ -54,7 +54,6 @@ Move_T Move_copy (Move_T oMove) {
     Square_T dst = Square_newCoords(oMove->sDst->y, oMove->sDst->x);
     return Move_new(src, dst);
 }
-
 void Move_copyTo (Move_T mSrc, Move_T mDst) {
     CHECK_NULL(mSrc);
     CHECK_NULL(mDst);

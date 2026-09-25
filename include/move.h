@@ -4,8 +4,8 @@
 
 #include "square.h"
 
-#ifndef MOVE_INCLUDED
-#define MOVE_INCLUDED
+#ifndef MOVE_H
+#define MOVE_H
 
 /* A Move_T object holds the location of source and destination 
     squares. */

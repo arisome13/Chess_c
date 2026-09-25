@@ -39,7 +39,13 @@ static long Eval_key (Eval_T eval) {
     if (eval->type == CENTIPAWN)
         return eval->score;
 
-    assert(eval->type == FORCED_MATE && eval->score != 0);
+    // error checking
+    if (eval->type != FORCED_MATE)
+        ERROR("Eval type is not forced mate: %d", eval->type);
+    if (eval->score == 0)
+        ERROR("Eval score is 0 when it is a forced mate.");
+    
+    // assign eval key
     if (eval->score > 0)
         return MATE - eval->score;
     else
@@ -72,7 +78,7 @@ char *Eval_toString(Eval_T oEval) {
         ptr += sprintf(ptr, "CP");
     else
         ptr += sprintf(ptr, "FM");
-    ptr += sprintf(ptr, ": %f\n", oEval->score);
+    ptr += sprintf(ptr, ": %.2f", oEval->score);
 
     return pcStrRep;
 }

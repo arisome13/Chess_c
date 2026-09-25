@@ -49,6 +49,8 @@ ChessBoard_T ChessBoard_copy(ChessBoard_T oBoard) {
     for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
         obCopy->pmPieceMaps[m] = Map_copy(oBoard->pmPieceMaps[m]);
     }
+
+    obCopy->NUM_MAPS = oBoard->NUM_MAPS;
     
     return obCopy;
 }
@@ -184,7 +186,6 @@ r_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove)
         /* try the move as a special move */;
     
     return result;
-
 }
 
 /*--------------------------------------------------------------------*/
@@ -219,6 +220,78 @@ void ChessBoard_onEachMap(ChessBoard_T oBoard, MapFunction mapfunc, int *data) {
 
 /*--------------------------------------------------------------------*/
 
+char *ChessBoard_getFen(ChessBoard_T oBoard) {
+    CHECK_NULL(oBoard);
+
+    char *pcStrRep = malloc(100);
+    CHECK_MEM(pcStrRep);
+    char *ptr = pcStrRep;
+
+    Square_T sqr = Square_newCoords(0, 0);
+    int i = 0;
+    p_type type;
+    p_color color;
+
+    for (size_t y = 0; y < 8; y++) { sqr->y = y;
+        if (y != 0)
+            ptr += sprintf(ptr, "/");
+        for (size_t x = 0; x < 8; x++) { sqr->x = x;
+            type = ChessBoard_typeOnSqr(oBoard, sqr);
+            color = ChessBoard_colorOnSqr(oBoard, sqr);
+            char name = Type_toString(type, color);
+            if (name == '#')
+                i++;
+            else {
+                if (i != 0)
+                    ptr += sprintf(ptr, "%d", i);
+                ptr += sprintf(ptr, "%c", name);
+            }
+        }
+        if (i != 0)
+            ptr += sprintf(ptr, "%d", i);
+        i = 0;
+    }
+
+    PRINT("difference in fen length: %ld\n", ptr - pcStrRep);
+    return pcStrRep;
+}
+char *ChessBoard_notation(ChessBoard_T oBoard, Move_T oMove)
+{
+    CHECK_NULL(oBoard);
+    CHECK_NULL(oMove);
+
+    Square_T sqrSrc = Move_src(oMove);
+    Square_T sqrDst = Move_dst(oMove);
+    char *srcStr = Square_toString(sqrSrc);
+    char *dstStr = Square_toString(sqrDst);
+    
+    char *pcStrRep = malloc(10);
+    CHECK_MEM(pcStrRep);
+    char *ptr = pcStrRep;
+
+    p_type ptype = ChessBoard_typeOnSqr(oBoard, Move_src(oMove));
+    switch (ptype)
+    {
+        case PAWN:
+            // if a pawn is moving forward (not to the side), 
+            // return the destination square
+            if (sqrSrc->x != sqrDst->x)
+                ptr += sprintf(ptr, "%s", srcStr);
+            break;
+        case KNIGHT:
+            ptr += sprintf(ptr, "%c", Type_toString(ptype, WHITE));
+            break;
+        default:
+            ptr += sprintf(ptr, "%s", srcStr);
+    }
+    // add the destination square for every notation
+    ptr += sprintf(ptr, "%s", dstStr);
+
+    // free and return
+    free(srcStr);
+    free(dstStr);
+    return pcStrRep;
+}
 char *ChessBoard_toString(ChessBoard_T oBoard)
 {
     CHECK_NULL(oBoard);

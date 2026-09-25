@@ -1,5 +1,6 @@
 
 #include "type.h"
+#include "printers.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -28,8 +29,7 @@ int Type_getValue (p_type type, p_color color) {
         case KING:
             return 0;
         default:
-            printf("Invalid type: #%d", type);
-            exit(1);
+            ERROR("Invalid type: #%d", type);
     }
 
     return value * mod;
@@ -37,7 +37,10 @@ int Type_getValue (p_type type, p_color color) {
 
 char Type_toString(p_type type, p_color color) {
 
-    char tcStr;
+    char tcStr = '\0';
+
+    if (type == NO_TYPE || color == NO_COLOR)
+        return '#';
 
     switch (type)
     {
@@ -60,8 +63,7 @@ char Type_toString(p_type type, p_color color) {
             tcStr = 'k';
             break;
         default:
-            printf("Invalid type: %d", type);
-            exit(1);
+            ERROR("Invalid type: %d\n", type);
     }
 
     if (color == WHITE)

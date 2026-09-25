@@ -2,8 +2,8 @@
 /* results.h                                                          */
 /*--------------------------------------------------------------------*/
 
-#ifndef RESULTS_INCLUDED
-#define RESULTS_INCLUDED
+#ifndef RESULTS_H
+#define RESULTS_H
 
 /* describes the end result of an attempted move */
 typedef enum r_move {

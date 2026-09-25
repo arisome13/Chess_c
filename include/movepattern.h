@@ -6,8 +6,8 @@
 #include <mask.h>
 #include <move.h>
 
-#ifndef MOVEPATTERN_INCLUDED
-#define MOVEPATTERN_INCLUDED
+#ifndef MOVEPATTERN_H
+#define MOVEPATTERN_H
 
 /* A MoveType is a direction a piece can move in and if it can repeat 
     that move. */

@@ -1,6 +1,5 @@
 
 #include "engine.h"
-#include <results.h>
 
 int main(void)
 {
@@ -29,7 +28,7 @@ int main(void)
         {
             PRINT("Invalid move for reason: %s\n", MoveResult_toString(moveResult));
         }
-        else 
+        else
         {
             PRINT("Succeeded in moving.\n");
             tempStr = Engine_toString(eng);
