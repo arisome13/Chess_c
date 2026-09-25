@@ -14,12 +14,15 @@
     either. */
 typedef enum CaptureRule {ONLY_CAPTURE, CANT_CAPTURE, BOTH} CaptureRule;
 
-/* A MoveType is a direction a piece can move in and if it can repeat 
+/* A Movement is a direction a piece can move in and if it can repeat 
     that move. */
-struct MoveType
+struct Movement
 {
+    // direction of movement
     int dx, dy;
-    bool repeating;
+    // number of times movement can be repeated (0 == infinity)
+    size_t num_reps;
+    // rule for if this movement has to or can't capture
     CaptureRule end;
 };
 
@@ -45,7 +48,7 @@ MovePattern_T MovePattern_copy (MovePattern_T oPattern);
 
 /* Adds a move in direction (dx, dy) to oPattern. */
 void MovePattern_add (MovePattern_T oPattern, 
-    int dy, int dx, bool repeating, CaptureRule end);
+    int dy, int dx, size_t reps, CaptureRule end);
 
 /* Returns a mask of the squares oMove goes through, or NULL if the 
     move cannot be made with oPattern. CALLER FREE. */
@@ -54,8 +57,8 @@ Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove, bool isCapture
 /* Returns the move pattern for type and color. CALLER FREE. */
 MovePattern_T MovePattern_for (p_type type, p_color color);
 
-/* Returns the ith MoveType held by oPattern. */
-struct MoveType *MovePattern_getMoveType(MovePattern_T oPattern, int i);
+/* Returns the ith Movement held by oPattern. */
+struct Movement *MovePattern_getMovement(MovePattern_T oPattern, int i);
 
 /*--------------------------------------------------------------------*/
 

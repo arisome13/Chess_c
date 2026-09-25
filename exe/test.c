@@ -6,7 +6,7 @@ int main (void) {
     char *tempStr;
 
     // create the engine
-    Engine_T eng = Engine_new("8/2k5/2p2p2/3p1P2/3P2K1/2P1N3/8/8 w - - 1 48");
+    Engine_T eng = Engine_new("r1bq1rk1/pp2bppp/2np1n2/2p1p3/2P1P3/2NP1N2/PP2BPPP/R1BQ1RK1 w - - 4 9");
     tempStr = Engine_toString(eng);
     printf("%s\n", tempStr);
     free(tempStr);

@@ -6,7 +6,7 @@
 
 struct MovePattern
 {
-    struct MoveType *movetypes[MAX_MOVE_TYPES];
+    struct Movement *movements[MAX_MOVE_TYPES];
     size_t NUM_MOVETYPES;
 };
 
@@ -25,18 +25,16 @@ MovePattern_T MovePattern_copy (MovePattern_T oPattern) {
     MovePattern_T opCopy = MovePattern_new();
 
     for (int i = 0; i < 8; i++) {
-        if (oPattern->movetypes[i] == NULL) {
-            break;
-        }
-        MovePattern_add(opCopy, oPattern->movetypes[i]->dy, 
-            oPattern->movetypes[i]->dx, oPattern->movetypes[i]->repeating, 
-            oPattern->movetypes[i]->end);
+        struct Movement *mnt = MovePattern_getMovement(oPattern, i);
+        if (mnt == NULL) break;
+        MovePattern_add(opCopy, mnt->dy, mnt->dx, mnt->num_reps, mnt->end);
     }
     
     return opCopy;
 }
 
-void MovePattern_add (MovePattern_T oPattern, int dy, int dx, bool repeating, CaptureRule end) {
+void MovePattern_add (MovePattern_T oPattern, int dy, int dx, 
+        size_t reps, CaptureRule end) {
     CHECK_MEM(oPattern);
 
     if (oPattern->NUM_MOVETYPES == 8)
@@ -45,12 +43,12 @@ void MovePattern_add (MovePattern_T oPattern, int dy, int dx, bool repeating, Ca
     // i is the next index available in oPattern
     size_t i = oPattern->NUM_MOVETYPES;
 
-    oPattern->movetypes[i] = (struct MoveType *)malloc(sizeof(struct MoveType));
+    oPattern->movements[i] = (struct Movement *)malloc(sizeof(struct Movement));
     
-    oPattern->movetypes[i]->dx = dx;
-    oPattern->movetypes[i]->dy = dy;
-    oPattern->movetypes[i]->repeating = repeating;
-    oPattern->movetypes[i]->end = end;
+    oPattern->movements[i]->dx = dx;
+    oPattern->movements[i]->dy = dy;
+    oPattern->movements[i]->num_reps = reps;
+    oPattern->movements[i]->end = end;
 
     oPattern->NUM_MOVETYPES++;
 }
@@ -58,68 +56,66 @@ void MovePattern_add (MovePattern_T oPattern, int dy, int dx, bool repeating, Ca
 MovePattern_T movepattern_pawn (p_color c) {
     MovePattern_T mpPiece = MovePattern_new();
     if (c == WHITE) {
-        MovePattern_add(mpPiece, -1, 0, false, CANT_CAPTURE);
-        MovePattern_add(mpPiece, -2, 0, false, CANT_CAPTURE);
-        MovePattern_add(mpPiece, -1, 1, false, ONLY_CAPTURE);
-        MovePattern_add(mpPiece, -1, -1, false, ONLY_CAPTURE);
+        MovePattern_add(mpPiece, -1, 0, 2, CANT_CAPTURE);
+        MovePattern_add(mpPiece, -1, 1, 1, ONLY_CAPTURE);
+        MovePattern_add(mpPiece, -1, -1, 1, ONLY_CAPTURE);
     } else {
-        MovePattern_add(mpPiece, 1, 0, false, CANT_CAPTURE);
-        MovePattern_add(mpPiece, 2, 0, false, CANT_CAPTURE);
-        MovePattern_add(mpPiece, 1, 1, false, ONLY_CAPTURE);
-        MovePattern_add(mpPiece, 1, -1, false, ONLY_CAPTURE);
+        MovePattern_add(mpPiece, 1, 0, 2, CANT_CAPTURE);
+        MovePattern_add(mpPiece, 1, 1, 1, ONLY_CAPTURE);
+        MovePattern_add(mpPiece, 1, -1, 1, ONLY_CAPTURE);
     }
     return mpPiece;
 }
 MovePattern_T movepattern_knight (void) {
     MovePattern_T mpPiece = MovePattern_new();
-    MovePattern_add(mpPiece, 1, 2, false, BOTH);
-    MovePattern_add(mpPiece, 1, -2, false, BOTH);
-    MovePattern_add(mpPiece, -1, 2, false, BOTH);
-    MovePattern_add(mpPiece, -1, -2, false, BOTH);
-    MovePattern_add(mpPiece, 2, 1, false, BOTH);
-    MovePattern_add(mpPiece, -2, 1, false, BOTH);
-    MovePattern_add(mpPiece, 2, -1, false, BOTH);
-    MovePattern_add(mpPiece, -2, -1, false, BOTH);
+    MovePattern_add(mpPiece, 1, 2, 1, BOTH);
+    MovePattern_add(mpPiece, 1, -2, 1, BOTH);
+    MovePattern_add(mpPiece, -1, 2, 1, BOTH);
+    MovePattern_add(mpPiece, -1, -2, 1, BOTH);
+    MovePattern_add(mpPiece, 2, 1, 1, BOTH);
+    MovePattern_add(mpPiece, -2, 1, 1, BOTH);
+    MovePattern_add(mpPiece, 2, -1, 1, BOTH);
+    MovePattern_add(mpPiece, -2, -1, 1, BOTH);
     return mpPiece;
 }
 MovePattern_T movepattern_bishop (void) {
     MovePattern_T mpPiece = MovePattern_new();
-    MovePattern_add(mpPiece, 1, 1, true, BOTH);
-    MovePattern_add(mpPiece, 1, -1, true, BOTH);
-    MovePattern_add(mpPiece, -1, 1, true, BOTH);
-    MovePattern_add(mpPiece, -1, -1, true, BOTH);
+    MovePattern_add(mpPiece, 1, 1, 0, BOTH);
+    MovePattern_add(mpPiece, 1, -1, 0, BOTH);
+    MovePattern_add(mpPiece, -1, 1, 0, BOTH);
+    MovePattern_add(mpPiece, -1, -1, 0, BOTH);
     return mpPiece;
 }
 MovePattern_T movepattern_rook (void) {
     MovePattern_T mpPiece = MovePattern_new();
-    MovePattern_add(mpPiece, 1, 0, true, BOTH);
-    MovePattern_add(mpPiece, 0, 1, true, BOTH);
-    MovePattern_add(mpPiece, -1, 0, true, BOTH);
-    MovePattern_add(mpPiece, 0, -1, true, BOTH);
+    MovePattern_add(mpPiece, 1, 0, 0, BOTH);
+    MovePattern_add(mpPiece, 0, 1, 0, BOTH);
+    MovePattern_add(mpPiece, -1, 0, 0, BOTH);
+    MovePattern_add(mpPiece, 0, -1, 0, BOTH);
     return mpPiece;
 }
 MovePattern_T movepattern_queen (void) {
     MovePattern_T mpPiece = MovePattern_new();
-    MovePattern_add(mpPiece, 1, 0, true, BOTH);
-    MovePattern_add(mpPiece, 0, 1, true, BOTH);
-    MovePattern_add(mpPiece, -1, 0, true, BOTH);
-    MovePattern_add(mpPiece, 0, -1, true, BOTH);
-    MovePattern_add(mpPiece, 1, 1, true, BOTH);
-    MovePattern_add(mpPiece, 1, -1, true, BOTH);
-    MovePattern_add(mpPiece, -1, 1, true, BOTH);
-    MovePattern_add(mpPiece, -1, -1, true, BOTH);
+    MovePattern_add(mpPiece, 1, 0, 0, BOTH);
+    MovePattern_add(mpPiece, 0, 1, 0, BOTH);
+    MovePattern_add(mpPiece, -1, 0, 0, BOTH);
+    MovePattern_add(mpPiece, 0, -1, 0, BOTH);
+    MovePattern_add(mpPiece, 1, 1, 0, BOTH);
+    MovePattern_add(mpPiece, 1, -1, 0, BOTH);
+    MovePattern_add(mpPiece, -1, 1, 0, BOTH);
+    MovePattern_add(mpPiece, -1, -1, 0, BOTH);
     return mpPiece;
 }
 MovePattern_T movepattern_king (void) {
     MovePattern_T mpPiece = MovePattern_new();
-    MovePattern_add(mpPiece, 1, 0, false, BOTH);
-    MovePattern_add(mpPiece, 0, 1, false, BOTH);
-    MovePattern_add(mpPiece, -1, 0, false, BOTH);
-    MovePattern_add(mpPiece, 0, -1, false, BOTH);
-    MovePattern_add(mpPiece, 1, 1, false, BOTH);
-    MovePattern_add(mpPiece, 1, -1, false, BOTH);
-    MovePattern_add(mpPiece, -1, 1, false, BOTH);
-    MovePattern_add(mpPiece, -1, -1, false, BOTH);
+    MovePattern_add(mpPiece, 1, 0, 1, BOTH);
+    MovePattern_add(mpPiece, 0, 1, 1, BOTH);
+    MovePattern_add(mpPiece, -1, 0, 1, BOTH);
+    MovePattern_add(mpPiece, 0, -1, 1, BOTH);
+    MovePattern_add(mpPiece, 1, 1, 1, BOTH);
+    MovePattern_add(mpPiece, 1, -1, 1, BOTH);
+    MovePattern_add(mpPiece, -1, 1, 1, BOTH);
+    MovePattern_add(mpPiece, -1, -1, 1, BOTH);
     return mpPiece;
 }
 
@@ -152,30 +148,39 @@ Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove, bool isCapture
     Mask_T traversedSqrs = Mask_new();
     for (size_t i = 0; i < oPattern->NUM_MOVETYPES; i++) 
     {
-        struct MoveType *mtype = oPattern->movetypes[i];
+        // get the movement struct
+        struct Movement *mtype = MovePattern_getMovement(oPattern, i);
         
-        if (isCapture && mtype->end == CANT_CAPTURE)
+        // check if there is a mismatch between the capture rule and whether this move captures
+        if ((isCapture && mtype->end == CANT_CAPTURE) 
+            || (!isCapture && mtype->end == ONLY_CAPTURE))
             continue;
 
+        // if the movement matches the move, return that it crosses no squares
         if (dx == mtype->dx && dy == mtype->dy)
             return traversedSqrs;
         
-        if (!oPattern->movetypes[i]->repeating)
+        // if the movement can't repeat more than once, 
+        // it can't follow through with this move 
+        if (mtype->num_reps == 1)
             continue;
         
         // if the direction of movement is the same...
-        if (oPattern->movetypes[i]->dy/oPattern->movetypes[i]->dx == dy/dx)
+        if (mtype->dy/mtype->dx == dy/dx)
         {
             Mask_reset(traversedSqrs);
+
+            // get the maximum number of times this move can repeat
+            int max_reps = 8 ? mtype->num_reps == 0 : mtype->num_reps;
             
             // check if one can move like the other
-            for (int j = 1; j < 8; j++) 
+            for (int j = 1; j < max_reps; j++) 
             {
-                if (dx == j * oPattern->movetypes[i]->dx && dy == j * oPattern->movetypes[i]->dy)
+                if (dx == j * mtype->dx && dy == j * mtype->dy)
                     return traversedSqrs;
 
-                int tempX = Move_src(oMove)->x + j * oPattern->movetypes[i]->dx;
-                int tempY = Move_src(oMove)->y + j * oPattern->movetypes[i]->dy;
+                int tempX = Move_src(oMove)->x + j * mtype->dx;
+                int tempY = Move_src(oMove)->y + j * mtype->dy;
                 if (!(0 <= tempX && tempX < 8 && 0 <= tempY && tempY < 8))
                     break;
                 
@@ -188,8 +193,8 @@ Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove, bool isCapture
     return NULL;
 }
 
-struct MoveType *MovePattern_getMoveType(MovePattern_T oPattern, int i) {
-    return oPattern->movetypes[i];
+struct Movement *MovePattern_getMovement(MovePattern_T oPattern, int i) {
+    return oPattern->movements[i];
 }
 
 char *MovePattern_toString (MovePattern_T oPattern) {
@@ -201,15 +206,21 @@ char *MovePattern_toString (MovePattern_T oPattern) {
     
     char *ptr = pcStrRep;
 
-    for (size_t i = 0; i < oPattern->NUM_MOVETYPES; i++) {
-        ptr += sprintf(ptr, "(%d, %d) ", 
-            oPattern->movetypes[i]->dx, oPattern->movetypes[i]->dy);
-        if (oPattern->movetypes[i]->repeating)
+    for (size_t i = 0; i < oPattern->NUM_MOVETYPES; i++)
+    {
+        struct Movement *mnt = MovePattern_getMovement(oPattern, i);
+        ptr += sprintf(ptr, "(%d, %d) ", mnt->dx, mnt->dy);
+        
+        if (mnt->num_reps != 1)
             ptr += sprintf(ptr, ": repeats ");
-        if (oPattern->movetypes[i]->end == CANT_CAPTURE)
+        else if (mnt->num_reps != 0)
+            ptr += sprintf(ptr, " (%zu) ", mnt->num_reps);
+
+        if (mnt->end == CANT_CAPTURE)
             ptr += sprintf(ptr, ": can't capture ");
-        if (oPattern->movetypes[i]->end == ONLY_CAPTURE)
+        else if (mnt->end == ONLY_CAPTURE)
             ptr += sprintf(ptr, ": only captures ");
+        
         ptr += sprintf(ptr, "\n");
     }
 
