@@ -27,7 +27,8 @@ int Type_getValue (p_type type, p_color color) {
             value = 9;
             break;
         case KING:
-            return 0;
+            value = 100;
+            break;
         default:
             ERROR("Invalid type: #%d", type);
     }

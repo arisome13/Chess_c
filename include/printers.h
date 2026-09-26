@@ -12,40 +12,40 @@
 #include <stdio.h>
 
 // 1 == true, 0 == false
-#define DEBUG   1
+#define DEBUG   0
 
 void print_message(const char *pcMessage, ...);
 void error_message(const char *function_name, 
         const char *pcMessage, ...);
 
-#if DEBUG // debugging macro functions
+/* use for: catching unexpected errors */
+#define ERROR(pcMessage, ...) \
+    do { \
+        error_message(__func__, pcMessage __VA_OPT__(,) __VA_ARGS__); \
+    } while (0)
 
-    /* use for: catching unexpected errors */
-    #define ERROR(pcMessage, ...) \
-        do { \
-            error_message(__func__, pcMessage __VA_OPT__(,) __VA_ARGS__); \
-        } while (0)
+/* use for printing some message */
+#define PRINT(pcMessage, ...) \
+    do { \
+        print_message(pcMessage __VA_OPT__(,) __VA_ARGS__); \
+    } while (0)
 
-    /* use for printing some message */
-    #define PRINT(pcMessage, ...) \
-        do { \
-            print_message(pcMessage __VA_OPT__(,) __VA_ARGS__); \
-        } while (0)
+/* use for printing some message */
+#define PRINT_I(num, pcMessage, ...) \
+    do { \
+        for (size_t print_i_index = 0; print_i_index < num; print_i_index++) \
+            printf("   "); \
+        print_message(pcMessage __VA_OPT__(,) __VA_ARGS__); \
+    } while (0)
 
-    /* use for printing some message */
-    #define PRINT_I(num, pcMessage, ...) \
-        do { \
-            for (size_t print_i_index = 0; print_i_index < num; print_i_index++) \
-                printf("   "); \
-            print_message(pcMessage __VA_OPT__(,) __VA_ARGS__); \
-        } while (0)
-
-    /* use for: catching memory errors after initialization */
+/* use for: catching memory errors after initialization */
     #define CHECK_MEM(pObject) \
         do { \
             if ((pObject) == NULL) \
                 ERROR("Memory error at %s.\n", __func__); \
         } while (0)
+
+#if DEBUG // debugging macro functions
 
     /* use for: catching null parameters */
     #define CHECK_NULL(pObject) \
@@ -63,7 +63,6 @@ void error_message(const char *function_name,
 
 #else // NO_DEBUG
 
-    #define CHECK_MEM(pObject) ((void)0)
     #define CHECK_NULL(pObject) ((void)0)
     #define CHECK_COORDS(y, x) ((void)0)
 

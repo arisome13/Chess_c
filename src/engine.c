@@ -11,7 +11,7 @@
 #define STARTING_FEN    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 #define MAX_DEPTH       8
 #define MAX_MOVES       256
-#define DEFAULT_DEPTH   2
+#define DEFAULT_DEPTH   4
 
 struct Engine
 {
@@ -194,7 +194,7 @@ static Eval_T Engine_score (Engine_T oEngine)
     return eval;
 }
 
-/* Returns ____ ? */
+/* Returns the evaluation of the position. */
 static Eval_T Engine_search (Engine_T oEngine, size_t depth, 
         Eval_T bestWhite, Eval_T bestBlack, Move_T outputBestMove)
 {
@@ -209,9 +209,11 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
     if (depth-- == 0) {
         Eval_T score = Engine_score(oEngine);
         
-        char *evalStr = Eval_toString(score);
-        PRINT_I(search_depth, "Got base case: returning (%s)\n", evalStr);
-        free(evalStr);
+        if (DEBUG) {
+            char *evalStr = Eval_toString(score);
+            PRINT_I(search_depth, "Got base case: returning (%s)\n", evalStr);
+            free(evalStr);
+        }
         
         return score;
     } // else, search the move tree one level lower
@@ -225,15 +227,6 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
     p_color moveColor = ChessParameters_turnColor(oEngine->oParams);
     // get all the legal moves from this position
     size_t moveListSize = Engine_legalMoves(oEngine, legalMoves);
-    PRINT("Moves list contians %zu moves:\n", moveListSize);
-    for (size_t i = 0; i < moveListSize; i++) {
-        if (i != 0)
-            PRINT(", ");
-        char *movestr = ChessBoard_notation(oEngine->oBoard, legalMoves[i]);
-        PRINT("%s", movestr);
-        free(movestr);
-    }
-    PRINT("\n");
 
     // if there are no legal moves, return a forced mate (update this for later)
     if (moveListSize == 0) {
@@ -253,9 +246,11 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
         assert(result == SUCCESS);
         (void)result; // silences a compiler warning about an unused var
 
-        char *pcMoveStr = ChessBoard_notation(oEngine->oBoard, legalMoves[i]);
-        PRINT_I(search_depth, "Made move: %s\n", pcMoveStr);
-        free(pcMoveStr);
+        if (DEBUG) {
+            char *pcMoveStr = ChessBoard_notation(oEngine->oBoard, legalMoves[i]);
+            PRINT_I(search_depth, "Made move: %s\n", pcMoveStr);
+            free(pcMoveStr);
+        }
 
         // recurse to find the evaluation for this move sequence
         Eval_T tempEval = Engine_search(oeCopy, depth, bestWhite, bestBlack, NULL);
@@ -288,6 +283,16 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
             break;
     }
 
+    if (DEBUG) {
+        CHECK_NULL(legalMoves[bestIndex]);
+        char *movestr = Move_toString(legalMoves[bestIndex]);
+        CHECK_NULL(bestEval);
+        char *evalstr = Eval_toString(bestEval);
+        PRINT_I(search_depth, "Bests: (%s) with %s\n", movestr, evalstr);
+        free(movestr);
+        free(evalstr);
+    }
+
     // return the best move
     if (outputBestMove != NULL)
         Move_copyTo(legalMoves[bestIndex], outputBestMove);
@@ -295,6 +300,7 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
     // free the used pointers
     for (size_t i = 0; i < moveListSize; i++) 
         Move_free(legalMoves[i]);
+
     // return the maximum possible evaluation
     return bestEval;
 }

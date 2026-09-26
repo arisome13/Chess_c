@@ -30,10 +30,20 @@ int main(void)
         }
         else
         {
-            PRINT("Succeeded in moving.\n");
             tempStr = Engine_toString(eng);
-            printf("\n%s\n", tempStr);
+            PRINT("Succeeded in moving.\n\n%s\n", tempStr);
             free(tempStr);
+
+            PRINT("Engine's turn now...\n");
+            Move_T bestMove = Engine_bestMove(eng);
+            r_move r = Engine_makeMove(eng, bestMove);
+            assert(r == SUCCESS);
+
+            char*movestr = Move_toString(bestMove);
+            tempStr = Engine_toString(eng);
+            PRINT("Engine moved %s.\n\n%s\n", movestr, tempStr);
+            free(tempStr);
+            free(movestr);
             moves++;
         }
     }

@@ -181,7 +181,7 @@ Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove, bool isCapture
         assert(0 <= max_reps && max_reps <= 8);
         
         // check if one can move like the other
-        for (int j = 1; j < max_reps; j++) 
+        for (int j = 1; j <= max_reps; j++) 
         {
             if (dx == j * mtype->dx && dy == j * mtype->dy)
                 return traversedSqrs;
