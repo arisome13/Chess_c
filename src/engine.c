@@ -11,7 +11,7 @@
 #define STARTING_FEN    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 #define MAX_DEPTH       8
 #define MAX_MOVES       256
-#define DEFAULT_DEPTH   1
+#define DEFAULT_DEPTH   2
 
 struct Engine
 {
@@ -101,7 +101,7 @@ r_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
 
     // check for unusual moves 
     if (result != SUCCESS) {
-        if (false /* is is a pawn attacking */)
+        if (false /* is a pawn attacking */)
             ;
         if (false /* is a castle */)
             ;
@@ -162,7 +162,8 @@ size_t Engine_legalMoves (Engine_T oEngine, Move_T aMoves[])
             Engine_T oeCopy = Engine_copy(oEngine);
 
             // check if the move is valid and add to the move list
-            if (Engine_makeMove(oeCopy, move) == SUCCESS)
+            r_move result = Engine_makeMove(oeCopy, move);
+            if (result == SUCCESS)
                 aMoves[uiCount++] = Move_copy(move);
 
             // reset engine set up
@@ -201,16 +202,15 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
 
     if (oEngine->iDepth < depth)
         ERROR("Engine depth %zu > search depth %zu\n", oEngine->iDepth, depth);
-    char *fen = Engine_getFen(oEngine);
-    PRINT("Searching... %s\nAt depth %d\n", fen, (oEngine->iDepth - depth));
-    free(fen);
+
+    size_t search_depth = oEngine->iDepth - depth;
 
     // base case
     if (depth-- == 0) {
         Eval_T score = Engine_score(oEngine);
         
         char *evalStr = Eval_toString(score);
-        PRINT("\tGot base case: returning (%s)\n", evalStr);
+        PRINT_I(search_depth, "Got base case: returning (%s)\n", evalStr);
         free(evalStr);
         
         return score;
@@ -238,7 +238,7 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
     // if there are no legal moves, return a forced mate (update this for later)
     if (moveListSize == 0) {
         // if (in check) {
-            int value = oEngine->iDepth - depth;
+            int value = search_depth;
             if (moveColor == WHITE) 
                 value = -value;
             return Eval_new(FORCED_MATE, value); // checkmate
@@ -252,6 +252,10 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
         result = Engine_makeMove(oeCopy, legalMoves[i]);
         assert(result == SUCCESS);
         (void)result; // silences a compiler warning about an unused var
+
+        char *pcMoveStr = ChessBoard_notation(oEngine->oBoard, legalMoves[i]);
+        PRINT_I(search_depth, "Made move: %s\n", pcMoveStr);
+        free(pcMoveStr);
 
         // recurse to find the evaluation for this move sequence
         Eval_T tempEval = Engine_search(oeCopy, depth, bestWhite, bestBlack, NULL);
@@ -324,6 +328,9 @@ Move_T Engine_bestMove (Engine_T oEngine)
 
 /*--------------------------------------------------------------------*/
 
+char *Engine_notation (Engine_T oEngine, Move_T oMove) {
+    return ChessBoard_notation(oEngine->oBoard, oMove);
+}
 char *Engine_toString (Engine_T oEngine)
 {
     CHECK_NULL(oEngine);
@@ -340,11 +347,7 @@ char *Engine_toString (Engine_T oEngine)
     char *params = ChessParameters_toString(oEngine->oParams);
     ptr += sprintf(ptr, "%s\n\n", params);
 
-    char *eval = Eval_toString(Engine_evaluate(oEngine));
-    ptr += sprintf(ptr, "  Engine eval: %s", eval);
-
     free(board);
     free(params);
-    free(eval);
     return pcStrRep;
 }

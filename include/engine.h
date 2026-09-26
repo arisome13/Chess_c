@@ -48,6 +48,8 @@ void Engine_setDepth (Engine_T oEngine, size_t d);
 
 /*--------------------------------------------------------------------*/
 
+char *Engine_notation (Engine_T oEngine, Move_T oMove);
+
 /* Return the string representation of oBoard. CALLER FREE. */
 char *Engine_toString (Engine_T oEngine);
 

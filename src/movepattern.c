@@ -165,27 +165,33 @@ Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove, bool isCapture
         if (mtype->num_reps == 1)
             continue;
         
-        // if the direction of movement is the same...
-        if (mtype->dy/mtype->dx == dy/dx)
+        // if the movement along one axis is zero and the move 
+        // being tested moves along that axis, invalid
+        if (mtype->dx * dx == 0 && (dx != 0 || mtype->dx != 0)) continue;
+        if (mtype->dy * dy == 0 && (dy != 0 || mtype->dy != 0)) continue;
+
+        // if the movement along one axis is opposit from the tested move's
+        // direction along that axis, invalid
+        if (mtype->dx * dx < 0 || mtype->dy * dy < 0) continue;
+        
+        Mask_reset(traversedSqrs);
+
+        // get the maximum number of times this move can repeat
+        int max_reps = mtype->num_reps == 0 ? 8 : mtype->num_reps;
+        assert(0 <= max_reps && max_reps <= 8);
+        
+        // check if one can move like the other
+        for (int j = 1; j < max_reps; j++) 
         {
-            Mask_reset(traversedSqrs);
+            if (dx == j * mtype->dx && dy == j * mtype->dy)
+                return traversedSqrs;
 
-            // get the maximum number of times this move can repeat
-            int max_reps = 8 ? mtype->num_reps == 0 : mtype->num_reps;
+            int tempX = Move_src(oMove)->x + j * mtype->dx;
+            int tempY = Move_src(oMove)->y + j * mtype->dy;
+            if (!(0 <= tempX && tempX < 8 && 0 <= tempY && tempY < 8))
+                break;
             
-            // check if one can move like the other
-            for (int j = 1; j < max_reps; j++) 
-            {
-                if (dx == j * mtype->dx && dy == j * mtype->dy)
-                    return traversedSqrs;
-
-                int tempX = Move_src(oMove)->x + j * mtype->dx;
-                int tempY = Move_src(oMove)->y + j * mtype->dy;
-                if (!(0 <= tempX && tempX < 8 && 0 <= tempY && tempY < 8))
-                    break;
-                
-                Mask_set(traversedSqrs, tempY, tempX, ON);
-            }
+            Mask_set(traversedSqrs, tempY, tempX, ON);
         }
     }
 

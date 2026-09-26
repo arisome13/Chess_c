@@ -71,3 +71,36 @@ char Type_toString(p_type type, p_color color) {
 
     return tcStr;
 }
+
+const char *Type_nameToSymbol (char name) {
+    //'a', 'A', 'Z', 'z';
+    int isWhite = name < 90;
+    
+    if (isWhite)
+        name += 32;
+
+    if (name == 'p')
+        return isWhite ? "♙" : "♟";
+    else if (name == 'r')
+        return isWhite ? "♖" : "♜";
+    else if (name == 'n')
+        return isWhite ? "♘" : "♞";
+    else if (name == 'b')
+        return isWhite ? "♗" : "♝";
+    else if (name == 'q')
+        return isWhite ? "♕" : "♛";
+    else if (name == 'k')
+        return isWhite ? "♔" : "♚";
+    else {
+        ERROR("Invalid piece name %c\n", name);
+        return "";
+    }
+}
+
+/*
+    ♜	♞	♝	♛	♚	♝	♞	♜
+    ♟	♟	♟	♟	♟	♟	♟	♟
+    ♙	♙	♙	♙	♙	♙	♙	♙
+    ♖	♘	♗	♕	♔	♗	♘	♖
+*/
+

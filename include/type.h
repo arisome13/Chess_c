@@ -17,4 +17,7 @@ int Type_getValue (p_type type, p_color color);
     or '#' if there is no type or color. */
 char Type_toString(p_type type, p_color color);
 
+/* Converts a piece name into a symbol. */
+const char *Type_nameToSymbol (char name);
+
 #endif

@@ -261,7 +261,6 @@ char *ChessBoard_getFen(ChessBoard_T oBoard) {
         i = 0;
     }
 
-    PRINT("difference in fen length: %ld\n", ptr - pcStrRep);
     return pcStrRep;
 }
 char *ChessBoard_notation(ChessBoard_T oBoard, Move_T oMove)
@@ -288,6 +287,11 @@ char *ChessBoard_notation(ChessBoard_T oBoard, Move_T oMove)
                 ptr += sprintf(ptr, "%s", srcStr);
             break;
         case KNIGHT:
+        case ROOK:
+        case BISHOP:
+        case QUEEN:
+        case KING:
+            /* Should implement disambiguation... */
             ptr += sprintf(ptr, "%c", Type_toString(ptype, WHITE));
             break;
         default:
@@ -314,15 +318,18 @@ char *ChessBoard_toString(ChessBoard_T oBoard)
     for (size_t y = 0; y < 8; y++) {
         ptr += sprintf(ptr, "%zu |", 8-y);
         for (size_t x = 0; x < 8; x++) {
-            char bit = ' ';
+            bool labeled = false;
             // go through all the bit maps
             for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
                 if (Map_isCovered_coords(oBoard->pmPieceMaps[m], y, x)) {
-                    bit = Map_getName(oBoard->pmPieceMaps[m]);
+                    const char *bit = Type_nameToSymbol(Map_getName(oBoard->pmPieceMaps[m]));
+                    ptr += sprintf(ptr, " %s |", bit);
+                    labeled = true;
                     break;
                 }
             }
-            ptr += sprintf(ptr, " %c |", bit);
+            if (!labeled)
+                ptr += sprintf(ptr, "   |");
         }
         ptr += sprintf(ptr, "\n  +---+---+---+---+---+---+---+---+\n");
     }
