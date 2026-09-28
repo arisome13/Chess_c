@@ -28,6 +28,33 @@ struct Engine
     size_t iDepth;
 };
 
+struct UndoInfo 
+{
+    Move_T      move; //
+
+    // captures
+    bool        wasCapture;
+    p_color     capturedPieceColor;
+    p_type      capturedPieceType;
+    Square_T    capturedSquare;
+
+    // enpassant
+    bool        wasEnPassant;
+    Square_T    prevEnPassantSquare;
+    
+    // castling
+    bool        wasCastle;
+    Castles_T   prevCastlingRights;
+
+    // promotion
+    bool        wasPromotion;
+    p_type      promotedFromType;
+
+    // half moves
+    size_t      prevHalfmoveClock;
+};
+typedef struct UndoInfo *UndoInfo_T;
+
 Engine_T Engine_new(const char *pcFen) 
 {
     Engine_T oEngine;
@@ -86,15 +113,33 @@ void Engine_setDepth (Engine_T oEngine, size_t d) {
     assert(0 < d && d < MAX_DEPTH);
     oEngine->iDepth = d;
 }
-r_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
+r_move Engine_makeMove (Engine_T oEngine, Move_T oMove, UndoInfo_T undo)
 {
     CHECK_NULL(oEngine);
     CHECK_NULL(oMove);
 
+    undo->move = oMove;
+
     // check if the turn color matches the selected piece
-    if (ChessParameters_turnColor(oEngine->oParams) 
-        != ChessBoard_colorOnSqr(oEngine->oBoard, Move_src(oMove)))
-            return WRONG_COLOR;
+    p_color turnColor = ChessParameters_turnColor(oEngine->oParams);
+    p_color srcColor = ChessBoard_colorOnSqr(oEngine->oBoard, Move_src(oMove));
+    if (turnColor != srcColor)
+        return WRONG_COLOR;
+    
+    // check for capture
+    p_color dstColor = ChessBoard_colorOnSqr(oEngine->oBoard, Move_dst(oMove));
+    bool isCapture = false;
+    undo->wasCapture = false;
+    undo->capturedSquare = NULL;
+    undo->capturedPieceColor = NO_COLOR;
+    undo->capturedPieceType = NO_TYPE;
+    if (dstColor != NO_COLOR && dstColor != turnColor) {
+        isCapture = true;
+        undo->wasCapture = true;
+        undo->capturedSquare = Move_copy(Move_dst(oMove));
+        undo->capturedPieceColor = dstColor;
+        undo->capturedPieceType = ChessBoard_typeOnSqr(oEngine->oBoard, Move_dst(oMove));
+    }
 
     // run chessboard to try and make the requested move
     r_move result = ChessBoard_tryMove(oEngine->oBoard, oMove);
@@ -111,8 +156,10 @@ r_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
     if (result != SUCCESS) 
         return result;
 
+    undo->prevEnPassantSquare = Square_copy(ChessParameters_enpSqr(oEngine->oParams));
+    undo->wasEnPassant = false;
+
     p_type piece = ChessBoard_typeOnSqr(oEngine->oBoard, Move_dst(oMove));
-    
     if (piece == PAWN) 
     {
         if (Move_dst(oMove)->x == Move_src(oMove)->x 
@@ -123,11 +170,17 @@ r_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
                 + Move_src(oMove)->y;
             Square_T enp = Square_newCoords(yEnpCoord, Move_dst(oMove)->x);
             ChessParameters_setEnpSqr(oEngine->oParams, enp);
+            undo->wasEnPassant = true;
         }
     }
 
-    bool isCapture = false; // update this
+    undo->wasPromotion = false;
+    undo->promotedFromType = NO_TYPE;
+
+    undo->wasCastle = false;
+    undo->prevCastlingRights = Castles_copy(ChessParameters_castles(oEngine->oParams));
     
+    undo->prevHalfmoveClock = ChessParameters_50MoveRule(oEngine->oParams);
     ChessParameters_incrementMove(oEngine->oParams, piece == PAWN || isCapture);
 
     return SUCCESS;
@@ -159,17 +212,17 @@ size_t Engine_legalMoves (Engine_T oEngine, Move_T aMoves[])
 
         for (int dst_y = 0; dst_y < 8; dst_y++) { dst->y = dst_y; 
         for (int dst_x = 0; dst_x < 8; dst_x++) { dst->x = dst_x;
-            Engine_T oeCopy = Engine_copy(oEngine);
+            UndoInfo_T undo = (UndoInfo_T)calloc(1, sizeof(struct UndoInfo));
 
             // check if the move is valid and add to the move list
-            r_move result = Engine_makeMove(oeCopy, move);
+            r_move result = Engine_makeMove(oEngine, move, undo);
             if (result == SUCCESS)
                 aMoves[uiCount++] = Move_copy(move);
+            
+            Engine_undo(oEngine, undo);
+            UndoInfo_free(undo);
 
-            // reset engine set up
-            Engine_free(oeCopy);
-
-            // break out if 
+            // break out if there are too many moves
             if (uiCount >= MAX_MOVES)
                 goto got_max_moves;
         }}

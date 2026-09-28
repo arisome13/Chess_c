@@ -18,6 +18,7 @@ struct ChessBoard
     size_t NUM_MAPS;
 };
 
+
 /*--------------------------------------------------------------------*/
 
 ChessBoard_T ChessBoard_new(const char *pcFen)

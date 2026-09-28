@@ -5,12 +5,15 @@
 #include "map.h"
 #include "move.h"
 #include "results.h"
+#include "castles.h"
 
 #ifndef BOARD_H
 #define BOARD_H
 
 /* A ChessBoard_T object holds the piece positions on a chess board. */
 typedef struct ChessBoard *ChessBoard_T;
+
+typedef struct UndoBoard *UndoBoard_T;
 
 /*--------------------------------------------------------------------*/
 
@@ -35,7 +38,7 @@ void ChessBoard_onEachMap(ChessBoard_T oBoard, MapFunction func, int *data);
 /* Tries to perform oMove on oBoard. Returns SUCCESS if move could be 
    completed, some other move result otherwise and leaves the chessboard 
    untouched. */
-r_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove);
+r_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove, UndoBoard_T undo);
 
 /* Return info about the piece currently on square oSqr. */
 p_type ChessBoard_typeOnSqr(ChessBoard_T oBoard, Square_T oSqr);

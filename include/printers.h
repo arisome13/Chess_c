@@ -12,7 +12,7 @@
 #include <stdio.h>
 
 // 1 == true, 0 == false
-#define DEBUG   0
+#define DEBUG   1
 
 void print_message(const char *pcMessage, ...);
 void error_message(const char *function_name, 
@@ -39,20 +39,20 @@ void error_message(const char *function_name,
     } while (0)
 
 /* use for: catching memory errors after initialization */
-    #define CHECK_MEM(pObject) \
-        do { \
-            if ((pObject) == NULL) \
-                ERROR("Memory error at %s.\n", __func__); \
-        } while (0)
+#define CHECK_MEM(pObject) \
+    do { \
+        if ((pObject) == NULL) \
+            ERROR("Memory error at %s.\n", __func__); \
+    } while (0)
+
+/* use for: catching null parameters */
+#define CHECK_NULL(pObject) \
+    do { \
+        if (pObject == NULL) \
+            ERROR("Null error @ %s\n", __func__); \
+    } while(0)
 
 #if DEBUG // debugging macro functions
-
-    /* use for: catching null parameters */
-    #define CHECK_NULL(pObject) \
-        do { \
-            if (pObject == NULL) \
-                ERROR("Null error @ %s\n", __func__); \
-        } while(0)
 
     /* use for: catching out of bounds errors */
     #define CHECK_COORDS(y, x) \
@@ -63,7 +63,7 @@ void error_message(const char *function_name,
 
 #else // NO_DEBUG
 
-    #define CHECK_NULL(pObject) ((void)0)
+    //#define CHECK_NULL(pObject) ((void)0)
     #define CHECK_COORDS(y, x) ((void)0)
 
 #endif // DEBUG
