@@ -102,7 +102,7 @@ p_color Map_getColor(Map_T oMap) {
     return oMap->color;
 }
 char Map_getName(Map_T oMap) {
-    return Type_toString(oMap->type, oMap->color);
+    return Type_toChar(oMap->type, oMap->color);
 }
 
 /*--------------------------------------------------------------------*/
@@ -155,7 +155,7 @@ char *Map_toString(Map_T oMap) {
     
     char *ptr = pcStrRep;
 
-    ptr += sprintf(ptr, "Piece Type: \'%c\'", Type_toString(oMap->type, oMap->color));
+    ptr += sprintf(ptr, "Piece Type: \'%c\'", Type_toChar(oMap->type, oMap->color));
 
     for (size_t y = 0; y < 8; y++) {
         ptr += sprintf(ptr, 

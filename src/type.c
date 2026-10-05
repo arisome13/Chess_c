@@ -36,7 +36,7 @@ int Type_getValue (p_type type, p_color color) {
     return value * mod;
 }
 
-char Type_toString(p_type type, p_color color) {
+char Type_toChar(p_type type, p_color color) {
 
     char tcStr = '\0';
 

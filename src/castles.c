@@ -3,7 +3,6 @@
 /*--------------------------------------------------------------------*/
 
 #include "castles.h"
-#include <assert.h>
 
 struct Castles
 {

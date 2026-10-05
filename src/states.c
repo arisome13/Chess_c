@@ -1,10 +1,10 @@
 /*--------------------------------------------------------------------*/
-/* results.c                                                          */
+/* states.c                                                          */
 /*--------------------------------------------------------------------*/
 
-#include "results.h"
+#include "states.h"
 
-char *MoveResult_toString(r_move r)
+char *MoveState_toString(s_move r)
 {
     switch (r)
     {
@@ -20,17 +20,20 @@ char *MoveResult_toString(r_move r)
         return "BLOCKED_PATH";
     case SAME_COLOR_DST:
         return "SAME_COLOR_DST";
+    case GAME_HAS_ENDED:
+        return "GAME_HAS_ENDED";
     case FAIL:
         return "FAIL";
     default:
         return "NULL MOVE RESULT";
     }
 }
-
-char *GameResult_toString(r_game r)
+char *GameState_toString(s_game r)
 {
     switch (r)
     {
+    case IN_PROGRESS:
+        return "IN_PROGRESS";
     case CHECKMATE:
         return "CHECKMATE";
     case DRAW:
@@ -45,3 +48,4 @@ char *GameResult_toString(r_game r)
         return "NULL GAME RESULT";
     }
 }
+

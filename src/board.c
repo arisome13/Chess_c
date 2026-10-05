@@ -3,9 +3,6 @@
 /*--------------------------------------------------------------------*/
 
 #include "board.h"
-#include "parameters.h"
-#include "validation.h"
-#include <mask.h>
 
 enum {MAX_PIECE_TYPES = 64};
 
@@ -17,7 +14,6 @@ struct ChessBoard
     /* the number of non-null maps */
     size_t NUM_MAPS;
 };
-
 
 /*--------------------------------------------------------------------*/
 
@@ -60,16 +56,16 @@ ChessBoard_T ChessBoard_copy(ChessBoard_T oBoard) {
 
 /* Return the map from oBoard matching cName. Create a new one if one
    hasn't already been created. */
-static Map_T Chessboard_getOrMakeMap(ChessBoard_T oBoard, p_type type) {
+static Map_T Chessboard_getOrMakeMap(ChessBoard_T oBoard, char name) {
     CHECK_NULL(oBoard);
     for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
-        if (Map_getType(oBoard->pmPieceMaps[m]) == type)
+        if (Map_getName(oBoard->pmPieceMaps[m]) == name)
             return oBoard->pmPieceMaps[m];
     }
     if (oBoard->NUM_MAPS == MAX_PIECE_TYPES)
         ERROR("ChessBoard does not have the piece requested and not space for more.");
     
-    oBoard->pmPieceMaps[oBoard->NUM_MAPS] = Map_new(type);
+    oBoard->pmPieceMaps[oBoard->NUM_MAPS] = Map_new(name);
     Map_T madeMap = oBoard->pmPieceMaps[oBoard->NUM_MAPS];
     oBoard->NUM_MAPS++;
     return madeMap;
@@ -138,7 +134,7 @@ static Map_T Chessboard_getMapFromSqr(ChessBoard_T oBoard, Square_T oSqr) {
 }
 /* Returns SUCCESS if move could be completed, some other move result 
     otherwise and leaves the chessboard untouched. */
-static r_move Chessboard_handleMove(ChessBoard_T oBoard, Move_T oMove) 
+static s_move Chessboard_handleMove(ChessBoard_T oBoard, Move_T oMove) 
 {
     CHECK_NULL(oBoard);
     CHECK_NULL(oMove);
@@ -184,16 +180,77 @@ static r_move Chessboard_handleMove(ChessBoard_T oBoard, Move_T oMove)
 }
 /* USED FOR tryMove */
 
-r_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove)
+s_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove)
 {
     /* currently configured as a king capture game */
     
-    r_move result = Chessboard_handleMove(oBoard, oMove);
+    s_move result = Chessboard_handleMove(oBoard, oMove);
     
     if (result != SUCCESS)
         /* try the move as a special move */;
     
     return result;
+}
+
+bool ChessBoard_undo (ChessBoard_T oBoard, UndoInfo_T undo)
+{
+    Move_T move = UndoInfo_getMove(undo);
+    Square_T src = Move_src(move);
+    Square_T dst = Move_dst(move);
+
+    // no piece can be on the moved from square
+    Map_T mapSrc = Chessboard_getMapFromSqr(oBoard, src);
+
+    char *fenStr = ChessBoard_toString(oBoard);
+    char *sqrStr = Square_toString(src);
+    char *movStr = Move_toString(move);
+    DEBUG_ASSERT(mapSrc == NULL, 
+        ("While undoing %s, there is a piece on square %s after a piece moved away from it:\n%s\n"), 
+        movStr, sqrStr, fenStr);
+    free(fenStr);
+    free(sqrStr);
+    free(movStr);
+
+    Map_T mapDst = Chessboard_getMapFromSqr(oBoard, dst);
+    assert(mapDst != NULL); // a piece has to be on the moved to square
+
+    if (UndoInfo_getWasPromotion(undo))
+    {
+        Map_T mapPromFrom = Chessboard_getOrMakeMap(
+            oBoard, 
+            Type_toChar(
+                UndoInfo_getPromotionType(undo),
+                Map_getColor(mapDst)
+            )
+        );
+
+        Map_remove(mapDst, dst);
+        Map_place(mapPromFrom, src);
+    }
+    else 
+    {
+        Map_remove(mapDst, dst);
+        Map_place(mapDst, src);
+    }
+
+    if (UndoInfo_getWasCapture(undo))
+    {
+        Map_T mapCaptured = Chessboard_getOrMakeMap(
+            oBoard, Type_toChar(
+                UndoInfo_getCaptureType(undo), 
+                UndoInfo_getCaptureColor(undo)
+            )
+        );
+
+        Map_place(mapCaptured, dst);
+    }
+
+    if (UndoInfo_getWasCastleMove(undo))
+    {
+        assert(false);
+    }
+
+    return true;
 }
 
 /*--------------------------------------------------------------------*/
@@ -246,7 +303,7 @@ char *ChessBoard_getFen(ChessBoard_T oBoard) {
         for (size_t x = 0; x < 8; x++) { sqr->x = x;
             type = ChessBoard_typeOnSqr(oBoard, sqr);
             color = ChessBoard_colorOnSqr(oBoard, sqr);
-            char name = Type_toString(type, color);
+            char name = Type_toChar(type, color);
             if (name == '#')
                 i++;
             else {
@@ -293,7 +350,7 @@ char *ChessBoard_notation(ChessBoard_T oBoard, Move_T oMove)
         case QUEEN:
         case KING:
             /* Should implement disambiguation... */
-            ptr += sprintf(ptr, "%c", Type_toString(ptype, WHITE));
+            ptr += sprintf(ptr, "%c", Type_toChar(ptype, WHITE));
             break;
         default:
             ptr += sprintf(ptr, "%s", srcStr);
@@ -323,8 +380,8 @@ char *ChessBoard_toString(ChessBoard_T oBoard)
             // go through all the bit maps
             for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
                 if (Map_isCovered_coords(oBoard->pmPieceMaps[m], y, x)) {
-                    const char *bit = Type_nameToSymbol(Map_getName(oBoard->pmPieceMaps[m]));
-                    ptr += sprintf(ptr, " %s |", bit);
+                    //const char *bit_s = Type_nameToSymbol(Map_getName(oBoard->pmPieceMaps[m])); ptr += sprintf(ptr, " %s |", bit_s);
+                    char bit_c = Map_getName(oBoard->pmPieceMaps[m]); ptr += sprintf(ptr, " %c |", bit_c);
                     labeled = true;
                     break;
                 }

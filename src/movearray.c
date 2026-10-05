@@ -36,6 +36,11 @@ void MoveArray_free (MoveArray_T omArray) {
 
 /*--------------------------------------------------------------------*/
 
+size_t MoveArray_length (MoveArray_T omArray) {
+    CHECK_NULL(omArray);
+    return omArray->ulArrLen;
+}
+
 void MoveArray_add (MoveArray_T omArray, Move_T oMove) {
     CHECK_NULL(omArray);
     CHECK_NULL(oMove);
@@ -66,18 +71,19 @@ char *MoveArray_toString (MoveArray_T omArray) {
     PRINT("Number of bites for move array string: %d\n", sizeof(char) * 5 * MAX_MOVES_IN_ARRAY);
     char *ptr = pcStr;
 
-    ptr += snprintf(ptr, 14, "Move Array: [");
+    ptr += sprintf(ptr, "Move Array (len=%zu): [", MoveArray_length(omArray));
 
-    for (size_t i = 0; i < MAX_MOVES_IN_ARRAY; i++) {
-        if (i > 0)
-            ptr += snprintf(ptr, 3, ", ");
-
+    for (size_t i = 0; i < MAX_MOVES_IN_ARRAY; i++)
+    {
         Move_T move = MoveArray_get(omArray, i);
         if (move == NULL)
-            break;
+            continue;
+
+        if (i > 0)
+            ptr += snprintf(ptr, 3, ", ");
         
         char *movestr = Move_toString(move);
-        ptr += snprintf(ptr, MAX_MOVE_LEN, "%s", movestr);
+        ptr += snprintf(ptr, MAX_MOVE_LEN + 1, "%s", movestr);
         free(movestr);
     }
 

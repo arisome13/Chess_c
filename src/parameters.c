@@ -117,12 +117,31 @@ size_t ChessParameters_numMoves(ChessParameters_T oParams) {
 
 /*--------------------------------------------------------------------*/
 
+void ChessParameters_undo (ChessParameters_T oParams, UndoInfo_T undo) {
+   /* change turn color */
+   if (oParams->cTurnColor == BLACK)
+      oParams->cTurnColor = WHITE;
+   else {
+      oParams->cTurnColor = BLACK;
+      oParams->ulCurrMove--;
+   }
+
+   Castles_free(oParams->oCastles);
+   oParams->oCastles = UndoInfo_getCastling(undo);
+
+   oParams->oEnpSqr = UndoInfo_getEnpSqr(undo);
+
+   oParams->ul50MoveCount = UndoInfo_getHalfMClock(undo);
+}
+
 void ChessParameters_incrementMove (
    ChessParameters_T oParams, bool wasPawnOrCapture) {
       CHECK_NULL(oParams);
 
       /* increment move count */
-      oParams->ulCurrMove++;
+      if (oParams->cTurnColor == BLACK)
+         oParams->ulCurrMove++;
+      
       if (wasPawnOrCapture)
          oParams->ul50MoveCount = 0;
       else

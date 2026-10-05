@@ -60,11 +60,18 @@ void error_message(const char *function_name,
             if (!(0 <= x && x < 8 && 0 <= y && y < 8)) \
                 ERROR("Invalid coordinates. %zu, %zu must be in [0, 7]\n", y, x); \
         } while(0)
+    
+    /* use for: debugging if statements */
+    #define DEBUG_ASSERT(b, pcMessage, ...) \
+        do { \
+            if (!(b)) \
+                error_message(__func__, pcMessage __VA_OPT__(,) __VA_ARGS__); \
+        } while(0)
 
 #else // NO_DEBUG
 
-    //#define CHECK_NULL(pObject) ((void)0)
     #define CHECK_COORDS(y, x) ((void)0)
+    #define DEBUG_ASSERT(b, pcMessage, ...) ((void)0)
 
 #endif // DEBUG
 

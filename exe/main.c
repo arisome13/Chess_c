@@ -11,16 +11,10 @@ int main(void)
     printf("%s\n", tempStr);
     free(tempStr);
 
-    Move_T aMoves[256];
-    size_t len = Engine_legalMoves(eng, aMoves);
-    printf("num available moves for white: %zu\n", len);
-
-    for (size_t i = 0; i < len; i++) {
-        char *strmove = Move_toString(aMoves[i]);
-        printf("Move #%zu: %s\n", i, strmove);
-        Move_free(aMoves[i]);
-        free(strmove);
-    }
+    MoveArray_T aMoves = Engine_legalMoves(eng);
+    char *strarr = MoveArray_toString(aMoves);
+    printf("%s\n", strarr);
+    free(strarr);
 
     /*
     // find the best move
@@ -31,10 +25,10 @@ int main(void)
     */
 
     /*
-    r_move result = Engine_makeMove(eng, bestM);
+    s_move result = Engine_makeMove(eng, bestM);
     Move_free(bestM);
 
-    PRINT("%s\n\n", MoveResult_toString(result));
+    PRINT("%s\n\n", MoveState_toString(result));
     tempStr = Engine_toString(eng);
     printf("%s\n", tempStr);
     free(tempStr);

@@ -20,10 +20,10 @@ MoveArray_T MoveArray_new (void);
 /* Free omArray. */
 void MoveArray_free (MoveArray_T omArray);
 
-/* Return a deep copy of omArray. CALLER FREE. */
-// MoveArray_T MoveArray_copy (MoveArray_T omArray);
-
 /*--------------------------------------------------------------------*/
+
+/* Returns the number of moves in omArray in CONSTANT time. */
+size_t MoveArray_length (MoveArray_T omArray);
 
 /* Adds a move to omArray. Raises an error if it is already at the 
     maximum number of moves. */
