@@ -4,7 +4,7 @@
 
 #include "states.h"
 
-char *MoveState_toString(s_move r)
+const char *MoveState_toString(s_move r)
 {
     switch (r)
     {
@@ -22,13 +22,17 @@ char *MoveState_toString(s_move r)
         return "SAME_COLOR_DST";
     case GAME_HAS_ENDED:
         return "GAME_HAS_ENDED";
+    case INVALID_ENP_CASE:
+        return "INVALID_ENP_CASE";
+    case INVALID_CASTLE_CASE:
+        return "INVALID_CASTLE_CASE";
     case FAIL:
         return "FAIL";
     default:
         return "NULL MOVE RESULT";
     }
 }
-char *GameState_toString(s_game r)
+const char *GameState_toString(s_game r)
 {
     switch (r)
     {

@@ -67,9 +67,11 @@ void Mask_set(Mask_T oMask, size_t y, size_t x, ON_OFF ONorOFF) {
     switch (ONorOFF)
     {
         case ON:
+            DEBUG_ASSERT(!Mask_isSet(oMask, y, x), "Bit is already on.");
             oMask->ullMask |= 1ULL << (8 * y + x);
             break;
         case OFF:
+            DEBUG_ASSERT(Mask_isSet(oMask, y, x), "Bit is already off.");
             oMask->ullMask &= ~(1ULL << (8 * y + x));
             break;
         default:

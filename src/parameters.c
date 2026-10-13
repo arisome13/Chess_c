@@ -158,11 +158,12 @@ void ChessParameters_incrementMove (
 
 void ChessParameters_setEnpSqr (
    ChessParameters_T oParams, Square_T oSqr) {
+      PRINT("An enp square was added!\n");
       CHECK_NULL(oParams);
       CHECK_NULL(oSqr);
       if (oParams->oEnpSqr != NULL)
          Square_free(oParams->oEnpSqr);
-      oParams->oEnpSqr = oSqr;
+      oParams->oEnpSqr = Square_copy(oSqr);
 }
 
 void ChessParameters_removeCastle (

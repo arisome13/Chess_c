@@ -98,10 +98,7 @@ static void Engine_updateGameState (Engine_T oEngine) {
     
     if (ChessParameters_50MoveRule(oEngine->oParams) >= 50) {
         oEngine->rGameState = BORING_MOVE_50;
-        return;
     }
-
-    
 }
 
 void Engine_setDepth (Engine_T oEngine, size_t d) {
@@ -118,8 +115,9 @@ s_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
         return GAME_HAS_ENDED;
 
     // check if the turn color matches the selected piece
+    Square_T srcSqr = Move_src(oMove);
     p_color turnColor = ChessParameters_turnColor(oEngine->oParams);
-    p_color srcColor = ChessBoard_colorOnSqr(oEngine->oBoard, Move_src(oMove));
+    p_color srcColor = ChessBoard_colorOnSqr(oEngine->oBoard, srcSqr);
     if (turnColor != srcColor)
         return WRONG_COLOR;
 
@@ -140,41 +138,63 @@ s_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
         isCapture = true;
         UndoInfo_logCapture(newUndo, 
             dstSqr, ChessBoard_typeOnSqr(
-                oEngine->oBoard, Move_dst(oMove)
+                oEngine->oBoard, dstSqr
             ), dstColor);
     }
 
+    // get the type of the moving piece
+    p_type pieceType = ChessBoard_typeOnSqr(oEngine->oBoard, srcSqr);
+
     // run chessboard to try and make the requested move
     s_move result = ChessBoard_tryMove(oEngine->oBoard, oMove);
-
-    // get the type of the moved piece
-    p_type piece = ChessBoard_typeOnSqr(oEngine->oBoard, Move_dst(oMove));
-
+    
     // check for unusual moves 
-    if (result != SUCCESS) { switch (piece)
+    int yMovement = (int)dstSqr->y - (int)srcSqr->y;
+    int xMovement = (int)dstSqr->x - (int)srcSqr->x;
+    s_move altResult;
+    if (result != SUCCESS) { switch (pieceType)
     {
         case PAWN:
             if (ChessParameters_enpSqr(oEngine->oParams) != NULL 
-                    && Square_equals(Move_dst(oMove), ChessParameters_enpSqr(oEngine->oParams))
-                    && abs((int)Move_dst(oMove)->y - (int)Move_src(oMove)->y) == 1 
-                    && abs((int)Move_dst(oMove)->x - (int)Move_src(oMove)->x) == 1) {
-                /* move the pawn */
-                /* take the piece */
-                /* result = SUCCESS; */
-
-                // PRINT("--> IMPLEMENT <-- Can't take with enpassant yet!\n");
+                    && Square_equals(dstSqr, ChessParameters_enpSqr(oEngine->oParams))
+                    && abs(yMovement) == 1 && abs(xMovement) == 1) 
+            {
+                altResult = ChessBoard_tryEnpassant(oEngine->oBoard, oMove);
+                if (altResult != SUCCESS)
+                    break;
+                
+                isCapture = true;
+                Square_T enpPawnSqr = Square_copy(srcSqr);
+                enpPawnSqr->x += xMovement;
+                UndoInfo_logCapture(newUndo, enpPawnSqr, PAWN, 
+                    Color_oposite(srcColor));
+                Square_free(enpPawnSqr);
             }
             break;
 
         case KING:
-            if (Move_dst(oMove)->y == Move_dst(oMove)->y 
-                    && abs((int)Move_dst(oMove)->x - (int)Move_src(oMove)->x) == 2) {
-                /* check if the squares are clear */
-                /* move the king */
-                /* move the rook */
-                /* result == SUCCESS; */
+            if (abs(xMovement) == 2 && yMovement == 0)
+            {
+                altResult = ChessBoard_tryCastle(oEngine->oBoard, oMove);
+                
+                // only activate if the move was a castle
+                if (altResult != SUCCESS)
+                    break;
 
-                // PRINT("--> IMPLEMENT <-- Can't castle yet!\n");
+                char castle_char;
+                if (turnColor == WHITE) // white castle
+                    if (xMovement > 0) // kingside
+                        castle_char = 'K';
+                    else // queenside
+                        castle_char = 'Q';
+                else // black castle
+                    if (xMovement > 0) // kingside
+                        castle_char = 'k';
+                    else // queenside
+                        castle_char = 'q';
+
+                UndoInfo_logCastle(newUndo);
+                ChessParameters_removeCastle(oEngine->oParams, castle_char);
             }
             break;
 
@@ -183,32 +203,25 @@ s_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
     }}
 
     // raise error if the move could not be made
-    if (result != SUCCESS) {
+    if (result != SUCCESS && altResult != SUCCESS) 
+    {
         UndoInfo_free(newUndo);
         return result;
     }
 
-    if (piece == PAWN)
+    ChessParameters_incrementMove(oEngine->oParams, pieceType == PAWN || isCapture);
+
+    if (pieceType == PAWN && xMovement == 0 && abs(yMovement) == 2)
     {
-        if (Move_dst(oMove)->x == Move_src(oMove)->x 
-                && abs((int)Move_dst(oMove)->y - (int)Move_src(oMove)->y) == 2) 
-        {
-            size_t yEnpCoord = 
-                ((int)Move_dst(oMove)->y - (int)Move_src(oMove)->y) / 2 
-                + Move_src(oMove)->y;
+        size_t yEnpCoord = yMovement / 2 + srcSqr->y;
+        DEBUG_ASSERT(0 <= yEnpCoord && yEnpCoord <= 7, 
+            "Invalid enp coord. Overflow error likely.\n");
 
-            Square_T enp = Square_newCoords(yEnpCoord, Move_dst(oMove)->x);
-            ChessParameters_setEnpSqr(oEngine->oParams, enp);
-            
-            UndoInfo_logEnpassant(newUndo);
-        }
+        Square_T enp = Square_newCoords(yEnpCoord, dstSqr->x);
+        ChessParameters_setEnpSqr(oEngine->oParams, enp);
+        
+        UndoInfo_logEnpassant(newUndo);
     }
-
-    /* // only activate if the move was a castle
-    UndoInfo_logCastle(newUndo, true);
-    ChessParameters_removeCastle(oEngine->oParams, 'castle_char');
-    */
-    ChessParameters_incrementMove(oEngine->oParams, piece == PAWN || isCapture);
 
     oEngine->oUndoList = newUndo;
     Engine_updateGameState(oEngine);
@@ -449,4 +462,10 @@ char *Engine_toString (Engine_T oEngine)
     free(board);
     free(params);
     return pcStrRep;
+}
+void Engine_PRINT(Engine_T oEngine)
+{
+    char *tempStr = Engine_toString(oEngine);
+    printf("%s\n", tempStr);
+    free(tempStr);
 }

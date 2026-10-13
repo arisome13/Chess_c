@@ -36,6 +36,8 @@ void ChessBoard_onEachMap(ChessBoard_T oBoard, MapFunction func, int *data);
    completed, some other move result otherwise and leaves the chessboard 
    untouched. */
 s_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove);
+s_move ChessBoard_tryEnpassant(ChessBoard_T oBoard, Move_T oMove);
+s_move ChessBoard_tryCastle(ChessBoard_T oBoard, Move_T oMove);
 
 /* Undo the given move. Returns true if it succeeds */
 bool ChessBoard_undo (ChessBoard_T oBoard, UndoInfo_T undo);

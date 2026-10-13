@@ -5,36 +5,31 @@
 
 int main (void)
 {
-    const char *fen = "r1bqkbnr/ppp2ppp/4p3/4n3/8/5N2/PPP1PPPP/RNBQKB1R w KQkq - 0 1";
-    const char *moveStr = "d1d8";
-    char *tempStr;
+    //const char *fen = "r1bqkbnr/ppp2ppp/4p3/4n3/8/5N2/PPP1PPPP/RNBQKB1R w KQkq - 0 1";
+    Engine_T eng;
+    MoveArray_T omArray;
+    s_move result;
 
-    // create the engine
-    Engine_T eng = Engine_new(fen);
+    // enter the moves to test an enpassant capture
+    omArray = MoveArray_new();
+    MoveArray_add(omArray, Move_read("e2e4"));
+    MoveArray_add(omArray, Move_read("a7a6"));
+    MoveArray_add(omArray, Move_read("e4e5"));
+    MoveArray_add(omArray, Move_read("d7d5"));
+    MoveArray_add(omArray, Move_read("e5d6"));
 
-    // print the enging
-    tempStr = Engine_toString(eng);
-    printf("%s\n", tempStr);
-    free(tempStr);
+    // create the engine with starting position
+    eng = Engine_new(NULL);
+    Engine_PRINT(eng); // print the position and eval
 
-    // make a move
-    Move_T move = Move_read(moveStr);
-    Engine_makeMove(eng, move);
-    
-    // print the engine
-    tempStr = Engine_toString(eng);
-    printf("%s\n", tempStr);
-    free(tempStr);
-
-    // undo the move
-    Engine_undo(eng);
-
-    // print the engine
-    tempStr = Engine_toString(eng);
-    printf("%s\n", tempStr);
-    free(tempStr);
+    for (size_t i = 0; i < MoveArray_length(omArray); i++)
+    {
+        result = Engine_makeMove(eng, MoveArray_get(omArray, i));
+        PRINT("Result was a %s\n", MoveState_toString(result));
+        Engine_PRINT(eng);
+    }
     
     // free the relevant pointers
-    Move_free(move);
     Engine_free(eng);
+    MoveArray_free(omArray);
 }
