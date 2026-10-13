@@ -237,16 +237,16 @@ s_move ChessBoard_tryCastle(ChessBoard_T oBoard, Move_T oMove) {
     if (Map_getType(kingMap) != KING)
         return INVALID_CASTLE_CASE;
     
-    int dx = Move_dst(oMove)->x - Move_src(oMove)->x;
+    int dx = (int)Move_dst(oMove)->x - (int)Move_src(oMove)->x;
     if (Move_dst(oMove)->y != Move_src(oMove)->y || abs(dx) != 2)
         return DOESNT_HAVE_RANGE;
     
     // check if the squares are clear
     Square_T focusSqr = Square_copy(Move_src(oMove));
     Map_T focusMap = NULL;
-    int increment = 1 ? dx > 0 : -1;
-    int traveredSqrCount = 2 ? dx > 0 : 3;
-    
+    int increment = dx > 0 ? 1 : -1;
+    int traveredSqrCount = dx > 0 ? 2 : 3;
+
     focusSqr->x += increment;
     Square_T rookSqr = Square_copy(focusSqr);
 
@@ -265,7 +265,7 @@ s_move ChessBoard_tryCastle(ChessBoard_T oBoard, Move_T oMove) {
         || Map_getType(rookMap) != ROOK // piece must be a rook
         || Map_getColor(rookMap) != Map_getColor(kingMap)) // rook must be the same color
         return INVALID_CASTLE_CASE;
-
+    
     // move the king
     Map_remove(kingMap, Move_src(oMove));
     Map_place(kingMap, Move_dst(oMove));

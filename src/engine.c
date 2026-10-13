@@ -176,25 +176,18 @@ s_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
             if (abs(xMovement) == 2 && yMovement == 0)
             {
                 altResult = ChessBoard_tryCastle(oEngine->oBoard, oMove);
-                
-                // only activate if the move was a castle
                 if (altResult != SUCCESS)
                     break;
 
-                char castle_char;
-                if (turnColor == WHITE) // white castle
-                    if (xMovement > 0) // kingside
-                        castle_char = 'K';
-                    else // queenside
-                        castle_char = 'Q';
-                else // black castle
-                    if (xMovement > 0) // kingside
-                        castle_char = 'k';
-                    else // queenside
-                        castle_char = 'q';
+                if (turnColor == WHITE) {// white castle
+                    ChessParameters_removeCastle(oEngine->oParams, 'K');
+                    ChessParameters_removeCastle(oEngine->oParams, 'Q');
+                } else { // black castle
+                    ChessParameters_removeCastle(oEngine->oParams, 'k');
+                    ChessParameters_removeCastle(oEngine->oParams, 'q');
+                }
 
                 UndoInfo_logCastle(newUndo);
-                ChessParameters_removeCastle(oEngine->oParams, castle_char);
             }
             break;
 
@@ -221,6 +214,34 @@ s_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
         ChessParameters_setEnpSqr(oEngine->oParams, enp);
         
         UndoInfo_logEnpassant(newUndo);
+    }
+
+    if (pieceType == KING) 
+    {
+        if (srcColor == WHITE) {
+            ChessParameters_removeCastle(oEngine->oParams, 'K');
+            ChessParameters_removeCastle(oEngine->oParams, 'Q');
+        } else {
+            ChessParameters_removeCastle(oEngine->oParams, 'k');
+            ChessParameters_removeCastle(oEngine->oParams, 'q');
+        }
+    }
+    else if (pieceType == ROOK)
+    {
+        if (srcColor == WHITE && srcSqr->y == 7)
+        {
+            if (srcSqr->x == 0)
+                ChessParameters_removeCastle(oEngine->oParams, 'Q');
+            else if (srcSqr->x == 7)
+                ChessParameters_removeCastle(oEngine->oParams, 'K');
+        }
+        else if (srcColor == BLACK && srcSqr->y == 0)
+        {
+            if (srcSqr->x == 0)
+                ChessParameters_removeCastle(oEngine->oParams, 'q');
+            else if (srcSqr->x == 7)
+                ChessParameters_removeCastle(oEngine->oParams, 'k');
+        }
     }
 
     oEngine->oUndoList = newUndo;

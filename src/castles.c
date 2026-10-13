@@ -90,7 +90,7 @@ void Castles_remove (Castles_T oCastles, char castleType) {
         default:
             ERROR("Invalid castle type: %c", castleType);
     }
-    ERROR("Tried to turn off an already off castle type: %c", castleType);
+    //ERROR("Tried to turn off an already off castle type: %c", castleType);
 }
 
 Castles_T Castles_copy (Castles_T oCastles) {

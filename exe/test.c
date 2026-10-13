@@ -14,9 +14,12 @@ int main (void)
     omArray = MoveArray_new();
     MoveArray_add(omArray, Move_read("e2e4"));
     MoveArray_add(omArray, Move_read("a7a6"));
-    MoveArray_add(omArray, Move_read("e4e5"));
-    MoveArray_add(omArray, Move_read("d7d5"));
-    MoveArray_add(omArray, Move_read("e5d6"));
+    MoveArray_add(omArray, Move_read("f1d3"));
+    MoveArray_add(omArray, Move_read("a6a5"));
+    MoveArray_add(omArray, Move_read("g1e2"));
+    MoveArray_add(omArray, Move_read("a5a4"));
+    MoveArray_add(omArray, Move_read("e1g1"));
+    MoveArray_add(omArray, Move_read("a8a7"));
 
     // create the engine with starting position
     eng = Engine_new(NULL);
@@ -25,8 +28,10 @@ int main (void)
     for (size_t i = 0; i < MoveArray_length(omArray); i++)
     {
         result = Engine_makeMove(eng, MoveArray_get(omArray, i));
-        PRINT("Result was a %s\n", MoveState_toString(result));
+        PRINT("Result was %s\n", MoveState_toString(result));
         Engine_PRINT(eng);
+        if (result != SUCCESS)
+            break;
     }
     
     // free the relevant pointers
