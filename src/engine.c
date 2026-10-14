@@ -87,11 +87,10 @@ Engine_T Engine_copy (Engine_T oEngine)
 
 /*--------------------------------------------------------------------*/
 
-/* static char *Engine_getFen (Engine_T oEngine) {
+static char *Engine_getFen (Engine_T oEngine) {
     CHECK_NULL(oEngine);
     return ChessBoard_getFen(oEngine->oBoard);
 }
-*/
 static void Engine_updateGameState (Engine_T oEngine) {
     oEngine->rGameState = IN_PROGRESS;
     //MoveArray_T oMArray = Engine_legalMoves(oEngine);
@@ -373,8 +372,10 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
 
         if (DEBUG) {
             char *pcMoveStr = ChessBoard_notation(oEngine->oBoard, move);
-            PRINT_I(search_depth, "Made move: %s\n", pcMoveStr);
+            char *pcFen = Engine_getFen(oEngine);
+            PRINT_I(search_depth, "Made move: %s on board \'%s\'\n", pcMoveStr, pcFen);
             free(pcMoveStr);
+            free(pcFen);
         }
 
         // recurse to find the evaluation for this move sequence

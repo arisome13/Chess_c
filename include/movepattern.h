@@ -3,8 +3,8 @@
 /*--------------------------------------------------------------------*/
 
 #include "helpers.h"
-#include <mask.h>
-#include <move.h>
+#include "mask.h"
+#include "move.h"
 
 #ifndef MOVEPATTERN_H
 #define MOVEPATTERN_H
@@ -13,6 +13,7 @@
     capture, 2) a move that can't capture, 3) and a move that can do 
     either. */
 typedef enum CaptureRule {ONLY_CAPTURE, CANT_CAPTURE, BOTH} CaptureRule;
+typedef enum Restriction {NONE, FROM_RANK_2, FROM_RANK_7} Restriction;
 
 /* A Movement is a direction a piece can move in and if it can repeat 
     that move. */
@@ -24,6 +25,8 @@ struct Movement
     size_t num_reps;
     // rule for if this movement has to or can't capture
     CaptureRule end;
+    // restriction on movement
+    Restriction restriction;
 };
 
 /* A MovePattern_T object holds the different types of moves a piece 
@@ -48,7 +51,7 @@ MovePattern_T MovePattern_copy (MovePattern_T oPattern);
 
 /* Adds a move in direction (dx, dy) to oPattern. */
 void MovePattern_add (MovePattern_T oPattern, 
-    int dy, int dx, size_t reps, CaptureRule end);
+    int dy, int dx, size_t reps, CaptureRule end, Restriction restr);
 
 /* Returns a mask of the squares oMove goes through, or NULL if the 
     move cannot be made with oPattern. CALLER FREE. */

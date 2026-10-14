@@ -158,7 +158,6 @@ void ChessParameters_incrementMove (
 
 void ChessParameters_setEnpSqr (
    ChessParameters_T oParams, Square_T oSqr) {
-      PRINT("An enp square was added!\n");
       CHECK_NULL(oParams);
       CHECK_NULL(oSqr);
       if (oParams->oEnpSqr != NULL)

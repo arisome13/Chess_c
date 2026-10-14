@@ -150,7 +150,7 @@ bool        UndoInfo_getWasEnpMove    (UndoInfo_T undo)
 }
 bool        UndoInfo_getWasCastleMove (UndoInfo_T undo)
 {
-    return undo->prevEnpSquare;
+    return undo->wasCastle;
 }
 bool        UndoInfo_getWasPromotion  (UndoInfo_T undo)
 {

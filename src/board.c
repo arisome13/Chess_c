@@ -213,7 +213,7 @@ s_move ChessBoard_tryEnpassant(ChessBoard_T oBoard, Move_T oMove) {
     Square_T capturedSqr = Square_newCoords(Move_src(oMove)->y, Move_dst(oMove)->x);
     Map_T capturedMap = Chessboard_getMapFromSqr(oBoard, capturedSqr);
     DEBUG_ASSERT(capturedMap != NULL && Map_getType(capturedMap) == PAWN, 
-        "An enpassat has to come from a pawn.");
+        "An enpassat has to come from a non-pawn piece.\n");
     
     Map_remove(capturedMap,capturedSqr);
     Map_remove(srcMap, Move_src(oMove));
@@ -328,12 +328,49 @@ bool ChessBoard_undo (ChessBoard_T oBoard, UndoInfo_T undo)
             )
         );
 
-        Map_place(mapCaptured, dst);
+        Map_place(mapCaptured, UndoInfo_getCaptureSqr(undo));
     }
 
     if (UndoInfo_getWasCastleMove(undo))
     {
-        assert(false);
+        size_t castleRank = Move_dst(UndoInfo_getMove(undo))->y;
+        char *moveStr = Move_toString(UndoInfo_getMove(undo));
+        DEBUG_ASSERT(castleRank == Move_src(UndoInfo_getMove(undo))->y, 
+            "Invalid castle move: %s\n", moveStr);
+        free(moveStr);
+
+        size_t kingFile = Move_dst(UndoInfo_getMove(undo))->x;
+        size_t oldKingFile = Move_src(UndoInfo_getMove(undo))->x;
+
+        size_t rookFile;
+        size_t oldRookFile;
+        if (kingFile > oldKingFile) {
+            rookFile = kingFile - 1;
+            oldRookFile = 7;
+        } else {
+            rookFile = kingFile + 1;
+            oldRookFile = 0;
+        }
+
+        Square_T focus = Square_newCoords(castleRank, 0);
+        
+        // get the rook map
+        focus->x = rookFile;
+        Map_T rookMap = Chessboard_getMapFromSqr(oBoard, focus);
+        // move the rook
+        Map_remove(rookMap, focus);
+        focus->x = oldRookFile;
+        Map_place(rookMap, focus);
+        
+        // get the king map
+        focus->x = kingFile;
+        Map_T kingMap = Chessboard_getMapFromSqr(oBoard, focus);
+        // move the king
+        Map_remove(kingMap, focus);
+        focus->x = oldKingFile;
+        Map_place(kingMap, focus);
+        
+        Square_free(focus);
     }
 
     return true;
