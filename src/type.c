@@ -93,7 +93,7 @@ const char *Type_nameToSymbol (char name) {
     else if (name == 'k')
         return isWhite ? "♔" : "♚";
     else {
-        ERROR("Invalid piece name %c\n", name);
+        ERROR("Invalid piece name \'%c\'\n", name);
         return "";
     }
 }

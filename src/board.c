@@ -518,4 +518,22 @@ char *ChessBoard_toString(ChessBoard_T oBoard)
 
     return pcStrRep;
 }
+char **ChessBoard_toCharBoard (ChessBoard_T oBoard)
+{
+    char **board = (char **)malloc(8 * sizeof(char *));
+    CHECK_MEM(board);
 
+    for (size_t y = 0; y < 8; y++) {
+    for (size_t x = 0; x < 8; x++) {
+        board[y][x] = '0';
+        // go through all the bit maps
+        for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
+            if (Map_isCovered_coords(oBoard->pmPieceMaps[m], y, x)) {
+                board[y][x] = Map_getName(oBoard->pmPieceMaps[m]);
+                break;
+            }
+        }
+    }}
+
+    return board;
+}
