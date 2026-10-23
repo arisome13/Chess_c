@@ -12,7 +12,7 @@ PSTN_OBJS = obj/position.o $(OBJECTS)
 
 GTK_CFLAGS = $(shell pkg-config --cflags gtk4)
 GTK_LIBS   = $(shell pkg-config --libs gtk4)
-CFLAGS = -std=c23 -Wall -Wextra -Wpedantic -Wshadow -I include
+CFLAGS = -std=c23 -Wall -Wextra -Wpedantic -Wshadow -I include -fsanitize=address -g -O0
 
 PROGRAMS = bin/test bin/main bin/game bin/position
 

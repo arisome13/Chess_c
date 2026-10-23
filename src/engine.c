@@ -150,7 +150,7 @@ s_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
     // check for unusual moves 
     int yMovement = (int)dstSqr->y - (int)srcSqr->y;
     int xMovement = (int)dstSqr->x - (int)srcSqr->x;
-    s_move altResult;
+    s_move altResult = FAIL;
     if (result != SUCCESS) { switch (pieceType)
     {
         case PAWN:
@@ -245,6 +245,10 @@ s_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
 
     oEngine->oUndoList = newUndo;
     Engine_updateGameState(oEngine);
+
+    char *movestr = Move_toString(oMove);
+    PRINT("Engine moved: %s.\n", movestr);
+    free(movestr);
     return SUCCESS;
 }
 
@@ -258,8 +262,16 @@ void Engine_undo (Engine_T oEngine)
     oEngine->oUndoList = UndoInfo_getNextUndo(toUndo);
     oEngine->rGameState = IN_PROGRESS;
 
-    ChessParameters_undo(oEngine->oParams, toUndo);
-    ChessBoard_undo(oEngine->oBoard, toUndo);
+    DEBUG_ASSERT(ChessParameters_undo(oEngine->oParams, toUndo), 
+        "ChessParameters_undo must succeed.");
+    DEBUG_ASSERT(ChessBoard_undo(oEngine->oBoard, toUndo), 
+        "ChessBoard_undo must succeed.");
+
+    char *movestr = Move_toString(UndoInfo_getMove(toUndo));
+    PRINT("Engine undid: %s.\n", movestr);
+    free(movestr);
+
+    UndoInfo_free(toUndo);
 }
 
 MoveArray_T Engine_legalMoves (Engine_T oEngine)
@@ -335,7 +347,7 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
         
         if (DEBUG) {
             char *evalStr = Eval_toString(score);
-            PRINT_I(search_depth, "Got base case: returning (%s)\n", evalStr);
+            DEBUG_PRINT(search_depth, "Got base case: returning (%s)\n", evalStr);
             free(evalStr);
         }
         
@@ -373,7 +385,7 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
         if (DEBUG) {
             char *pcMoveStr = ChessBoard_notation(oEngine->oBoard, move);
             char *pcFen = Engine_getFen(oEngine);
-            PRINT_I(search_depth, "Made move: %s on board \'%s\'\n", pcMoveStr, pcFen);
+            DEBUG_PRINT(search_depth, "Made move: %s on board \'%s\'\n", pcMoveStr, pcFen);
             free(pcMoveStr);
             free(pcFen);
         }
@@ -417,7 +429,7 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
         char *movestr = Move_toString(bestMove);
         char *evalstr = Eval_toString(bestEval);
         
-        PRINT_I(search_depth, "Bests: (%s) with %s\n", movestr, evalstr);
+        DEBUG_PRINT(search_depth, "Bests: (%s) with %s\n", movestr, evalstr);
         
         free(movestr);
         free(evalstr);
@@ -444,7 +456,7 @@ Move_T Engine_bestMove (Engine_T oEngine)
     PRINT("Checking for best move.\n");
     CHECK_NULL(oEngine);
     
-    Move_T bestMove = Move_new(Square_newCoords(0, 0), Square_newCoords(0, 0));
+    Move_T bestMove = NULL;
     Eval_T eval = Engine_search(oEngine, oEngine->iDepth, NULL, NULL, bestMove);
     
     char *moveStr = Move_toString(bestMove);
@@ -476,14 +488,17 @@ char *Engine_toString (Engine_T oEngine)
     ptr[0] = '\0';
 
     char *board = ChessBoard_toString(oEngine->oBoard);
-    ptr += sprintf(ptr, "%s\n\n", board);
+    ptr += snprintf(ptr, "%s\n\n", 803, board);
 
     char *params = ChessParameters_toString(oEngine->oParams);
-    ptr += sprintf(ptr, "%s\n\n", params);
+    ptr += snprintf(ptr, "%s\n\n", 803, params);
 
     free(board);
     free(params);
     return pcStrRep;
+}
+BoardInfo_T Engine_getInfo (Engine_T oEngine) {
+    return ChessBoard_getInfo(oEngine->oBoard);
 }
 void Engine_PRINT(Engine_T oEngine)
 {

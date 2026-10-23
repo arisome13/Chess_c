@@ -19,4 +19,7 @@
 // universal switch
 typedef enum ON_OFF {OFF, ON} ON_OFF;
 
+// a proxy type for an 8 by 8 char array
+typedef char (*CharBoard)[8];
+
 #endif

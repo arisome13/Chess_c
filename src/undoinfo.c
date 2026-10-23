@@ -84,7 +84,7 @@ UndoInfo_T UndoInfo_copy (UndoInfo_T undo)
     if (undo->wasEnpMove)
         UndoInfo_logEnpassant(uCopy);
     
-    if (undo->wasCapture)
+    if (undo->wasCastle)
         UndoInfo_logCastle(uCopy);
 
     if (undo->wasPromotion)

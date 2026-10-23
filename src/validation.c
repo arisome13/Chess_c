@@ -43,7 +43,7 @@ bool Validate_move (Move_T move) {
         return false;
 
     // invalid if the src square is equal to the dst square
-    if (src->x == dst->x && src->y == dst->y)
+    if (Square_equals(src, dst))
         return false;
 
     // invalid if the coordinates of x and y are invalid

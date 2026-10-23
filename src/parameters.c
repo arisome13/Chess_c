@@ -117,21 +117,25 @@ size_t ChessParameters_numMoves(ChessParameters_T oParams) {
 
 /*--------------------------------------------------------------------*/
 
-void ChessParameters_undo (ChessParameters_T oParams, UndoInfo_T undo) {
+bool ChessParameters_undo (ChessParameters_T oParams, UndoInfo_T undo) {
    /* change turn color */
-   if (oParams->cTurnColor == BLACK)
+   if (oParams->cTurnColor == BLACK) {
       oParams->cTurnColor = WHITE;
-   else {
+   } else {
       oParams->cTurnColor = BLACK;
       oParams->ulCurrMove--;
    }
 
    Castles_free(oParams->oCastles);
-   oParams->oCastles = UndoInfo_getCastling(undo);
+   oParams->oCastles = Castles_copy(UndoInfo_getCastling(undo));
 
-   oParams->oEnpSqr = UndoInfo_getEnpSqr(undo);
+   if (oParams->oEnpSqr != NULL)
+      Square_free(oParams->oEnpSqr);
+   oParams->oEnpSqr = UndoInfo_getEnpSqr(undo) == NULL ? NULL : Square_copy(UndoInfo_getEnpSqr(undo));
 
    oParams->ul50MoveCount = UndoInfo_getHalfMClock(undo);
+
+   return true;
 }
 
 void ChessParameters_incrementMove (
@@ -188,23 +192,23 @@ char *ChessParameters_toString(ChessParameters_T oParams) {
 
    // print the top row
    char *rowPtr = ptr;
-   ptr += sprintf(ptr, "  +-------+-");
+   ptr += snprintf(ptr, "  +-------+-", 13);
    for (size_t i = 0; i < strlen(pcCastleStr); i++) {
-      ptr += sprintf(ptr, "-");
+      ptr += snprintf(ptr, "-", 2);
    }
-   ptr += sprintf(ptr, "-+----+-");
+   ptr += snprintf(ptr, "-+----+-", 9);
    for (size_t i = 0; i < strlen(buf50Count); i++) {
-      ptr += sprintf(ptr, "-");
+      ptr += snprintf(ptr, "-", 2);
    }
-   ptr += sprintf(ptr, "-+-");
+   ptr += snprintf(ptr, "-+-", 4);
    for (size_t i = 0; i < strlen(bufCurMove); i++) {
-      ptr += sprintf(ptr, "-");
+      ptr += snprintf(ptr, "-", 2);
    }
-   ptr += sprintf(ptr, "-+\n");
+   ptr += snprintf(ptr, "-+\n", 4);
    char *endRow = ptr;
    
    // print the parameter data
-   ptr += sprintf(ptr, "  | %s | %s | %s | %s | %s |\n", 
+   ptr += snprintf(ptr, "  | %.5s | %s | %.2s | %s | %s |\n", 60,
       Color_toString(oParams->cTurnColor), pcCastleStr, pcEnpSqr, buf50Count, bufCurMove);
    
    ptr += snprintf(ptr, endRow - rowPtr, "%s", rowPtr);

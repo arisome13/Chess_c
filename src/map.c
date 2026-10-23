@@ -119,11 +119,13 @@ void Map_remove(Map_T oMap, Square_T oSqr) {
 
 bool Map_isCovered_coords(Map_T oMap, size_t y, size_t x) {
     CHECK_NULL(oMap);
+    CHECK_COORDS(y, x);
     return Mask_isSet(oMap->mask, y, x);
 }
 bool Map_isCovered_sqr(Map_T oMap, Square_T oSqr) {
     CHECK_NULL(oMap);
     CHECK_NULL(oSqr);
+    CHECK_COORDS(oSqr->y, oSqr->x);
     return Mask_isSet(oMap->mask, oSqr->y, oSqr->x);
 }
 
@@ -155,11 +157,11 @@ char *Map_toString(Map_T oMap) {
     
     char *ptr = pcStrRep;
 
-    ptr += sprintf(ptr, "Piece Type: \'%c\'", Type_toChar(oMap->type, oMap->color));
+    ptr += snprintf(ptr, "Piece Type: \'%c\'", 17, Type_toChar(oMap->type, oMap->color));
 
     for (size_t y = 0; y < 8; y++) {
-        ptr += sprintf(ptr, 
-            "\n  +---+---+---+---+---+---+---+---+\n%zu |", 8-y);
+        ptr += snprintf(ptr, 
+            "\n  +---+---+---+---+---+---+---+---+\n%zu |", 43, 8-y);
         for (size_t x = 0; x < 8; x++) {
             char *bit = Map_isCovered_coords(oMap, y, x) ? "X": " ";
             ptr += sprintf(ptr, " %s |", bit);

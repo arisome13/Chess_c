@@ -5,6 +5,7 @@
 #include "map.h"
 #include "states.h"
 #include "undoinfo.h"
+#include "boardinfo.h"
 
 #ifndef BOARD_H
 #define BOARD_H
@@ -57,5 +58,8 @@ char *ChessBoard_notation(ChessBoard_T oBoard, Move_T oMove);
 
 /* Return the string representation of oBoard. CALLER FREE. */
 char *ChessBoard_toString(ChessBoard_T oBoard);
+
+/* Return a summary of oBoard. For use by user interfaces. */
+BoardInfo_T ChessBoard_getInfo (ChessBoard_T oBoard);
 
 #endif

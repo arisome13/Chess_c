@@ -94,6 +94,7 @@ char *Mask_toString(Mask_T oMask) {
         ptr += sprintf(ptr, 
             "\n  +---+---+---+---+---+---+---+---+\n%d |", 8-y);
         for (int x = 0; x < 8; x++) {
+            CHECK_COORDS(y, x);
             char *bit = Mask_isSet(oMask, y, x) ? "X": " ";
             ptr += sprintf(ptr, " %s |", bit);
         }

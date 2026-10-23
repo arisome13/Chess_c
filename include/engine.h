@@ -6,6 +6,7 @@
 #include "states.h"
 #include "eval.h"
 #include "movearray.h"
+#include "boardinfo.h"
 
 #ifndef ENGINE_H
 #define ENGINE_H
@@ -59,6 +60,10 @@ char *Engine_notation (Engine_T oEngine, Move_T oMove);
 
 /* Return the string representation of oEngine. CALLER FREE. */
 char *Engine_toString (Engine_T oEngine);
+
+/* Return a summary representation of oEngine's board 
+   for use by user interfaces. */
+BoardInfo_T Engine_getInfo (Engine_T oEngine);
 
 /* Directly print the string representation of oEngine. */
 void Engine_PRINT(Engine_T oEngine);

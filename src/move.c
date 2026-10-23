@@ -86,22 +86,17 @@ Square_T Move_dst(Move_T oMove) {
 /*--------------------------------------------------------------------*/
 
 char *Move_toString(Move_T oMove) {
+    if (oMove == NULL)
+        return "NULL";
+
+    
     char *src = Square_toString(oMove->sSrc);
     char *dst = Square_toString(oMove->sDst);
 
     char *pcStrRep = malloc(10);
     CHECK_MEM(pcStrRep);
     
-    if (oMove != NULL) 
-    {
-        pcStrRep[0] = '\0';
-        strncpy(pcStrRep, src, 2);
-        strncpy(pcStrRep+2, dst, 2);
-    }
-    else 
-    {
-        pcStrRep = "NULL";
-    }
+    snprintf(pcStrRep, 5, "%.2s%.2s", src, dst);
 
     free(src);
     free(dst);

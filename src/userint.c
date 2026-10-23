@@ -5,16 +5,7 @@
 #include "userint.h"
 
 /* 0 = empty; uppercase = white, lowercase = black */
-static char UI_charboard[8][8] = {
-    {'r','n','b','q','k','b','n','r'},
-    {'p','p','p','p','p','p','p','p'},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    {'P','P','P','P','P','P','P','P'},
-    {'R','N','B','Q','K','B','N','R'},
-};
+static char UI_charboard[8][8];
 /* selected square or NULL */
 static Square_T UI_selected = NULL;
 /* buttons show on the ui window */
@@ -26,12 +17,11 @@ static GtkWidget *UI_window = NULL;
 
 static const char *CSS = (
     ".square {  min-width: 64px; min-height: 64px;  padding: 0; border-radius: 0; border: none;"
-    "  box-shadow: none; background-image: none;  font-size: 40px; color: #000;}"
-    ".light    { background-color: #f0d9b5; }"
-    ".dark     { background-color: #b58863; }"
-    ".selected { background-color: #f6f669; }"
+    "  box-shadow: none; background-image: none;  font-size: 40px; color: #000;}.light    { background-color: #f0d9b5; }"
+    ".dark     { background-color: #b58863; }.selected { background-color: #f6f669; }"
 );
 
+/* ... */
 static void clear_selection(void)
 {
     if (UI_selected != NULL) {
@@ -39,9 +29,8 @@ static void clear_selection(void)
         UI_selected = NULL;
     }
 }
-
 /* Sync every button with the board array and selection. */
-static void refresh()
+static void refresh(void)
 {
     // if the buttons don't exist, don't refresh
     if (UI_window == NULL)
@@ -60,7 +49,7 @@ static void refresh()
             gtk_widget_remove_css_class(btn, "selected");
     }}
 }
-
+/* ... */
 static void on_square_clicked(GtkButton *button, gpointer user_data)
 {
     (void)button;
@@ -72,18 +61,17 @@ static void on_square_clicked(GtkButton *button, gpointer user_data)
         if (UI_charboard[r][c])
             UI_selected = Square_newCoords(r, c);
     } else { // second click
-        int fromY = UI_selected->y, fromX = UI_selected->x;
+        size_t fromY = UI_selected->y, fromX = UI_selected->x;
         clear_selection();
         if (sendfunc && !(fromY == r && fromX == c))
             sendfunc(fromY, fromX, r, c);
     }
     refresh();
 }
-
+/* ... */
 static void activate(GtkApplication *gtk_app, gpointer user_data)
 {
     (void)user_data;
-
     if (UI_window != NULL) {
         gtk_window_present(GTK_WINDOW(UI_window));
         return;
@@ -105,6 +93,17 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
     gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
     gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
 
+    char startingboard[8][8] = {
+        {'r','n','b','q','k','b','n','r'},
+        {'p','p','p','p','p','p','p','p'},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {'P','P','P','P','P','P','P','P'},
+        {'R','N','B','Q','K','B','N','R'},
+    };
+
     for (int r = 0; r < 8; r++) {
     for (int c = 0; c < 8; c++) {
         GtkWidget *btn = gtk_button_new();
@@ -119,28 +118,29 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
 
         gtk_grid_attach(GTK_GRID(grid), btn, c, r, 1, 1);
         UI_buttons[r][c] = btn;
+        UI_charboard[r][c] = startingboard[r][c];
     }}
 
     gtk_window_set_child(GTK_WINDOW(window), grid);
     UI_window = window;
-    refresh(); // WHY IS THIS IN THE MIDDLE?
+    refresh();
     gtk_window_present(GTK_WINDOW(window));
 }
 
-void ChessUI_load(char inputcharboard[8][8])
+void ChessUI_load(CharBoard inputboard)
 {
     // set the board up
     for (int y = 0; y < 8; y++) {
     for (int x = 0; x < 8; x++) {
-        UI_charboard[y][x] = inputcharboard[y][x] == ' ' ? 0 : inputcharboard[y][x];
+        UI_charboard[y][x] = inputboard[y][x] == ' ' ? 0 : inputboard[y][x];
     }}
 
     clear_selection();
     refresh();
 }
-void ChessUI_run(SendMove_func func)
+void ChessUI_run(SendMove_func sfunc, void (*endfunc)(void))
 {
-    sendfunc = func;
+    sendfunc = sfunc;
 
     GtkApplication *gtk_app =
         gtk_application_new("org.example.ChessBoard", G_APPLICATION_DEFAULT_FLAGS);
@@ -152,5 +152,5 @@ void ChessUI_run(SendMove_func func)
     UI_window = NULL;
     clear_selection();
     
-    DEBUG_ASSERT(status, "Status is not true, exiting unexpectedly.");
+    endfunc();
 }

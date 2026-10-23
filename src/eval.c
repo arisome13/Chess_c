@@ -75,10 +75,10 @@ char *Eval_toString(Eval_T oEval) {
     char *ptr = pcStrRep;
 
     if (oEval->type == CENTIPAWN)
-        ptr += sprintf(ptr, "CP");
+        ptr += snprintf(ptr, "CP", 3);
     else
-        ptr += sprintf(ptr, "FM");
-    ptr += sprintf(ptr, ": %.2f", oEval->score);
+        ptr += snprintf(ptr, "FM", 3);
+    ptr += snprintf(ptr, ": %.2f", 10, oEval->score);
 
     return pcStrRep;
 }

@@ -30,14 +30,6 @@ void error_message(const char *function_name,
         print_message(pcMessage __VA_OPT__(,) __VA_ARGS__); \
     } while (0)
 
-/* use for printing some message */
-#define PRINT_I(num, pcMessage, ...) \
-    do { \
-        for (size_t print_i_index = 0; print_i_index < num; print_i_index++) \
-            printf("   "); \
-        print_message(pcMessage __VA_OPT__(,) __VA_ARGS__); \
-    } while (0)
-
 /* use for: catching memory errors after initialization */
 #define CHECK_MEM(pObject) \
     do { \
@@ -67,11 +59,21 @@ void error_message(const char *function_name,
             if (!(b)) \
                 error_message(__func__, pcMessage __VA_OPT__(,) __VA_ARGS__); \
         } while(0)
+    
+    /* use for printing some message */
+    #define DEBUG_PRINT(num, pcMessage, ...) \
+        do { \
+            for (size_t print_i_index = 0; print_i_index < num; print_i_index++) \
+                printf("   "); \
+            print_message(pcMessage __VA_OPT__(,) __VA_ARGS__); \
+            fflush(stdout); \
+        } while (0)
 
 #else // NO_DEBUG
 
     #define CHECK_COORDS(y, x) ((void)0)
     #define DEBUG_ASSERT(b, pcMessage, ...) ((void)0)
+    #define DEBUG_PRINT(num, pcMessage, ...) ((void)0)
 
 #endif // DEBUG
 

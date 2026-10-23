@@ -45,7 +45,8 @@ size_t ChessParameters_numMoves(ChessParameters_T oParams);
 
 /*--------------------------------------------------------------------*/
 
-void ChessParameters_undo (ChessParameters_T oParams, UndoInfo_T undo);
+bool ChessParameters_undo (ChessParameters_T oParams, UndoInfo_T undo);
+
 void ChessParameters_incrementMove (ChessParameters_T oParams, bool wasPawnOrCapture);
 void ChessParameters_setEnpSqr (ChessParameters_T oParams, Square_T oSqr);
 void ChessParameters_removeCastle (ChessParameters_T oParams, char castle);
