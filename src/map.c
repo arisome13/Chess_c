@@ -157,18 +157,18 @@ char *Map_toString(Map_T oMap) {
     
     char *ptr = pcStrRep;
 
-    ptr += snprintf(ptr, "Piece Type: \'%c\'", 17, Type_toChar(oMap->type, oMap->color));
+    ptr += snprintf(ptr, 17, "Piece Type: \'%c\'", Type_toChar(oMap->type, oMap->color));
 
     for (size_t y = 0; y < 8; y++) {
-        ptr += snprintf(ptr, 
-            "\n  +---+---+---+---+---+---+---+---+\n%zu |", 43, 8-y);
+        ptr += snprintf(ptr, 43, 
+            "\n  +---+---+---+---+---+---+---+---+\n%zu |", 8-y);
         for (size_t x = 0; x < 8; x++) {
-            char *bit = Map_isCovered_coords(oMap, y, x) ? "X": " ";
-            ptr += sprintf(ptr, " %s |", bit);
+            char bit = Map_isCovered_coords(oMap, y, x) ? 'X': ' ';
+            ptr += snprintf(ptr, 5, " %c |", bit);
         }
     }
-    ptr += sprintf(ptr, "\n  +---+---+---+---+---+---+---+---+\n");
-    ptr += sprintf(ptr, "    a   b   c   d   e   f   g   h  \n");
+    ptr += snprintf(ptr, 38, "\n  +---+---+---+---+---+---+---+---+\n");
+    ptr += snprintf(ptr, 37, "    a   b   c   d   e   f   g   h  \n");
 
     return pcStrRep;
 }

@@ -45,8 +45,10 @@ void MovePattern_add (MovePattern_T oPattern, int dy, int dx,
 
     oPattern->movements[i] = (struct Movement *)malloc(sizeof(struct Movement));
     
+    CHECK_COORDS(abs(dx), abs(dy));
     oPattern->movements[i]->dx = dx;
     oPattern->movements[i]->dy = dy;
+    CHECK_COORDS(reps, 0); // check if reps is in [0, 7]
     oPattern->movements[i]->num_reps = reps;
     oPattern->movements[i]->end = end;
     oPattern->movements[i]->restriction = restr;
@@ -228,19 +230,19 @@ char *MovePattern_toString (MovePattern_T oPattern) {
     for (size_t i = 0; i < oPattern->NUM_MOVETYPES; i++)
     {
         struct Movement *mnt = MovePattern_getMovement(oPattern, i);
-        ptr += sprintf(ptr, "(%d, %d) ", mnt->dx, mnt->dy);
+        ptr += snprintf(ptr, 8, "(%d, %d) ", mnt->dx, mnt->dy);
         
         if (mnt->num_reps != 1)
-            ptr += sprintf(ptr, ": repeats ");
+            ptr += snprintf(ptr, 11, ": repeats ");
         else if (mnt->num_reps != 0)
-            ptr += sprintf(ptr, " (%zu) ", mnt->num_reps);
+            ptr += snprintf(ptr, 6, " (%zu) ", mnt->num_reps);
 
         if (mnt->end == CANT_CAPTURE)
-            ptr += sprintf(ptr, ": can't capture ");
+            ptr += snprintf(ptr, 17, ": can't capture ");
         else if (mnt->end == ONLY_CAPTURE)
-            ptr += sprintf(ptr, ": only captures ");
+            ptr += snprintf(ptr, 17, ": only captures ");
         
-        ptr += sprintf(ptr, "\n");
+        ptr += snprintf(ptr, 2, "\n");
     }
 
     return pcStrRep;
@@ -252,11 +254,11 @@ char *MovePattern_showMovesFrom (MovePattern_T oPattern, Square_T oSqr) {
     CHECK_MEM(pcStrRep);
     char *ptr = pcStrRep;
 
-    ptr += sprintf(ptr, "  +---+---+---+---+---+---+---+---+\n");
+    ptr += snprintf(ptr, 37, "  +---+---+---+---+---+---+---+---+\n");
 
     Move_T move = Move_new(oSqr, Square_newCoords(0, 0));
     for (Move_dst(move)->y = 0; Move_dst(move)->y <= 7; Move_dst(move)->y++) {
-        ptr += sprintf(ptr, "%zu |", 8-Move_dst(move)->y);
+        ptr += snprintf(ptr, 4, "%zu |", 8-Move_dst(move)->y);
         for (Move_dst(move)->x = 0; Move_dst(move)->x <= 7; Move_dst(move)->x++) {
             char bit = ' ';
             if (Square_equals(Move_dst(move), Move_src(move)))
@@ -265,11 +267,11 @@ char *MovePattern_showMovesFrom (MovePattern_T oPattern, Square_T oSqr) {
                 bit = 'X';
             else if (MovePattern_canMove(oPattern, move, false))
                 bit = 'O';
-            ptr += sprintf(ptr, " %c |", bit);
+            ptr += snprintf(ptr, 5, " %c |", bit);
         }
-        ptr += sprintf(ptr, "\n  +---+---+---+---+---+---+---+---+\n");
+        ptr += snprintf(ptr, 38, "\n  +---+---+---+---+---+---+---+---+\n");
     }
-    ptr += sprintf(ptr, "    a   b   c   d   e   f   g   h  ");
+    ptr += snprintf(ptr, 36, "    a   b   c   d   e   f   g   h  ");
 
     return pcStrRep;
 }

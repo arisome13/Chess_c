@@ -91,15 +91,15 @@ char *Mask_toString(Mask_T oMask) {
     char *ptr = pcStrRep;
 
     for (int y = 0; y < 8; y++) {
-        ptr += sprintf(ptr, 
+        ptr += snprintf(ptr, 42,
             "\n  +---+---+---+---+---+---+---+---+\n%d |", 8-y);
         for (int x = 0; x < 8; x++) {
             CHECK_COORDS(y, x);
-            char *bit = Mask_isSet(oMask, y, x) ? "X": " ";
-            ptr += sprintf(ptr, " %s |", bit);
+            char bit = Mask_isSet(oMask, y, x) ? 'X': ' ';
+            ptr += snprintf(ptr, 5, " %c |", bit);
         }
     }
-    ptr += sprintf(ptr, "\n  +---+---+---+---+---+---+---+---+\n");
+    ptr += snprintf(ptr, 38, "\n  +---+---+---+---+---+---+---+---+\n");
 
     return pcStrRep;
 }

@@ -147,6 +147,7 @@ void ChessUI_run(SendMove_func sfunc, void (*endfunc)(void))
     g_signal_connect(gtk_app, "activate", G_CALLBACK(activate), NULL);
 
     int status = g_application_run(G_APPLICATION(gtk_app), 0, 0);
+    (void)status;
 
     g_object_unref(gtk_app);
     UI_window = NULL;

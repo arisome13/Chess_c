@@ -488,10 +488,10 @@ char *Engine_toString (Engine_T oEngine)
     ptr[0] = '\0';
 
     char *board = ChessBoard_toString(oEngine->oBoard);
-    ptr += snprintf(ptr, "%s\n\n", 803, board);
+    ptr += snprintf(ptr, 803, "%s\n\n", board);
 
     char *params = ChessParameters_toString(oEngine->oParams);
-    ptr += snprintf(ptr, "%s\n\n", 803, params);
+    ptr += snprintf(ptr, 803, "%s\n\n", params);
 
     free(board);
     free(params);

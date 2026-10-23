@@ -192,23 +192,23 @@ char *ChessParameters_toString(ChessParameters_T oParams) {
 
    // print the top row
    char *rowPtr = ptr;
-   ptr += snprintf(ptr, "  +-------+-", 13);
+   ptr += snprintf(ptr, 13, "  +-------+-");
    for (size_t i = 0; i < strlen(pcCastleStr); i++) {
-      ptr += snprintf(ptr, "-", 2);
+      ptr += snprintf(ptr, 2, "-");
    }
-   ptr += snprintf(ptr, "-+----+-", 9);
+   ptr += snprintf(ptr, 9, "-+----+-");
    for (size_t i = 0; i < strlen(buf50Count); i++) {
-      ptr += snprintf(ptr, "-", 2);
+      ptr += snprintf(ptr, 2, "-");
    }
-   ptr += snprintf(ptr, "-+-", 4);
+   ptr += snprintf(ptr, 4, "-+-");
    for (size_t i = 0; i < strlen(bufCurMove); i++) {
-      ptr += snprintf(ptr, "-", 2);
+      ptr += snprintf(ptr, 2, "-");
    }
-   ptr += snprintf(ptr, "-+\n", 4);
+   ptr += snprintf(ptr, 4, "-+\n");
    char *endRow = ptr;
    
    // print the parameter data
-   ptr += snprintf(ptr, "  | %.5s | %s | %.2s | %s | %s |\n", 60,
+   ptr += snprintf(ptr, 60, "  | %.5s | %s | %.2s | %s | %s |\n",
       Color_toString(oParams->cTurnColor), pcCastleStr, pcEnpSqr, buf50Count, bufCurMove);
    
    ptr += snprintf(ptr, endRow - rowPtr, "%s", rowPtr);

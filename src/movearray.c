@@ -71,7 +71,8 @@ char *MoveArray_toString (MoveArray_T omArray) {
     PRINT("Number of bites for move array string: %d\n", sizeof(char) * 5 * MAX_MOVES_IN_ARRAY);
     char *ptr = pcStr;
 
-    ptr += sprintf(ptr, "Move Array (len=%zu): [", MoveArray_length(omArray));
+
+    ptr += snprintf(ptr, 24, "Move Array (len=%zu): [", MoveArray_length(omArray));
 
     for (size_t i = 0; i < MAX_MOVES_IN_ARRAY; i++)
     {

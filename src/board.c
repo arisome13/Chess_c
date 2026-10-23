@@ -442,7 +442,7 @@ char *ChessBoard_getFen(ChessBoard_T oBoard) {
 
     for (size_t y = 0; y < 8; y++) { sqr->y = y;
         if (y != 0)
-            ptr += snprintf(ptr, "/", 2);
+            ptr += snprintf(ptr, 2, "/");
         for (size_t x = 0; x < 8; x++) { sqr->x = x;
             type = ChessBoard_typeOnSqr(oBoard, sqr);
             color = ChessBoard_colorOnSqr(oBoard, sqr);
@@ -451,14 +451,14 @@ char *ChessBoard_getFen(ChessBoard_T oBoard) {
                 i++;
             else {
                 if (i != 0) {
-                    ptr += snprintf(ptr, "%d", 2, i);
+                    ptr += snprintf(ptr, 2, "%d", i);
                     i = 0;
                 }
-                ptr += snprintf(ptr, "%c", 2, name);
+                ptr += snprintf(ptr, 2, "%c", name);
             }
         }
         if (i != 0)
-            ptr += snprintf(ptr, "%d", 2, i);
+            ptr += snprintf(ptr, 2, "%d", i);
         i = 0;
     }
 
@@ -485,7 +485,7 @@ char *ChessBoard_notation(ChessBoard_T oBoard, Move_T oMove)
             // if a pawn is moving forward (not to the side), 
             // return the destination square
             if (sqrSrc->x != sqrDst->x)
-                ptr += snprintf(ptr, "%s", 3, srcStr);
+                ptr += snprintf(ptr, 3, "%s", srcStr);
             break;
         case KNIGHT:
         case ROOK:
@@ -493,13 +493,13 @@ char *ChessBoard_notation(ChessBoard_T oBoard, Move_T oMove)
         case QUEEN:
         case KING:
             /* Should implement disambiguation... */
-            ptr += snprintf(ptr, "%c", 2, Type_toChar(ptype, WHITE));
+            ptr += snprintf(ptr, 2, "%c", Type_toChar(ptype, WHITE));
             break;
         default:
-            ptr += snprintf(ptr, "%s", 3, srcStr);
+            ptr += snprintf(ptr, 3, "%s", srcStr);
     }
     // add the destination square for every notation
-    ptr += snprintf(ptr, "%s", 3, dstStr);
+    ptr += snprintf(ptr, 3, "%s", dstStr);
 
     // free and return
     free(srcStr);
@@ -514,27 +514,27 @@ char *ChessBoard_toString(ChessBoard_T oBoard)
     CHECK_MEM(pcStrRep);
     char *ptr = pcStrRep;
 
-    ptr += snprintf(ptr, "  +---+---+---+---+---+---+---+---+\n", 37);
+    ptr += snprintf(ptr, 37, "  +---+---+---+---+---+---+---+---+\n");
 
     for (size_t y = 0; y < 8; y++) {
-        ptr += snprintf(ptr, "%zu |", 4, 8-y);
+        ptr += snprintf(ptr, 4, "%zu |", 8-y);
         for (size_t x = 0; x < 8; x++) {
             bool labeled = false;
             // go through all the bit maps
             for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
                 if (Map_isCovered_coords(oBoard->pmPieceMaps[m], y, x)) {
-                    //const char *bit_s = Type_nameToSymbol(Map_getName(oBoard->pmPieceMaps[m])); ptr += snprintf(ptr, " %s |", 5, bit_s);
-                    char bit_c = Map_getName(oBoard->pmPieceMaps[m]); ptr += snprintf(ptr, " %c |", 5, bit_c);
+                    //const char *bit_s = Type_nameToSymbol(Map_getName(oBoard->pmPieceMaps[m])); ptr += snprintf(ptr, 5, " %s |", bit_s);
+                    char bit_c = Map_getName(oBoard->pmPieceMaps[m]); ptr += snprintf(ptr, 5, " %c |", bit_c);
                     labeled = true;
                     break;
                 }
             }
             if (!labeled)
-                ptr += snprintf(ptr, "   |", 5);
+                ptr += snprintf(ptr, 5, "   |");
         }
-        ptr += snprintf(ptr, "\n  +---+---+---+---+---+---+---+---+\n", 38);
+        ptr += snprintf(ptr, 38, "\n  +---+---+---+---+---+---+---+---+\n");
     }
-    ptr += snprintf(ptr, "    a   b   c   d   e   f   g   h  ", 36);
+    ptr += snprintf(ptr, 36, "    a   b   c   d   e   f   g   h  ");
 
     return pcStrRep;
 }
