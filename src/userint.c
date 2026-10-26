@@ -1,7 +1,6 @@
 
 #include <gtk/gtk.h>
 #include "type.h"
-#include "square.h"
 #include "userint.h"
 
 /* 0 = empty; uppercase = white, lowercase = black */
@@ -16,9 +15,13 @@ static SendMove_func sendfunc = NULL;
 static GtkWidget *UI_window = NULL;
 
 static const char *CSS = (
-    ".square {  min-width: 64px; min-height: 64px;  padding: 0; border-radius: 0; border: none;"
-    "  box-shadow: none; background-image: none;  font-size: 40px; color: #000;}.light    { background-color: #f0d9b5; }"
-    ".dark     { background-color: #b58863; }.selected { background-color: #f6f669; }"
+    ".square {  min-width: 64px; min-height: 64px;  padding: 0; border-radius: 0; border: none; box-shadow: none; background-image: none; font-size: 40px; color: #000;}"
+    ".light    { background-color: #f0d9b5; }"
+    ".dark     { background-color: #b58863; }"
+    //".selected { background-color: #f6f669; }"
+    //".moved    { background-color: #f5d797; }"
+    ".selected { background-image: linear-gradient(rgba(246, 246, 105, 0.6), rgba(246, 246, 105, 0.6)); }"
+    ".moved    { background-image: linear-gradient(rgba(246, 246, 105, 0.45), rgba(246, 246, 105, 0.45)); }"
 );
 
 /* ... */
@@ -47,6 +50,8 @@ static void refresh(void)
             gtk_widget_add_css_class(btn, "selected");
         else
             gtk_widget_remove_css_class(btn, "selected");
+        
+        //gtk_widget_remove_css_class(btn, "moved");
     }}
 }
 /* ... */
@@ -127,12 +132,16 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
     gtk_window_present(GTK_WINDOW(window));
 }
 
-void ChessUI_load(CharBoard inputboard)
+void ChessUI_load(CharBoard inputboard, Square_T s1, Square_T s2)
 {
     // set the board up
-    for (int y = 0; y < 8; y++) {
-    for (int x = 0; x < 8; x++) {
+    for (size_t y = 0; y < 8; y++) {
+    for (size_t x = 0; x < 8; x++) {
         UI_charboard[y][x] = inputboard[y][x] == ' ' ? 0 : inputboard[y][x];
+        gtk_widget_remove_css_class(UI_buttons[y][x], "moved");
+        if (s1 != NULL && s2 != NULL)
+            if ((y == s1->y && x == s1->x) || (y == s2->y && x == s2->x))
+                gtk_widget_add_css_class(UI_buttons[y][x], "moved");
     }}
 
     clear_selection();

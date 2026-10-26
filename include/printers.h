@@ -15,13 +15,13 @@
 #define DEBUG   1
 
 void print_message(const char *pcMessage, ...);
-void error_message(const char *function_name, 
-        const char *pcMessage, ...);
+void error_message(const char *file_name, const char *function_name, 
+        int line_num, const char *pcMessage, ...);
 
 /* use for: catching unexpected errors */
 #define ERROR(pcMessage, ...) \
     do { \
-        error_message(__func__, pcMessage __VA_OPT__(,) __VA_ARGS__); \
+        error_message(__FILE__, __func__, __LINE__, pcMessage __VA_OPT__(,) __VA_ARGS__); \
     } while (0)
 
 /* use for printing some message */
@@ -34,14 +34,14 @@ void error_message(const char *function_name,
 #define CHECK_MEM(pObject) \
     do { \
         if ((pObject) == NULL) \
-            ERROR("Memory error at %s.\n", __func__); \
+            ERROR("Memory error.\n"); \
     } while (0)
 
 /* use for: catching null parameters */
 #define CHECK_NULL(pObject) \
     do { \
         if (pObject == NULL) \
-            ERROR("Null error @ %s\n", __func__); \
+            ERROR("Null error.\n"); \
     } while(0)
 
 #if DEBUG // debugging macro functions
@@ -57,7 +57,7 @@ void error_message(const char *function_name,
     #define DEBUG_ASSERT(b, pcMessage, ...) \
         do { \
             if (!(b)) \
-                error_message(__func__, pcMessage __VA_OPT__(,) __VA_ARGS__); \
+                error_message(__FILE__, __func__, __LINE__, pcMessage __VA_OPT__(,) __VA_ARGS__); \
         } while(0)
     
     /* use for printing some message */

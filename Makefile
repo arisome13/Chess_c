@@ -41,6 +41,8 @@ bin/position: $(PSTN_OBJS) | bin
 # .o file creations
 obj/userint.o: src/userint.c | obj
 	gcc $(CFLAGS) $(GTK_CFLAGS) -c $< -o $@
+obj/test.o: exe/test.c | obj
+	gcc $(CFLAGS) $(GTK_CFLAGS) -c $< -o $@
 obj/%.o: exe/%.c | obj
 	gcc $(CFLAGS) -c $< -o $@
 obj/%.o: src/%.c | obj
@@ -50,3 +52,4 @@ obj/%.o: src/%.c | obj
 obj bin:
 	mkdir -p $@
 
+-include $(wildcard obj/*.d)

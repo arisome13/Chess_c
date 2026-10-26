@@ -252,6 +252,7 @@ s_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
     p_type pieceType = ChessBoard_typeOnSqr(oEngine->oBoard, srcSqr);
 
     // run chessboard to try and make the requested move
+    char *movestr = ChessBoard_notation(oEngine->oBoard, oMove);
     s_move result = ChessBoard_tryMove(oEngine->oBoard, oMove);
     
     // check for unusual moves 
@@ -322,6 +323,13 @@ s_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
         UndoInfo_logEnpassant(newUndo);
     }
 
+    if (pieceType == PAWN
+            && ((dstSqr->y == 7 && srcColor == BLACK)
+            || (dstSqr->y == 0 && srcColor == WHITE))) {
+        UndoInfo_logPromotion(newUndo, PAWN);
+        ChessBoard_promote(oEngine->oBoard, dstSqr, QUEEN);
+    }
+
     if (pieceType == KING) 
     {
         if (srcColor == WHITE) {
@@ -350,6 +358,7 @@ s_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
         }
     }
 
+    free(movestr);
     oEngine->oUndoList = newUndo;
     Engine_updateGameState(oEngine);
     return SUCCESS;
@@ -462,17 +471,7 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
     for (size_t i = 0; i < MoveArray_length(legalMoves); i++) 
     {
         Move_T move = MoveArray_get(legalMoves, i);
-        if (DEBUG) {
-            char *pcMoveStr = ChessBoard_notation(oEngine->oBoard, move);
-            DEBUG_PRINT(search_depth, "Made move: %s", pcMoveStr);
-            free(pcMoveStr);
-        }
         result = Engine_makeMove(oEngine, move);
-        if (DEBUG) {
-            char *pcFen = Engine_getFen(oEngine);
-            DEBUG_PRINT(0, " on the board: %s\n", pcFen);
-            free(pcFen);
-        }
 
         DEBUG_ASSERT(result == SUCCESS,
             "already checked by legalMoves, has to be legal");
@@ -481,12 +480,6 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
         // recurse to find the evaluation for this move sequence
         Eval_T tempEval = Engine_search(oEngine, depth, bestWhite, bestBlack, NULL);
         Engine_undo(oEngine);
-
-        if (DEBUG) {
-            char *evalstr = Eval_toString(tempEval);
-            DEBUG_PRINT(search_depth, "Eval for that move was: %s\n", evalstr);
-            free(evalstr);
-        }
 
         if (bestEval == NULL
             || (moveColor == WHITE && Eval_compare(tempEval, bestEval) > 0)

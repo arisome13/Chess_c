@@ -40,6 +40,9 @@ s_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove);
 s_move ChessBoard_tryEnpassant(ChessBoard_T oBoard, Move_T oMove);
 s_move ChessBoard_tryCastle(ChessBoard_T oBoard, Move_T oMove);
 
+/* promotes the piece on oSqr */
+void ChessBoard_promote(ChessBoard_T oBoard, Square_T oSqr, p_type type);
+
 /* Undo the given move. Returns true if it succeeds */
 bool ChessBoard_undo (ChessBoard_T oBoard, UndoInfo_T undo);
 

@@ -183,7 +183,7 @@ s_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove)
         }
     }
     
-    if (dstMap != NULL)   
+    if (dstMap != NULL)
         Map_remove(dstMap, Move_dst(oMove));
     Map_remove(srcMap, Move_src(oMove));
     Map_place(srcMap, Move_dst(oMove));
@@ -202,8 +202,8 @@ s_move ChessBoard_tryEnpassant(ChessBoard_T oBoard, Move_T oMove) {
     if (srcMap == NULL)
         return NO_PIECE_ON_SRC;
     // if there is a non-pawn piece on the src square for the move, the move is INVALID
-    DEBUG_ASSERT(Map_getType(srcMap) == PAWN, 
-        "Not a pawn map.\n");
+    if (Map_getType(srcMap) != PAWN)
+        return INVALID_ENP_CASE;
 
     // get the map that contains the piece on the dst square (must be null for enpassant)
     Map_T dstMap = Chessboard_getMapFromSqr(oBoard, Move_dst(oMove));
@@ -212,12 +212,17 @@ s_move ChessBoard_tryEnpassant(ChessBoard_T oBoard, Move_T oMove) {
     
     Square_T capturedSqr = Square_newCoords(Move_src(oMove)->y, Move_dst(oMove)->x);
     Map_T capturedMap = Chessboard_getMapFromSqr(oBoard, capturedSqr);
-    DEBUG_ASSERT(capturedMap != NULL && Map_getType(capturedMap) == PAWN, 
-        "An enpassat has to come from a non-pawn piece.\n");
+    if (capturedMap == NULL 
+            || Map_getType(capturedMap) != PAWN
+            || Map_getColor(capturedMap) == Map_getColor(srcMap)) {
+        Square_free(capturedSqr);
+        return INVALID_ENP_CASE;
+    }
     
-    Map_remove(capturedMap,capturedSqr);
+    Map_remove(capturedMap, capturedSqr);
     Map_remove(srcMap, Move_src(oMove));
     Map_place(srcMap, Move_dst(oMove));
+    Square_free(capturedSqr);
     return SUCCESS;
 }
 s_move ChessBoard_tryCastle(ChessBoard_T oBoard, Move_T oMove) {
@@ -240,6 +245,10 @@ s_move ChessBoard_tryCastle(ChessBoard_T oBoard, Move_T oMove) {
     int dx = (int)Move_dst(oMove)->x - (int)Move_src(oMove)->x;
     if (Move_dst(oMove)->y != Move_src(oMove)->y || abs(dx) != 2)
         return DOESNT_HAVE_RANGE;
+
+    size_t homeRank = (Map_getColor(kingMap) == WHITE) ? 7 : 0;
+    if (Move_src(oMove)->x != 4 || Move_src(oMove)->y != homeRank)
+        return INVALID_CASTLE_CASE;
     
     // check if the squares are clear
     Square_T focusSqr = Square_copy(Move_src(oMove));
@@ -276,6 +285,18 @@ s_move ChessBoard_tryCastle(ChessBoard_T oBoard, Move_T oMove) {
     Square_free(focusSqr);
     Square_free(rookSqr);
     return SUCCESS;
+}
+
+void ChessBoard_promote(ChessBoard_T oBoard, Square_T oSqr, p_type type) {
+    CHECK_NULL(oBoard);
+    CHECK_NULL(oSqr);
+    
+    Map_T fromMap = Chessboard_getMapFromSqr(oBoard, oSqr);
+    DEBUG_ASSERT(fromMap != NULL, "Must promote a square with a piece.");
+    Map_T toMap = Chessboard_getOrMakeMap(oBoard, Type_toChar(type, Map_getColor(fromMap)));
+
+    Map_remove(fromMap, oSqr);
+    Map_place(toMap, oSqr);
 }
 
 bool ChessBoard_undo (ChessBoard_T oBoard, UndoInfo_T undo)
@@ -337,48 +358,28 @@ bool ChessBoard_undo (ChessBoard_T oBoard, UndoInfo_T undo)
 
     if (UndoInfo_getWasCastleMove(undo))
     {
-        size_t castleRank = Move_dst(UndoInfo_getMove(undo))->y;
-        char *moveStr = Move_toString(UndoInfo_getMove(undo));
-        DEBUG_ASSERT(castleRank == Move_src(UndoInfo_getMove(undo))->y, 
-            "Invalid castle move: %s\n", moveStr);
-        free(moveStr);
-
-        size_t kingFile = Move_dst(UndoInfo_getMove(undo))->x;
-        size_t oldKingFile = Move_src(UndoInfo_getMove(undo))->x;
+        size_t castleRank = dst->y;
+        DEBUG_ASSERT(castleRank == src->y, "Invalid castle move.\n");
 
         size_t rookFile;
         size_t oldRookFile;
-        if (kingFile > oldKingFile) {
-            rookFile = kingFile - 1;
+        if (dst->x > src->x) {
+            rookFile = dst->x - 1;
             oldRookFile = 7;
         } else {
-            rookFile = kingFile + 1;
+            rookFile = dst->x + 1;
             oldRookFile = 0;
         }
 
-        Square_T focus = Square_newCoords(castleRank, 0);
-        
-        // get the rook map
-        focus->x = rookFile;
+        Square_T focus = Square_newCoords(castleRank, rookFile);
         Map_T rookMap = Chessboard_getMapFromSqr(oBoard, focus);
-        // move the rook
+        DEBUG_ASSERT(rookMap != NULL, 
+            "While undoing a castle, the rook map must be present.");
+
         Map_remove(rookMap, focus);
         focus->x = oldRookFile;
         Map_place(rookMap, focus);
-        
-        // get the king map
-        focus->x = kingFile;
-        Map_T kingMap = Chessboard_getMapFromSqr(oBoard, focus);
-        // move the king
-        Map_remove(kingMap, focus);
-        focus->x = oldKingFile;
-        Map_place(kingMap, focus);
-        
         Square_free(focus);
-
-        char *movestr = Move_toString(move);
-        PRINT("Move %s was undone.\n", movestr);
-        free(movestr);
     }
 
     return true;
