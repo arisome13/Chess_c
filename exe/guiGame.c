@@ -1,6 +1,6 @@
 
 #include <glib.h>
-#include "userint.h"
+#include "gui.h"
 #include "engine.h"
 #include "boardinfo.h"
 

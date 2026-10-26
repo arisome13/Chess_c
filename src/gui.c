@@ -1,7 +1,7 @@
 
 #include <gtk/gtk.h>
 #include "type.h"
-#include "userint.h"
+#include "gui.h"
 
 /* 0 = empty; uppercase = white, lowercase = black */
 static char UI_charboard[8][8];

@@ -2,19 +2,13 @@
 #  Makefile																  #
 # ----------------------------------------------------------------------- #
 
-SOURCES = $(wildcard src/*.c)
-OBJECTS = $(patsubst src/%.c, obj/%.o, $(SOURCES))
-
-TEST_OBJS = obj/test.o $(OBJECTS)
-MAIN_OBJS = obj/main.o $(OBJECTS)
-GAME_OBJS = obj/game.o $(OBJECTS)
-PSTN_OBJS = obj/position.o $(OBJECTS)
-
 GTK_CFLAGS = $(shell pkg-config --cflags gtk4)
 GTK_LIBS   = $(shell pkg-config --libs gtk4)
-CFLAGS = -std=c23 -Wall -Wextra -Wpedantic -Wshadow -I include -fsanitize=address -g -O0
+CFLAGS = -std=c23 -Wall -Wextra -Wpedantic -Wshadow -I include -fsanitize=address -g -O0 $(GTK_CFLAGS)
 
-PROGRAMS = bin/test bin/main bin/game bin/position
+SOURCES = $(wildcard src/*.c)
+OBJECTS = $(patsubst src/%.c, obj/%.o, $(SOURCES))
+PROGRAMS = bin/test bin/position bin/termGame bin/guiGame
 
 # make both executables
 all: $(PROGRAMS)
@@ -29,20 +23,20 @@ clobber: clean
 re: clobber all
 
 # make the programs
-bin/test: $(TEST_OBJS) | bin
-	gcc $(CFLAGS) -o $@ $^ $(GTK_LIBS)
-bin/main: $(MAIN_OBJS) | bin
-	gcc $(CFLAGS) -o $@ $^ $(GTK_LIBS)
-bin/game: $(GAME_OBJS) | bin
-	gcc $(CFLAGS) -o $@ $^ $(GTK_LIBS)
-bin/position: $(PSTN_OBJS) | bin
-	gcc $(CFLAGS) -o $@ $^ $(GTK_LIBS)
+bin/test: obj/test.o $(OBJECTS) | bin
+	gcc $(CFLAGS) $(GTK_LIBS) -o $@ $^
+bin/position: obj/position.o $(OBJECTS) | bin
+	gcc $(CFLAGS) $(GTK_LIBS) -o $@ $^
+bin/termGame: obj/termGame.o $(OBJECTS) | bin
+	gcc $(CFLAGS) $(GTK_LIBS) -o $@ $^
+bin/guiGame: obj/guiGame.o $(OBJECTS) | bin
+	gcc $(CFLAGS) $(GTK_LIBS) -o $@ $^
 
 # .o file creations
-obj/userint.o: src/userint.c | obj
-	gcc $(CFLAGS) $(GTK_CFLAGS) -c $< -o $@
-obj/test.o: exe/test.c | obj
-	gcc $(CFLAGS) $(GTK_CFLAGS) -c $< -o $@
+obj/termGame.o: exe/termGame.c |obj
+	gcc $(CFLAGS) -c $< -o $@
+obj/gui.o: src/gui.c |obj
+	gcc $(CFLAGS) -c $< -o $@
 obj/%.o: exe/%.c | obj
 	gcc $(CFLAGS) -c $< -o $@
 obj/%.o: src/%.c | obj

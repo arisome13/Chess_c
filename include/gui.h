@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------*/
-/* userint.h                                                          */
+/* gui.h.                                                             */
 /*--------------------------------------------------------------------*/
 
-#ifndef USERINT_H
-#define USERINT_H
+#ifndef GUI_H
+#define GUI_H
 
 #include "helpers.h"
 #include "square.h"
