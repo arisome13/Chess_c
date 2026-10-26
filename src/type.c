@@ -105,3 +105,30 @@ const char *Type_nameToSymbol (char name) {
     ♖	♘	♗	♕	♔	♗	♘	♖
 */
 
+p_type Type_getType (char name) {
+    if (name < 90)
+        name += 32;
+
+    if (name == 'p')
+        return PAWN;
+    else if (name == 'r')
+        return ROOK;
+    else if (name == 'n')
+        return KNIGHT;
+    else if (name == 'b')
+        return BISHOP;
+    else if (name == 'q')
+        return QUEEN;
+    else if (name == 'k')
+        return KING;
+    else {
+        ERROR("Invalid piece name \'%c\'\n", name);
+        return NO_TYPE;
+    }
+}
+p_color Type_getColor (char name) {
+    if (name < 90)
+        return WHITE;
+    else 
+        return BLACK;
+}

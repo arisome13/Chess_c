@@ -15,9 +15,14 @@ int Type_getValue (p_type type, p_color color);
 
 /* returns a char representation of the given chess piece, 
     or '#' if there is no type or color. */
-char Type_toChar(p_type type, p_color color);
+char Type_toChar (p_type type, p_color color);
 
 /* Converts a piece name into a symbol. */
 const char *Type_nameToSymbol (char name);
+
+/* Returns the type of the given chess piece name */
+p_type Type_getType (char name);
+/* Returns the color of the given chess piece name */
+p_color Type_getColor (char name);
 
 #endif

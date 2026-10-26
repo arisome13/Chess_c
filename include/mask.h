@@ -27,6 +27,11 @@ Mask_T Mask_copy (Mask_T oMask);
 /* Resets oMask's grid to hold only 0s (nothing/empty). */
 void Mask_reset (Mask_T oMask);
 
+/* Return a mask that covers either all the light or all 
+    the dark squares. */
+Mask_T Mask_darkSqrs(void);
+Mask_T Mask_lightSqrs(void);
+
 /*--------------------------------------------------------------------*/
 // INFORMATION
 

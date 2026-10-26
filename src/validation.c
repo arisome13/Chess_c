@@ -35,6 +35,9 @@ bool Validate_src_dyx (Square_T src, int dy, int dx) {
 }
 
 bool Validate_move (Move_T move) {
+    if (move == NULL)
+        return false;
+
     Square_T src = Move_src(move);
     Square_T dst = Move_dst(move);
 

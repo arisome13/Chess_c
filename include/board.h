@@ -47,6 +47,12 @@ bool ChessBoard_undo (ChessBoard_T oBoard, UndoInfo_T undo);
 p_type ChessBoard_typeOnSqr(ChessBoard_T oBoard, Square_T oSqr);
 p_color ChessBoard_colorOnSqr(ChessBoard_T oBoard, Square_T oSqr);
 
+/* Return the number of the given piece present on the board. */
+size_t ChessBoard_numPieces(ChessBoard_T oBoard, p_type t, p_color c);
+/* Return true if there is enough material on the board for one of
+   the players to checkmate the other. */
+bool ChessBoard_sufficientMaterial(ChessBoard_T oBoard);
+
 /*--------------------------------------------------------------------*/
 
 /* Return the chess board part of a fen for oBoard. */

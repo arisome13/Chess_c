@@ -68,7 +68,7 @@ void error_message(const char *function_name,
             print_message(pcMessage __VA_OPT__(,) __VA_ARGS__); \
             fflush(stdout); \
         } while (0)
-
+    
 #else // NO_DEBUG
 
     #define CHECK_COORDS(y, x) ((void)0)

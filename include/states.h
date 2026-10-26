@@ -20,7 +20,8 @@ typedef enum s_game {
     // still playing
     IN_PROGRESS, 
     // ended with a winner
-    CHECKMATE, 
+    CHECKMATE_WHITE, 
+    CHECKMATE_BLACK,
     // ended with a draw
     DRAW, BORING_MOVE_50, 
     THREEFOLD_REP, STALEMATE, 

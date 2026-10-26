@@ -66,8 +66,8 @@ Map_T Map_new(char name) {
 void Map_free(Map_T oMap) {
     CHECK_NULL(oMap);
 
-    free(oMap->mask);
-    free(oMap->moves);
+    Mask_free(oMap->mask);
+    MovePattern_free(oMap->moves);
     free(oMap);
 }
 Map_T Map_copy (Map_T oMap) {

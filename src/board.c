@@ -72,6 +72,22 @@ static Map_T Chessboard_getOrMakeMap(ChessBoard_T oBoard, char name) {
 }
 /* USED FOR setFen */
 
+/* Return the map from oBoard that has a piece on oSqr. Return NULL if 
+   none like that exist. */
+static Map_T Chessboard_getMapFromSqr(ChessBoard_T oBoard, Square_T oSqr) {
+    CHECK_NULL(oBoard);
+    CHECK_NULL(oSqr);
+    CHECK_COORDS(oSqr->y, oSqr->x);
+    for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
+        if (Map_isCovered_sqr(oBoard->pmPieceMaps[m], oSqr))
+            return oBoard->pmPieceMaps[m];
+    }
+    return NULL;
+}
+/* USED FOR tryMove */
+
+/*--------------------------------------------------------------------*/
+
 void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
 {
     CHECK_NULL(pcFen);
@@ -121,21 +137,7 @@ void ChessBoard_setFen(ChessBoard_T oBoard, const char *pcFen)
     free(sqr);
 }
 
-/* Return the map from oBoard that has a piece on oSqr. Return NULL if 
-   none like that exist. */
-static Map_T Chessboard_getMapFromSqr(ChessBoard_T oBoard, Square_T oSqr) {
-    CHECK_NULL(oBoard);
-    CHECK_NULL(oSqr);
-    CHECK_COORDS(oSqr->y, oSqr->x);
-    for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
-        if (Map_isCovered_sqr(oBoard->pmPieceMaps[m], oSqr))
-            return oBoard->pmPieceMaps[m];
-    }
-    return NULL;
-}
-/* Returns SUCCESS if move could be completed, some other move result 
-    otherwise and leaves the chessboard untouched. */
-static s_move Chessboard_handleMove(ChessBoard_T oBoard, Move_T oMove) 
+s_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove) 
 {
     CHECK_NULL(oBoard);
     CHECK_NULL(oMove);
@@ -175,8 +177,10 @@ static s_move Chessboard_handleMove(ChessBoard_T oBoard, Move_T oMove)
 
     // if the piece traverses squares that are covered, the move is INVALID
     for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
-        if (Map_shareSqr(oBoard->pmPieceMaps[m], traversed))
+        if (Map_shareSqr(oBoard->pmPieceMaps[m], traversed)) {
+            Mask_free(traversed);
             return BLOCKED_PATH;
+        }
     }
     
     if (dstMap != NULL)   
@@ -184,23 +188,8 @@ static s_move Chessboard_handleMove(ChessBoard_T oBoard, Move_T oMove)
     Map_remove(srcMap, Move_src(oMove));
     Map_place(srcMap, Move_dst(oMove));
 
-    char *movestr = Move_toString(oMove);
-    PRINT("Move %s was played.\n", movestr);
-    free(movestr);
+    Mask_free(traversed);
     return SUCCESS;
-}
-/* USED FOR tryMove */
-
-s_move ChessBoard_tryMove(ChessBoard_T oBoard, Move_T oMove)
-{
-    /* currently configured as a king capture game */
-    
-    s_move result = Chessboard_handleMove(oBoard, oMove);
-    
-    if (result != SUCCESS)
-        /* try the move as a special move */;
-    
-    return result;
 }
 s_move ChessBoard_tryEnpassant(ChessBoard_T oBoard, Move_T oMove) {
 
@@ -418,6 +407,71 @@ p_color ChessBoard_colorOnSqr(ChessBoard_T oBoard, Square_T oSqr) {
     return NO_COLOR;
 }
 
+size_t ChessBoard_numPieces(ChessBoard_T oBoard, p_type t, p_color c) {
+    CHECK_NULL(oBoard);
+    for (size_t m = 0; m < oBoard->NUM_MAPS; m++) {
+        if (Map_getType(oBoard->pmPieceMaps[m]) == t
+                && Map_getColor(oBoard->pmPieceMaps[m]) == c)
+            return Map_numPieces(oBoard->pmPieceMaps[m]);
+    }
+    return 0;
+}
+bool ChessBoard_sufficientMaterial(ChessBoard_T oBoard)
+{
+    size_t knights = 0;
+    size_t bishops = 0;
+    bool bOnDark = false;
+    bool bOnLight = false;
+    bool BOnDark = false;
+    bool BOnLight = false;
+
+    for (size_t m = 0; m < oBoard->NUM_MAPS; m++)
+    {
+        Map_T map = oBoard->pmPieceMaps[m];
+        p_type type = Map_getType(map);
+        
+        if (type == BISHOP)
+        {
+            bishops += Map_numPieces(map);
+
+            Mask_T dark = Mask_darkSqrs();
+            Mask_T light = Mask_lightSqrs();
+            if (Map_shareSqr(map, dark)) {
+                if (Map_getColor(map) == WHITE)
+                    BOnDark = true;
+                else
+                    bOnDark = true;
+            } else if (Map_shareSqr(map, light)) {
+                if (Map_getColor(map) == WHITE)
+                    BOnLight = true;
+                else
+                    bOnLight = true;
+            }
+            Mask_free(dark);
+            Mask_free(light);
+        } 
+        else if (type == KNIGHT)
+        {
+            knights += Map_numPieces(map);
+        } 
+        else
+            if (Map_numPieces(map) > 0)
+                return true;
+    }
+
+    if (bishops == 0)
+        return knights > 2;
+    else if (knights == 0)
+        if (bishops > 2)
+            return true;
+        else if (bishops == 2)
+            return (bOnDark && BOnDark) || (bOnLight && BOnLight);
+        else
+            return true;
+    else
+        return true;
+}
+
 void ChessBoard_onEachMap(ChessBoard_T oBoard, MapFunction mapfunc, int *data) {
     assert(oBoard != NULL);
     assert(mapfunc != NULL);
@@ -431,7 +485,7 @@ void ChessBoard_onEachMap(ChessBoard_T oBoard, MapFunction mapfunc, int *data) {
 char *ChessBoard_getFen(ChessBoard_T oBoard) {
     CHECK_NULL(oBoard);
 
-    char *pcStrRep = malloc(80);
+    char *pcStrRep = malloc(200);
     CHECK_MEM(pcStrRep);
     char *ptr = pcStrRep;
 
@@ -462,6 +516,7 @@ char *ChessBoard_getFen(ChessBoard_T oBoard) {
         i = 0;
     }
 
+    Square_free(sqr);
     return pcStrRep;
 }
 char *ChessBoard_notation(ChessBoard_T oBoard, Move_T oMove)

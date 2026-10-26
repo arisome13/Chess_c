@@ -13,7 +13,6 @@ struct MoveArray
     size_t ulArrLen;
 };
 
-
 /*--------------------------------------------------------------------*/
 
 MoveArray_T MoveArray_new (void) {
@@ -32,7 +31,6 @@ void MoveArray_free (MoveArray_T omArray) {
 
     free(omArray);
 }
-// MoveArray_T MoveArray_copy (MoveArray_T omArray);
 
 /*--------------------------------------------------------------------*/
 

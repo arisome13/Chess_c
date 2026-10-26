@@ -87,18 +87,125 @@ Engine_T Engine_copy (Engine_T oEngine)
 
 /*--------------------------------------------------------------------*/
 
+/* Return the engine's fen representation. Currently implemented to 
+    just showing the char board (not the parameters). */
 static char *Engine_getFen (Engine_T oEngine) {
     CHECK_NULL(oEngine);
     return ChessBoard_getFen(oEngine->oBoard);
 }
-static void Engine_updateGameState (Engine_T oEngine) {
+/* Update the engine's game state (checkmate, draw, etc.) */
+static void Engine_updateGameState (Engine_T oEngine)
+{
+    // default value
     oEngine->rGameState = IN_PROGRESS;
-    //MoveArray_T oMArray = Engine_legalMoves(oEngine);
-    
+
+    // check for checkmate
+    if (ChessBoard_numPieces(oEngine->oBoard, KING, WHITE) > 0) {
+        if (ChessBoard_numPieces(oEngine->oBoard, KING, BLACK) > 0) {
+            // nothing
+        } else {
+            oEngine->rGameState = CHECKMATE_WHITE;
+            return;
+        }
+    } else {
+        if (ChessBoard_numPieces(oEngine->oBoard, KING, BLACK) > 0) {
+            oEngine->rGameState = CHECKMATE_BLACK;
+            return;
+        } else {
+            ERROR("Both white and black king are not present on the board.");
+        }
+    }
+
     if (ChessParameters_50MoveRule(oEngine->oParams) >= 50) {
         oEngine->rGameState = BORING_MOVE_50;
+    } else if (!ChessBoard_sufficientMaterial(oEngine->oBoard)) {
+        oEngine->rGameState = INSUFFICIENT_MATERIAL;
+    } else {
+        UndoInfo_T ui1 = UndoInfo_getNextUndo(oEngine->oUndoList);
+        if (ui1 == NULL) goto isnt3fold;
+        UndoInfo_T ui2 = UndoInfo_getNextUndo(ui1);
+        if (ui2 == NULL) goto isnt3fold;
+        UndoInfo_T ui3 = UndoInfo_getNextUndo(ui2);
+        if (ui3 == NULL) goto isnt3fold;
+        UndoInfo_T ui4 = UndoInfo_getNextUndo(ui3);
+        if (ui4 == NULL) goto isnt3fold;
+        UndoInfo_T ui5 = UndoInfo_getNextUndo(ui4);
+        if (ui5 == NULL) goto isnt3fold;
+        UndoInfo_T ui6 = UndoInfo_getNextUndo(ui5);
+        if (ui6 == NULL) goto isnt3fold;
+        UndoInfo_T ui7 = UndoInfo_getNextUndo(ui6);
+        if (ui7 == NULL) goto isnt3fold;
+
+        Move_T m0 = UndoInfo_getMove(oEngine->oUndoList);
+        DEBUG_ASSERT(m0 != NULL, "invalid undo, move is null\n");
+        Square_T src0 = Move_src(m0); Square_T dst0 = Move_dst(m0);
+        Move_T m1 = UndoInfo_getMove(ui1);
+        DEBUG_ASSERT(m1 != NULL, "invalid undo, move is null\n");
+        Square_T src1 = Move_src(m1); Square_T dst1 = Move_dst(m1);
+
+        // opposite of first moves
+        Move_T m2 = UndoInfo_getMove(ui2);
+        DEBUG_ASSERT(m2 != NULL, "invalid undo, move is null\n");
+        if (!(Square_equals(Move_src(m2), dst0) 
+                && Square_equals(Move_dst(m2), src0)))
+            goto isnt3fold;
+        Move_T m3 = UndoInfo_getMove(ui3);
+        DEBUG_ASSERT(m3 != NULL, "invalid undo, move is null\n");
+        if (!(Square_equals(Move_src(m3), dst1) 
+                && Square_equals(Move_dst(m3), src1)))
+            goto isnt3fold;
+        
+        // same as first moves
+        Move_T m4 = UndoInfo_getMove(ui4);
+        DEBUG_ASSERT(m4 != NULL, "invalid undo, move is null\n");
+        if (!(Square_equals(Move_src(m4), src0) 
+                && Square_equals(Move_dst(m4), dst0)))
+            goto isnt3fold;
+        Move_T m5 = UndoInfo_getMove(ui5);
+        DEBUG_ASSERT(m5 != NULL, "invalid undo, move is null\n");
+        if (!(Square_equals(Move_src(m5), src1) 
+                && Square_equals(Move_dst(m5), dst1)))
+            goto isnt3fold;
+        
+        // same as second moves
+        Move_T m6 = UndoInfo_getMove(ui6);
+        DEBUG_ASSERT(m6 != NULL, "invalid undo, move is null\n");
+        if (!(Square_equals(Move_src(m6), dst0) 
+                && Square_equals(Move_dst(m6), src0)))
+            goto isnt3fold;
+        Move_T m7 = UndoInfo_getMove(ui7);
+        DEBUG_ASSERT(m7 != NULL, "invalid undo, move is null\n");
+        if (!(Square_equals(Move_src(m7), dst1) 
+                && Square_equals(Move_dst(m7), src1)))
+            goto isnt3fold;
+
+        oEngine->rGameState = THREEFOLD_REP;
+        
+        isnt3fold:
     }
 }
+/* SOMETHING */
+static void Engine_undo (Engine_T oEngine)
+{
+    CHECK_NULL(oEngine);
+
+    UndoInfo_T toUndo = oEngine->oUndoList;
+    oEngine->oUndoList = UndoInfo_getNextUndo(toUndo);
+    oEngine->rGameState = IN_PROGRESS;
+
+    DEBUG_ASSERT(ChessParameters_undo(oEngine->oParams, toUndo), 
+        "ChessParameters_undo must succeed.");
+    DEBUG_ASSERT(ChessBoard_undo(oEngine->oBoard, toUndo), 
+        "ChessBoard_undo must succeed.");
+
+    char *movestr = Move_toString(UndoInfo_getMove(toUndo));
+    //PRINT("Engine undid: %s.\n", movestr);
+    free(movestr);
+
+    UndoInfo_free(toUndo);
+}
+
+/*--------------------------------------------------------------------*/
 
 void Engine_setDepth (Engine_T oEngine, size_t d) {
     CHECK_NULL(oEngine);
@@ -245,38 +352,13 @@ s_move Engine_makeMove (Engine_T oEngine, Move_T oMove)
 
     oEngine->oUndoList = newUndo;
     Engine_updateGameState(oEngine);
-
-    char *movestr = Move_toString(oMove);
-    PRINT("Engine moved: %s.\n", movestr);
-    free(movestr);
     return SUCCESS;
 }
-
-/*--------------------------------------------------------------------*/
-
-void Engine_undo (Engine_T oEngine)
-{
-    CHECK_NULL(oEngine);
-
-    UndoInfo_T toUndo = oEngine->oUndoList;
-    oEngine->oUndoList = UndoInfo_getNextUndo(toUndo);
-    oEngine->rGameState = IN_PROGRESS;
-
-    DEBUG_ASSERT(ChessParameters_undo(oEngine->oParams, toUndo), 
-        "ChessParameters_undo must succeed.");
-    DEBUG_ASSERT(ChessBoard_undo(oEngine->oBoard, toUndo), 
-        "ChessBoard_undo must succeed.");
-
-    char *movestr = Move_toString(UndoInfo_getMove(toUndo));
-    PRINT("Engine undid: %s.\n", movestr);
-    free(movestr);
-
-    UndoInfo_free(toUndo);
-}
-
 MoveArray_T Engine_legalMoves (Engine_T oEngine)
 {
     CHECK_NULL(oEngine);
+    DEBUG_ASSERT(oEngine->rGameState == IN_PROGRESS, 
+        "Can't evaluate the legal moves, the game isn't in progress.");
 
     Square_T src = Square_newCoords(0, 0);
     Square_T dst = Square_newCoords(0, 0);
@@ -311,9 +393,14 @@ MoveArray_T Engine_legalMoves (Engine_T oEngine)
         }}
     }}
 
+    if (MoveArray_length(aMoves) == 0)
+        oEngine->rGameState = STALEMATE;
+
     Move_free(move); // frees dst and src as well
     return aMoves;
 }
+
+/*--------------------------------------------------------------------*/
 
 /* Return a score for the position held by oEngine. + if it is in 
     favor of white, - if it is in favor of black. CALLER FREE. */
@@ -329,30 +416,18 @@ static Eval_T Engine_score (Engine_T oEngine)
     
     return eval;
 }
-
 /* Returns the evaluation of the position. */
 static Eval_T Engine_search (Engine_T oEngine, size_t depth, 
         Eval_T bestWhite, Eval_T bestBlack, Move_T outputBestMove)
 {
     CHECK_NULL(oEngine);
-
-    if (oEngine->iDepth < depth)
-        ERROR("Engine depth %zu > search depth %zu\n", oEngine->iDepth, depth);
-
     size_t search_depth = oEngine->iDepth - depth;
 
-    // base case
-    if (depth-- == 0) {
-        Eval_T score = Engine_score(oEngine);
-        
-        if (DEBUG) {
-            char *evalStr = Eval_toString(score);
-            DEBUG_PRINT(search_depth, "Got base case: returning (%s)\n", evalStr);
-            free(evalStr);
-        }
-        
-        return score;
-    } // else, search the move tree one level lower
+    // return if in base case
+    if (depth-- == 0)
+        return Engine_score(oEngine);
+
+    // else: search the move tree one level lower
 
     Eval_T bestEval = NULL;
     size_t bestIndex = 0;
@@ -360,39 +435,58 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
 
     // preemptively get this move's color
     p_color moveColor = ChessParameters_turnColor(oEngine->oParams);
+
+    // if the game isn't in progress, return the end result
+    switch (oEngine->rGameState)
+    {
+        case CHECKMATE_BLACK:
+            return Eval_new(FORCED_MATE, -search_depth);
+        case CHECKMATE_WHITE:
+            return Eval_new(FORCED_MATE, search_depth);
+        case DRAW:
+        case BORING_MOVE_50:
+        case THREEFOLD_REP:
+        case STALEMATE:
+        case INSUFFICIENT_MATERIAL:
+            return Eval_new(CENTIPAWN, 0);
+        case IN_PROGRESS:
+            break;
+    }
+
     // get all the legal moves from this position
     MoveArray_T legalMoves = Engine_legalMoves(oEngine);
-
-    // if there are no legal moves, return a forced mate (update this for later)
-    if (MoveArray_length(legalMoves) == 0) {
-        // if (in check) {
-            int value = search_depth;
-            if (moveColor == WHITE) 
-                value = -value;
-            return Eval_new(FORCED_MATE, value); // checkmate
-        //} else 
-            // return Eval_new(CENTIPAWN, 0); // stalemate
-    }
+    if (oEngine->rGameState == STALEMATE)
+        return Eval_new(CENTIPAWN, 0);
 
     // cycle through each move, checking for a better eval
     for (size_t i = 0; i < MoveArray_length(legalMoves); i++) 
     {
         Move_T move = MoveArray_get(legalMoves, i);
-
-        result = Engine_makeMove(oEngine, move);
-        assert(result == SUCCESS); (void)result; // silences a compiler warning about an unused var
-
         if (DEBUG) {
             char *pcMoveStr = ChessBoard_notation(oEngine->oBoard, move);
-            char *pcFen = Engine_getFen(oEngine);
-            DEBUG_PRINT(search_depth, "Made move: %s on board \'%s\'\n", pcMoveStr, pcFen);
+            DEBUG_PRINT(search_depth, "Made move: %s", pcMoveStr);
             free(pcMoveStr);
+        }
+        result = Engine_makeMove(oEngine, move);
+        if (DEBUG) {
+            char *pcFen = Engine_getFen(oEngine);
+            DEBUG_PRINT(0, " on the board: %s\n", pcFen);
             free(pcFen);
         }
+
+        DEBUG_ASSERT(result == SUCCESS,
+            "already checked by legalMoves, has to be legal");
+        (void)result; // silences the unused var compiler warning
 
         // recurse to find the evaluation for this move sequence
         Eval_T tempEval = Engine_search(oEngine, depth, bestWhite, bestBlack, NULL);
         Engine_undo(oEngine);
+
+        if (DEBUG) {
+            char *evalstr = Eval_toString(tempEval);
+            DEBUG_PRINT(search_depth, "Eval for that move was: %s\n", evalstr);
+            free(evalstr);
+        }
 
         if (bestEval == NULL
             || (moveColor == WHITE && Eval_compare(tempEval, bestEval) > 0)
@@ -429,7 +523,7 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
         char *movestr = Move_toString(bestMove);
         char *evalstr = Eval_toString(bestEval);
         
-        DEBUG_PRINT(search_depth, "Bests: (%s) with %s\n", movestr, evalstr);
+        //DEBUG_PRINT(search_depth, "Bests: (%s) with %s\n", movestr, evalstr);
         
         free(movestr);
         free(evalstr);
@@ -447,28 +541,26 @@ static Eval_T Engine_search (Engine_T oEngine, size_t depth,
 
 Eval_T Engine_evaluate (Engine_T oEngine)
 {
-    PRINT("evaluating...\n");
     CHECK_NULL(oEngine);
     return Engine_search(oEngine, oEngine->iDepth, NULL, NULL, NULL);
 }
 Move_T Engine_bestMove (Engine_T oEngine)
 {
-    PRINT("Checking for best move.\n");
     CHECK_NULL(oEngine);
     
-    Move_T bestMove = NULL;
+    Move_T bestMove = Move_read("b1a3");
     Eval_T eval = Engine_search(oEngine, oEngine->iDepth, NULL, NULL, bestMove);
-    
-    char *moveStr = Move_toString(bestMove);
-    PRINT("Best move is: %s\n", moveStr);
-    free(moveStr);
-    Eval_free(eval);
     
     if (!Validate_move(bestMove))
     {
-        Move_free(bestMove);
+        if (bestMove != NULL)
+            Move_free(bestMove);
+        if (eval != NULL)
+            Eval_free(eval);
         return NULL;
     }
+    
+    Eval_free(eval);
     return bestMove;
 }
 

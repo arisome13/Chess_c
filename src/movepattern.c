@@ -19,6 +19,8 @@ MovePattern_T MovePattern_new (void) {
     return oPattern;
 }
 void MovePattern_free (MovePattern_T oPattern) {
+    for (size_t i = 0; i < MAX_MOVE_TYPES; i++)
+        free(oPattern->movements[i]);
     free(oPattern);
 }
 MovePattern_T MovePattern_copy (MovePattern_T oPattern) {
@@ -210,7 +212,7 @@ Mask_T MovePattern_canMove (MovePattern_T oPattern, Move_T oMove,
         }
     }
 
-    free(traversedSqrs);
+    Mask_free(traversedSqrs);
     return NULL;
 }
 
@@ -222,8 +224,9 @@ char *MovePattern_toString (MovePattern_T oPattern) {
     CHECK_NULL(oPattern);
 
     char *pcStrRep = malloc(200);
+    pcStrRep[0] = '\0';
     if (pcStrRep == NULL)
-        return "NO SPACE IN MEMORY";
+        return pcStrRep;
     
     char *ptr = pcStrRep;
 

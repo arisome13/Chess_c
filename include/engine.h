@@ -33,9 +33,6 @@ Engine_T Engine_copy (Engine_T oEngine);
 
 /*--------------------------------------------------------------------*/
 
-/* undo the last move */
-void Engine_undo (Engine_T oEngine);
-
 /* Fill a MoveArray_T with the legal moves for oEngine and return it. 
    CALLER FREE. */
 MoveArray_T Engine_legalMoves (Engine_T oEngine);

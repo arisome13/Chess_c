@@ -38,8 +38,10 @@ const char *GameState_toString(s_game r)
     {
     case IN_PROGRESS:
         return "IN_PROGRESS";
-    case CHECKMATE:
-        return "CHECKMATE";
+    case CHECKMATE_WHITE:
+        return "CHECKMATE_WHITE";
+    case CHECKMATE_BLACK:
+        return "CHECKMATE_BLACK";
     case DRAW:
         return "DRAW";
     case BORING_MOVE_50:

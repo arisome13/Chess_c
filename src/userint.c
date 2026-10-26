@@ -138,7 +138,7 @@ void ChessUI_load(CharBoard inputboard)
     clear_selection();
     refresh();
 }
-void ChessUI_run(SendMove_func sfunc, void (*endfunc)(void))
+void ChessUI_run(SendMove_func sfunc)
 {
     sendfunc = sfunc;
 
@@ -152,6 +152,4 @@ void ChessUI_run(SendMove_func sfunc, void (*endfunc)(void))
     g_object_unref(gtk_app);
     UI_window = NULL;
     clear_selection();
-    
-    endfunc();
 }

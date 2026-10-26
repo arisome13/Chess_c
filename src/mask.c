@@ -9,6 +9,9 @@ struct Mask
     u_int64_t ullMask;
 };
 
+static const u_int64_t LIGHTSQUARES = 12273903644374837845ULL;
+static const u_int64_t DARKSQUARES = ~LIGHTSQUARES;
+
 Mask_T Mask_new(void) 
 {
     Mask_T oMask = (Mask_T)calloc(1, sizeof(struct Mask));
@@ -38,6 +41,19 @@ void Mask_reset (Mask_T oMask)
 {
     CHECK_NULL(oMask);
     oMask->ullMask = 0;
+}
+
+Mask_T Mask_darkSqrs(void)
+{
+    Mask_T dark = Mask_new();
+    dark->ullMask = DARKSQUARES;
+    return dark;
+}
+Mask_T Mask_lightSqrs(void)
+{
+    Mask_T light = Mask_new();
+    light->ullMask = LIGHTSQUARES;
+    return light;
 }
 
 /*--------------------------------------------------------------------*/
